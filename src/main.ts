@@ -1,19 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, type NestApplicationOptions } from '@nestjs/common';
-import * as bodyParser from 'body-parser'
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
-  const configNest: NestApplicationOptions = {
-    cors: true
-  }
-  
-  const app = await NestFactory.create(AppModule, configNest);
+	const configNest: NestApplicationOptions = {
+		cors: true,
+	};
 
-  app.use(bodyParser.json({ limit: '150mb'}))
+	const app = await NestFactory.create(AppModule, configNest);
 
-  await app.listen(process.env.PORT || 3000, () => {
-    Logger.log(`Server listen on port: ${process.env.PORT || 3000}`, 'InitServer')
-  });
+	app.use(bodyParser.json({ limit: '150mb' }));
+
+	await app.listen(process.env.PORT || 3000, () => {
+		Logger.log(
+			`Server listen on port: ${process.env.PORT || 3000}`,
+			'InitServer',
+		);
+	});
 }
 bootstrap();
