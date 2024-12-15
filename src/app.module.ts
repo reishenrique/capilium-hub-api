@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
 	imports: [
+		ConfigModule.forRoot(),
 		MongooseModule.forRoot(process.env.DATABASE_URL, {
 			maxPoolSize: Number(process.env.MAX_POOL_SIZE_MONGO) || 50,
 			minPoolSize: Number(process.env.MIN_POOL_SIZE_MONGO) || 5,
