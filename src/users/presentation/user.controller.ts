@@ -7,16 +7,16 @@ import {
 	Logger,
 	Post,
 } from '@nestjs/common';
-import type { UserService } from '../service/user.service';
-import type { UserDTO } from '../dto/user.dto';
-import type { UserEntity } from '../entity/users.entity';
+import { UserService } from '../service/user.service';
+import { UserDTO } from '../dto/user.dto';
+import { UserEntity } from '../entity/users.entity';
 
 @Controller('user')
 export class UserController {
 	protected readonly _logger = new Logger(UserController.name);
 	constructor(private readonly userService: UserService) {}
 
-	@Post('/')
+	@Post('/create')
 	@HttpCode(HttpStatus.CREATED)
 	public async create(@Body() user: UserDTO): Promise<UserEntity> {
 		try {
