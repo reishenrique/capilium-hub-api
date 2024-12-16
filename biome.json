@@ -5,7 +5,11 @@
 	},
 	"javascript": {
 		"formatter": {
-			"quoteStyle": "single"
+			"quoteStyle": "single",
+			"arrowParentheses": "always",
+			"bracketSpacing": true,
+			"quoteProperties": "asNeeded",
+			"semicolons": "always"
 		},
 		"parser": {
 			"unsafeParameterDecoratorsEnabled": true
@@ -14,7 +18,13 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"style": {
+				"useImportType": "off"
+			}
 		}
+	},
+	"files": {
+		"ignore": ["node_modules", "dist"]
 	}
 }

@@ -5,10 +5,8 @@ import { UserEntity } from './entity/users.entity';
 import { UsersSchema } from './schemas/users.schema';
 import { UserService } from './service/user.service';
 import { UserRepository } from './repository/user.repository';
-import userProvider from './user.provider';
 
 @Module({
-	controllers: [UserController],
 	imports: [
 		MongooseModule.forFeature([
 			{
@@ -17,7 +15,8 @@ import userProvider from './user.provider';
 			},
 		]),
 	],
-	providers: userProvider,
-	exports: [MongooseModule, UserRepository, UserService],
+	controllers: [UserController],
+	providers: [UserService, UserRepository],
+	exports: [MongooseModule, UserService, UserRepository],
 })
 export class UserModule {}
