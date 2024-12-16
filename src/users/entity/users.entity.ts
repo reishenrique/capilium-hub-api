@@ -24,7 +24,7 @@ export class UserEntity {
 
 	@ApiProperty()
 	@Prop()
-	specializaion: SpecializationEnum[];
+	specialization: SpecializationEnum[];
 
 	@ApiProperty()
 	@Prop()
@@ -36,5 +36,5 @@ export class UserEntity {
 
 	@ApiProperty({ required: false })
 	@Prop()
-	portfolio: string;
+	portfolio?: string;
 }
