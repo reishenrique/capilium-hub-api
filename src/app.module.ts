@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './users/user.module';
 
 @Module({
 	imports: [
@@ -14,11 +15,13 @@ import { ConfigModule } from '@nestjs/config';
 			{
 				ttl: Number(process.env.RATE_LIMIT_TIME) || 10000,
 				limit: Number(process.env.RATE_LIMIT_AMOUNT_REQUESTS) || 10,
-				skipIf(context) {
-					return context.getClass().name !== 'UserController';
+				skipIf: (context) => {
+					const className = context.getClass()?.name;
+					return className !== 'UserController';
 				},
 			},
 		]),
+		UserModule,
 	],
 	controllers: [],
 	providers: [],
