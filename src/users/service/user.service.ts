@@ -1,14 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
-import { UserEntity } from '../entity/users.entity';
-import { UserDTO } from '../dto/user.dto';
+import { CreateUserDto } from '../dto/createUserDto';
+import { ResponseUserDto } from '../dto/responseUserDto';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(private readonly userRepository: UserRepository) {}
 
-	async newUser(user: UserDTO): Promise<UserEntity> {
+	async newUser(
+		user: CreateUserDto,
+	): Promise<Partial<ResponseUserDto>> {
 		const newUser = await this.userRepository.createUser(user);
 		return newUser;
 	}
