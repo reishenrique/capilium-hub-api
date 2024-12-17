@@ -8,9 +8,11 @@ import {
 	Post,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
-import { UserDTO } from '../dto/user.dto';
-import { UserEntity } from '../entity/users.entity';
+import { CreateUserDto } from '../dto/createUserDto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResponseUserDto } from '../dto/responseUserDto';
 
+@ApiTags('user')
 @Controller('user')
 export class UserController {
 	protected readonly _logger = new Logger(UserController.name);
@@ -18,7 +20,15 @@ export class UserController {
 
 	@Post('/create')
 	@HttpCode(HttpStatus.CREATED)
-	public async create(@Body() user: UserDTO): Promise<UserEntity> {
+	@ApiOperation({ summary: 'Create a new user' })
+	@ApiResponse({ status: 201, type: ResponseUserDto })
+	@ApiResponse({
+		status: 400,
+		description: 'Error when trying to created a new user',
+	})
+	public async create(
+		@Body() user: CreateUserDto,
+	): Promise<Partial<ResponseUserDto>> {
 		try {
 			const newUser = await this.userService.newUser(user);
 
