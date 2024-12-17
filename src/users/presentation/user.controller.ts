@@ -1,10 +1,15 @@
 import {
 	BadRequestException,
 	Body,
+	ConflictException,
 	Controller,
+	Get,
 	HttpCode,
 	HttpStatus,
+	InternalServerErrorException,
 	Logger,
+	NotFoundException,
+	Param,
 	Post,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
@@ -23,6 +28,10 @@ export class UserController {
 	@ApiOperation({ summary: 'Create a new user' })
 	@ApiResponse({ status: 201, type: ResponseUserDto })
 	@ApiResponse({
+		status: 409,
+		description: 'CPF already registered in the system',
+	})
+	@ApiResponse({
 		status: 400,
 		description: 'Error when trying to created a new user',
 	})
@@ -34,8 +43,33 @@ export class UserController {
 
 			return newUser;
 		} catch (error) {
+			if (error instanceof ConflictException) {
+				throw error
+			}
+
 			this._logger.error('Error when trying to created a new user');
 			throw new BadRequestException(error.message);
+		}
+	}
+
+	@Get('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Getting user by id' })
+	@ApiResponse({ status: 200, type: ResponseUserDto })
+	@ApiResponse({ status: 404, description: 'User not found' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async findUserById(@Param('id') id: string): Promise<Partial<ResponseUserDto>> {
+		try {
+			const user = await this.userService.getUserById(id)
+
+			return user
+		} catch (error) {
+			if (error instanceof NotFoundException) {
+				throw error
+			}
+
+			this._logger.error('Error when trying to get a user by id')
+			throw new InternalServerErrorException(error.message)
 		}
 	}
 }
