@@ -15,4 +15,14 @@ export class UserRepository {
 		const newUser = (await this.userModel.create(user)).save();
 		return newUser;
 	}
+
+	async getUserById(id: string): Promise<UserEntity> {
+		const user = await this.userModel.findById(id).exec()
+		return user;
+	}
+
+	async getUserByCpf(cpf: string): Promise<UserEntity> {
+		const user = await this.userModel.findOne({ cpf }).exec()
+		return user;
+	}
 }
