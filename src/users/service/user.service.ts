@@ -28,7 +28,17 @@ export class UserService {
 		const user = await this.userRepository.getUserById(id)
 
 		if (!user) {	
-			throw new NotFoundException('User not found')
+			throw new NotFoundException('User not found by id')
+		}
+
+		return user
+	}
+
+	async getUserByCpf(cpf: string): Promise<Partial<ResponseUserDto>> {
+		const user = await this.userRepository.getUserByCpf(cpf)
+
+		if (!user) {
+			throw new NotFoundException('User not found by CPF')
 		}
 
 		return user
