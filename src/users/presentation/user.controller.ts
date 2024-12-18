@@ -52,11 +52,11 @@ export class UserController {
 		}
 	}
 
-	@Get('/:id')
+	@Get('by-id/:id')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Getting user by id' })
 	@ApiResponse({ status: 200, type: ResponseUserDto })
-	@ApiResponse({ status: 404, description: 'User not found' })
+	@ApiResponse({ status: 404, description: 'User not found by id' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	public async findUserById(@Param('id') id: string): Promise<Partial<ResponseUserDto>> {
 		try {
@@ -69,6 +69,27 @@ export class UserController {
 			}
 
 			this._logger.error('Error when trying to get a user by id')
+			throw new InternalServerErrorException(error.message)
+		}
+	}
+
+	@Get('by-cpf/:cpf')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Getting user by id' })
+	@ApiResponse({ status: 200, type: ResponseUserDto })
+	@ApiResponse({ status: 404, description: 'User not found by CPF' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async findUserByCpf(@Param('cpf') cpf: string): Promise<Partial<ResponseUserDto>> {
+		try {
+			const user = await this.userService.getUserByCpf(cpf)
+
+			return user
+		} catch (error) {
+			if (error instanceof NotFoundException) {
+				throw error
+			}
+
+			this._logger.error('Error when trying to get a user by cpf')
 			throw new InternalServerErrorException(error.message)
 		}
 	}
