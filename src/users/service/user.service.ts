@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+	ConflictException,
+	Injectable,
+	Logger,
+	NotFoundException,
+} from '@nestjs/common';
 import { UserRepository } from '../repository/user.repository';
 import { CreateUserDto } from '../dto/createUserDto';
 import { ResponseUserDto } from '../dto/responseUserDto';
@@ -8,15 +13,13 @@ export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(private readonly userRepository: UserRepository) {}
 
-	async newUser(
-		user: CreateUserDto,
-	): Promise<Partial<ResponseUserDto>> {
-		const { cpf }: { cpf: string } = user
-	
-		const userExistsByCpf = await this.userRepository.getUserByCpf(cpf)
+	async newUser(user: CreateUserDto): Promise<Partial<ResponseUserDto>> {
+		const { cpf }: { cpf: string } = user;
+
+		const userExistsByCpf = await this.userRepository.getUserByCpf(cpf);
 
 		if (userExistsByCpf) {
-			throw new ConflictException('CPF already registered in the system')
+			throw new ConflictException('CPF already registered in the system');
 		}
 
 		const newUser = await this.userRepository.createUser(user);
@@ -25,22 +28,32 @@ export class UserService {
 	}
 
 	async getUserById(id: string): Promise<Partial<ResponseUserDto>> {
-		const user = await this.userRepository.getUserById(id)
+		const user = await this.userRepository.getUserById(id);
 
-		if (!user) {	
-			throw new NotFoundException('User not found by id')
+		if (!user) {
+			throw new NotFoundException('User not found by id');
 		}
 
-		return user
+		return user;
 	}
 
 	async getUserByCpf(cpf: string): Promise<Partial<ResponseUserDto>> {
-		const user = await this.userRepository.getUserByCpf(cpf)
+		const user = await this.userRepository.getUserByCpf(cpf);
 
 		if (!user) {
-			throw new NotFoundException('User not found by CPF')
+			throw new NotFoundException('User not found by CPF');
 		}
 
-		return user
+		return user;
+	}
+
+	async deleteUserById(id: string): Promise<void> {
+		const user = await this.userRepository.getUserById(id)
+
+		if (!user) {
+			throw new NotFoundException('User not found to delete')
+		}
+
+		await this.userRepository.deleteUserById(id)
 	}
 }
