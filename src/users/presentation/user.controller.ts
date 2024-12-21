@@ -3,6 +3,7 @@ import {
 	Body,
 	ConflictException,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
@@ -23,7 +24,7 @@ export class UserController {
 	protected readonly _logger = new Logger(UserController.name);
 	constructor(private readonly userService: UserService) {}
 
-	@Post('/create')
+	@Post('/')
 	@HttpCode(HttpStatus.CREATED)
 	@ApiOperation({ summary: 'Create a new user' })
 	@ApiResponse({ status: 201, type: ResponseUserDto })
@@ -44,7 +45,7 @@ export class UserController {
 			return newUser;
 		} catch (error) {
 			if (error instanceof ConflictException) {
-				throw error
+				throw error;
 			}
 
 			this._logger.error('Error when trying to created a new user');
@@ -58,18 +59,20 @@ export class UserController {
 	@ApiResponse({ status: 200, type: ResponseUserDto })
 	@ApiResponse({ status: 404, description: 'User not found by id' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
-	public async findUserById(@Param('id') id: string): Promise<Partial<ResponseUserDto>> {
+	public async findUserById(
+		@Param('id') id: string,
+	): Promise<Partial<ResponseUserDto>> {
 		try {
-			const user = await this.userService.getUserById(id)
+			const user = await this.userService.getUserById(id);
 
-			return user
+			return user;
 		} catch (error) {
 			if (error instanceof NotFoundException) {
-				throw error
+				throw error;
 			}
 
-			this._logger.error('Error when trying to get a user by id')
-			throw new InternalServerErrorException(error.message)
+			this._logger.error('Error when trying to get a user by id');
+			throw new InternalServerErrorException(error.message);
 		}
 	}
 
@@ -79,18 +82,42 @@ export class UserController {
 	@ApiResponse({ status: 200, type: ResponseUserDto })
 	@ApiResponse({ status: 404, description: 'User not found by CPF' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
-	public async findUserByCpf(@Param('cpf') cpf: string): Promise<Partial<ResponseUserDto>> {
+	public async findUserByCpf(
+		@Param('cpf') cpf: string,
+	): Promise<Partial<ResponseUserDto>> {
 		try {
-			const user = await this.userService.getUserByCpf(cpf)
+			const user = await this.userService.getUserByCpf(cpf);
+
+			return user;
+		} catch (error) {
+			if (error instanceof NotFoundException) {
+				throw error;
+			}
+
+			this._logger.error('Error when trying to get a user by cpf');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Delete('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Delete user by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'User not found to delete' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
+	public async deleteUserById(@Param('id') id: string): Promise<void> {
+		try {
+
+			const user = await this.userService.deleteUserById(id)
 
 			return user
 		} catch (error) {
 			if (error instanceof NotFoundException) {
-				throw error
+				throw error;
 			}
 
-			this._logger.error('Error when trying to get a user by cpf')
-			throw new InternalServerErrorException(error.message)
+			this._logger.error('Error trying delete user by id');
+			throw new InternalServerErrorException(error.message);
 		}
 	}
 }
