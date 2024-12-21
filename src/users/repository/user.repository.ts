@@ -17,12 +17,16 @@ export class UserRepository {
 	}
 
 	async getUserById(id: string): Promise<UserEntity> {
-		const user = await this.userModel.findById(id).exec()
+		const user = await this.userModel.findById(id).exec();
 		return user;
 	}
 
 	async getUserByCpf(cpf: string): Promise<UserEntity> {
-		const user = await this.userModel.findOne({ cpf }).exec()
+		const user = await this.userModel.findOne({ cpf }).exec();
 		return user;
+	}
+
+	async deleteUserById(id: string): Promise<void> {
+		await this.userModel.deleteOne({ _id: id }).exec();
 	}
 }
