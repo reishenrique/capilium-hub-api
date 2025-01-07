@@ -48,12 +48,28 @@ export class UserService {
 	}
 
 	async deleteUserById(id: string): Promise<void> {
-		const user = await this.userRepository.getUserById(id)
+		const user = await this.userRepository.getUserById(id);
 
 		if (!user) {
-			throw new NotFoundException('User not found to delete')
+			throw new NotFoundException('User not found to delete');
 		}
 
-		await this.userRepository.deleteUserById(id)
+		await this.userRepository.deleteUserById(id);
+	}
+
+	async upgradeUserById(
+		id: string,
+		newUserData: object,
+	): Promise<Partial<ResponseUserDto>> {
+		const findUserAndUpdate = await this.userRepository.findUserByIdAndUpdate(
+			id,
+			newUserData,
+		);
+
+		if (!findUserAndUpdate) {
+			throw new NotFoundException('User not found for update');
+		}
+
+		return findUserAndUpdate;
 	}
 }
