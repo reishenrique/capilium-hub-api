@@ -12,6 +12,7 @@ import {
 	NotFoundException,
 	Param,
 	Post,
+	Put,
 } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 import { CreateUserDto } from '../dto/createUserDto';
@@ -107,16 +108,42 @@ export class UserController {
 	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
 		try {
+			const user = await this.userService.deleteUserById(id);
 
-			const user = await this.userService.deleteUserById(id)
-
-			return user
+			return user;
 		} catch (error) {
 			if (error instanceof NotFoundException) {
 				throw error;
 			}
 
 			this._logger.error('Error trying delete user by id');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Put('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Upgrade a user by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'User not found to delete' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async upgradeUserById(
+		@Param('id') id: string,
+		@Body() newUserData: Partial<CreateUserDto>,
+	): Promise<Partial<ResponseUserDto>> {
+		try {
+			const upgradeUser = await this.userService.upgradeUserById(
+				id,
+				newUserData,
+			);
+
+			return upgradeUser;
+		} catch (error) {
+			if (error instanceof NotFoundException) {
+				throw error;
+			}
+
+			this._logger.error('Error trying upgrade a user by id');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
