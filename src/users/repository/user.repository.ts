@@ -29,4 +29,19 @@ export class UserRepository {
 	async deleteUserById(id: string): Promise<void> {
 		await this.userModel.deleteOne({ _id: id }).exec();
 	}
+
+	async findUserByIdAndUpdate(
+		id: string,
+		newUserData: object,
+	): Promise<UserEntity> {
+		const findUserAndUpdate = await this.userModel.findByIdAndUpdate(
+			id,
+			newUserData,
+			{
+				new: true,
+			},
+		);
+
+		return findUserAndUpdate;
+	}
 }
