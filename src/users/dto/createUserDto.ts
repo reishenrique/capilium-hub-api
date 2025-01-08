@@ -44,6 +44,14 @@ export class CreateUserDto {
 	email: string;
 
 	@ApiProperty({
+		example: '123@Test',
+		description: 'Password user',
+	})
+	@IsNotEmpty({ message: 'The "password" is required' })
+	@IsString({ message: 'The "password" field can be anything' })
+	password: string;
+
+	@ApiProperty({
 		example: 'Dermatologist',
 		description: 'Profession of the user',
 	})

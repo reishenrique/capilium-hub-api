@@ -24,6 +24,10 @@ export class UserEntity {
 
 	@ApiProperty()
 	@Prop()
+	password: string;
+
+	@ApiProperty()
+	@Prop()
 	profession: ProfessionEnum;
 
 	@ApiProperty()
