@@ -26,6 +26,11 @@ export class UserRepository {
 		return user;
 	}
 
+	async getUserByEmail(email: string): Promise<UserEntity> {
+		const user = await this.userModel.findOne({ email }).exec();
+		return user
+	}
+
 	async deleteUserById(id: string): Promise<void> {
 		await this.userModel.deleteOne({ _id: id }).exec();
 	}
