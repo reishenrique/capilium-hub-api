@@ -7,22 +7,31 @@ import {
 import { UserRepository } from '../repository/user.repository';
 import { CreateUserDto } from '../dto/createUserDto';
 import { ResponseUserDto } from '../dto/responseUserDto';
+import { removeNonNumeric } from 'src/helpers/cleaners';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(private readonly userRepository: UserRepository) {}
 
-	async newUser(user: CreateUserDto): Promise<Partial<ResponseUserDto>> {
-		const { cpf, email }: { cpf: string; email: string} = user;
+	async newUser(userPayload: CreateUserDto): Promise<Partial<ResponseUserDto>> {
+		const { cpf, email }: { cpf: string; email: string } = userPayload;
 
-		const userExistsByCpf = await this.userRepository.getUserByCpf(cpf);
+		const formattedCpf = removeNonNumeric(cpf);
+
+		const userExistsByCpf = await this.userRepository.getUserByCpf(formattedCpf);
 
 		if (userExistsByCpf) throw new ConflictException('CPF already registered in the system');
 		
 		const userExistsByEmail = await this.userRepository.getUserByEmail(email)
 
 		if (userExistsByEmail) throw new ConflictException('Email already registered in the system')
+
+		const saltRounds = await bcrypt.genSalt(10);
+		const hashPassword = await bcrypt.hash(userPayload.password, saltRounds);
+
+		const user = { ...userPayload, password: hashPassword };
 
 		const newUser = await this.userRepository.createUser(user);
 
