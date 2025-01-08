@@ -20,6 +20,10 @@ export class UserEntity {
 
 	@ApiProperty()
 	@Prop()
+	email: string;
+
+	@ApiProperty()
+	@Prop()
 	profession: ProfessionEnum;
 
 	@ApiProperty()
