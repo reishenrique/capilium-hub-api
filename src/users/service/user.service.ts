@@ -14,13 +14,15 @@ export class UserService {
 	constructor(private readonly userRepository: UserRepository) {}
 
 	async newUser(user: CreateUserDto): Promise<Partial<ResponseUserDto>> {
-		const { cpf }: { cpf: string } = user;
+		const { cpf, email }: { cpf: string; email: string} = user;
 
 		const userExistsByCpf = await this.userRepository.getUserByCpf(cpf);
 
-		if (userExistsByCpf) {
-			throw new ConflictException('CPF already registered in the system');
-		}
+		if (userExistsByCpf) throw new ConflictException('CPF already registered in the system');
+		
+		const userExistsByEmail = await this.userRepository.getUserByEmail(email)
+
+		if (userExistsByEmail) throw new ConflictException('Email already registered in the system')
 
 		const newUser = await this.userRepository.createUser(user);
 
