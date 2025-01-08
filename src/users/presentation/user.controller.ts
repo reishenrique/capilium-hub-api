@@ -34,6 +34,10 @@ export class UserController {
 		description: 'CPF already registered in the system',
 	})
 	@ApiResponse({
+		status: 409,
+		description: 'Email already registered in the system',
+	})
+	@ApiResponse({
 		status: 400,
 		description: 'Error when trying to created a new user',
 	})
