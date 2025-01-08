@@ -36,6 +36,14 @@ export class CreateUserDto {
 	cpf: string;
 
 	@ApiProperty({
+		example: 'johndoe@test.com',
+		description: 'User email',
+	})
+	@IsNotEmpty({ message: 'The "email" is required' })
+	@IsString({ message: 'The "email" field must be a string' })
+	email: string;
+
+	@ApiProperty({
 		example: 'Dermatologist',
 		description: 'Profession of the user',
 	})
