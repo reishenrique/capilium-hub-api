@@ -22,9 +22,15 @@
 			"style": {
 				"useImportType": "off"
 			}
-		}
+		},
+		"ignore": [
+			"test/mock/**/*.ts"
+		]
 	},
 	"files": {
-		"ignore": ["node_modules", "dist"]
+		"ignore": [
+			"node_modules",
+			"dist"
+		]
 	}
 }
