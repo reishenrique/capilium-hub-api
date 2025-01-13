@@ -19,7 +19,7 @@ export class AuthController {
 	protected readonly _logger = new Logger(AuthController.name);
 	constructor(private readonly authService: AuthService) {}
 
-	@Post('/')
+	@Post('/login')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Logging a user' })
 	@ApiResponse({ status: 201, description: 'Login successful!' })
