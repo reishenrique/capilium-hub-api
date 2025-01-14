@@ -1,14 +1,22 @@
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Logger,
+	NotFoundException,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { UserRepository } from 'src/users/repository/user.repository';
+import { RefreshAuthCredentialsDto } from '../dto/refreshAuthCredentialsDto';
+import { RefreshAuthResponseDto } from '../dto/refreshAuthResponseDto';
 import { LoginDto } from '../dto/loginDto';
-import { generateAccessToken } from 'src/helpers/jwt';
+import { generateAccessToken, refreshAccessToken } from 'src/helpers/jwt';
 import bcrypt from 'bcrypt';
+import { LoginResponseDto } from '../dto/loginResponseDto';
 
 export class AuthService {
 	protected readonly _logger = new Logger('AuthService');
 	constructor(private readonly userRepository: UserRepository) {}
 
-	async login(login: LoginDto): Promise<{ message: string; token: string}> {
+	async login(login: LoginDto): Promise<LoginResponseDto> {
 		const user = await this.userRepository.getUserByEmail(login.email);
 
 		if (!user) throw new UnauthorizedException('Unauthorized');
@@ -20,11 +28,37 @@ export class AuthService {
 
 		if (!isValidPassword) throw new UnauthorizedException('Invalid password');
 
-        const token = generateAccessToken(user);
+		const token = generateAccessToken(user);
 
-        return {
-            message: 'Login successful!',
-            token
-        }
+		return {
+			message: 'Login successful!',
+			token,
+		};
+	}
+
+	async refreshToken(
+		refreshAuthCredentials: RefreshAuthCredentialsDto,
+	): Promise<RefreshAuthResponseDto> {
+		if (!refreshAuthCredentials.email || !refreshAuthCredentials.refreshToken) {
+			throw new BadRequestException(
+				'User email and refresh token is required to proceed with refresh',
+			);
+		}
+
+		const user = await this.userRepository.getUserByEmail(
+			refreshAuthCredentials.email,
+		);
+
+		if (!user) throw new NotFoundException('User not found');
+
+		const token = refreshAccessToken(
+			refreshAuthCredentials.refreshToken,
+			refreshAuthCredentials.email,
+		);
+
+		return {
+			message: 'Access token updated successfully',
+			token,
+		};
 	}
 }
