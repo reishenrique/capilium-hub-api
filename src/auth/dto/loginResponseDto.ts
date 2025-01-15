@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class LoginResponseDto {
+class LoginResponse {
 	@ApiProperty({
 		example: 'Login successful!',
 		description: 'Message indicating successful login',
@@ -13,3 +13,5 @@ export class LoginResponseDto {
 	})
 	token: string;
 }
+
+export type LoginResponseDto = Omit<LoginResponse, never>;
