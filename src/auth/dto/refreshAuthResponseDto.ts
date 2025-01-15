@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class RefreshAuthResponseDto {
+class RefreshAuthResponse {
 	@ApiProperty({
 		example: 'Access token updated successfully',
 		description: 'Message indicating user token update',
@@ -13,3 +13,5 @@ export class RefreshAuthResponseDto {
 	})
 	token: string;
 }
+
+export type RefreshAuthResponseDto = Omit<RefreshAuthResponse, never>;
