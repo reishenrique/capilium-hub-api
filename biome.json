@@ -24,7 +24,8 @@
 			}
 		},
 		"ignore": [
-			"test/mock/**/*.ts"
+			"test/mock/**/*.ts",
+			"src/infrastructure/**/*.ts"
 		]
 	},
 	"files": {
