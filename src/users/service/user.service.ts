@@ -5,17 +5,21 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/createUserDto';
-import { ResponseUserDto } from '../dto/responseUserDto';
+import { UserResponseDto } from '../dto/responseUserDto';
 import { removeNonNumeric } from 'src/helpers/cleaners';
 import bcrypt from 'bcrypt';
 import { IUserRepository } from '../interfaces/IUserRepository';
+import { CacheService } from 'src/infrastructure/cache/service/cacheService';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
-	constructor(private readonly userRepository: IUserRepository) {}
+	constructor(
+		private readonly userRepository: IUserRepository,
+		private readonly cacheService: CacheService,
+	) {}
 
-	async newUser(userPayload: CreateUserDto): Promise<Partial<ResponseUserDto>> {
+	async newUser(userPayload: CreateUserDto): Promise<Partial<UserResponseDto>> {
 		const { cpf, email }: { cpf: string; email: string } = userPayload;
 
 		const formattedCpf = removeNonNumeric(cpf);
@@ -41,17 +45,25 @@ export class UserService {
 		return newUser;
 	}
 
-	async getUserById(id: string): Promise<Partial<ResponseUserDto>> {
-		const user = await this.userRepository.getUserById(id);
+	async getUserById(id: string): Promise<Partial<UserResponseDto>> {
+		const cacheKey = `user:${id}`;
 
-		if (!user) {
-			throw new NotFoundException('User not found by id');
+		let getUserById = await this.cacheService.getCacheValue(cacheKey);
+
+		if (!getUserById) {
+			getUserById = await this.userRepository.getUserById(id);
+
+			if (!getUserById) {
+				throw new NotFoundException('User not found by id');
+			}
+
+			await this.cacheService.cacheValue(cacheKey, getUserById);
 		}
 
-		return user;
+		return getUserById;
 	}
 
-	async getUserByCpf(cpf: string): Promise<Partial<ResponseUserDto>> {
+	async getUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
 		const user = await this.userRepository.getUserByCpf(cpf);
 
 		if (!user) {
@@ -74,7 +86,7 @@ export class UserService {
 	async upgradeUserById(
 		id: string,
 		newUserData: object,
-	): Promise<Partial<ResponseUserDto>> {
+	): Promise<Partial<UserResponseDto>> {
 		const findUserAndUpdate = await this.userRepository.findUserByIdAndUpdate(
 			id,
 			newUserData,
