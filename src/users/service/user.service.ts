@@ -9,14 +9,14 @@ import { UserResponseDto } from '../dto/responseUserDto';
 import { removeNonNumeric } from 'src/helpers/cleaners';
 import bcrypt from 'bcrypt';
 import { IUserRepository } from '../interfaces/IUserRepository';
-import { CacheService } from 'src/infrastructure/cache/service/cacheService';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(
 		private readonly userRepository: IUserRepository,
-		private readonly cacheService: CacheService,
+		private readonly cacheService?: CacheService,
 	) {}
 
 	async newUser(userPayload: CreateUserDto): Promise<Partial<UserResponseDto>> {
