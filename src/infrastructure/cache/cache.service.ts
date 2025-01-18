@@ -1,7 +1,9 @@
-import CacheStrategy from '../cacheStrategy/abstractCacheStrategy';
-import NodeCacheStrategy from '../cacheStrategy/nodeCacheStrategy';
-import { CacheStrategiesEnum } from '../enum/CacheStrategies';
+import { Injectable } from "@nestjs/common";
+import CacheStrategy from "./cacheStrategy/abstractCacheStrategy";
+import NodeCacheStrategy from "./cacheStrategy/nodeCacheStrategy";
+import { CacheStrategiesEnum } from "./enum/CacheStrategies";
 
+@Injectable()
 export class CacheService {
 	private strategyCacheMap = new Map<CacheStrategiesEnum, CacheStrategy>();
 

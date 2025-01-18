@@ -1,5 +1,7 @@
+import { Injectable } from '@nestjs/common';
 import { ICache } from '../interfaces/ICache';
 
+@Injectable()
 export default abstract class CacheStrategy implements ICache {
 	abstract setOnCache(key: string, value: any, ttl?: number): boolean;
 	abstract getOnCache(key: string): any;
