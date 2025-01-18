@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './users/user.module';
+import { CacheModule } from './infrastructure/cache/cache.module';
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import { UserModule } from './users/user.module';
 			},
 		]),
 		UserModule,
+		CacheModule,
 	],
 	controllers: [],
 	providers: [],
