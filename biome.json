@@ -25,6 +25,7 @@
 		},
 		"ignore": [
 			"test/mock/**/*.ts",
+			"test/unit/**/*.ts",
 			"src/infrastructure/**/*.ts"
 		]
 	},
