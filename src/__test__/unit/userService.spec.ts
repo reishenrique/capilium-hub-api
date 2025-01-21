@@ -49,17 +49,17 @@ describe('User Service', () => {
 			portfolio: 'www.teste.com.br',
 		};
 
-		const spyCreateUserMethod = jest.spyOn(userService, 'newUser');
+		const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
 
-		const spyCreateUser = jest
+		const spyCreateUserRepo = jest
 			.spyOn(userRepository, 'createUser')
-			.mockResolvedValue(userPayload);
+			.mockResolvedValue({ ...userPayload });
 
-		const spyFindUserByCpfMethod = jest
+		const spyFindUserByCpfMethodRepo = jest
 			.spyOn(userRepository, 'getUserByCpf')
 			.mockResolvedValue(null);
 
-		const spyFindUserByEmailMethod = jest
+		const spyFindUserByEmailMethodRepo = jest
 			.spyOn(userRepository, 'getUserByEmail')
 			.mockResolvedValue(null);
 
@@ -84,9 +84,9 @@ describe('User Service', () => {
 			}),
 		);
 
-		expect(spyCreateUser).toHaveBeenCalledTimes(1);
-		expect(spyFindUserByCpfMethod).toHaveBeenCalledTimes(1);
-		expect(spyFindUserByEmailMethod).toHaveBeenCalledTimes(1);
-		expect(spyCreateUserMethod).toHaveBeenCalledTimes(1);
+		expect(spyCreateUserMethodService).toHaveBeenCalledTimes(1);
+		expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(1);
+		expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(1);
+		expect(spyCreateUserRepo).toHaveBeenCalledTimes(1);
 	});
 });
