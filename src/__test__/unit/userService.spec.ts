@@ -107,6 +107,8 @@ describe('User Service', () => {
 				portfolio: 'www.teste.com.br',
 			};
 
+			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
+
 			const spyFindUserByCpfMethodRepo = jest
 				.spyOn(userRepository, 'getUserByCpf')
 				.mockResolvedValue(userPayload);
@@ -117,8 +119,63 @@ describe('User Service', () => {
 				'CPF already registered in the system',
 			);
 
-			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(1);
-			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(1);
+			await expect(userService.newUser(userPayload)).rejects.toMatchObject({
+				response: {
+					message: 'CPF already registered in the system',
+					error: 'Conflict',
+					statusCode: 409,
+				},
+			});
+
+			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
+			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(2);
+
+			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
+		});
+
+		it('Should throw an error if email already exists', async () => {
+			const userPayload = {
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '5556667780',
+				email: 'johndoe@test.com',
+				password: 'TestPassword',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+			};
+
+			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
+
+			const spyFindUserByCpfMethodRepo = jest
+				.spyOn(userRepository, 'getUserByCpf')
+				.mockResolvedValue(null);
+
+			const spyFindUserByEmailMethodRepo = jest
+				.spyOn(userRepository, 'getUserByEmail')
+				.mockResolvedValue(userPayload);
+
+			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
+
+			await expect(userService.newUser(userPayload)).rejects.toThrow(
+				'Email already registered in the system',
+			);
+
+			await expect(userService.newUser(userPayload)).rejects.toMatchObject({
+				response: {
+					message: 'Email already registered in the system',
+					error: 'Conflict',
+					statusCode: 409,
+				},
+			});
+
+			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
+			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(2);
+			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(2);
+
+			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
 		});
 	});
 });
