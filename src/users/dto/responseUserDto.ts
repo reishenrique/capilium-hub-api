@@ -26,6 +26,12 @@ export class UserResponseDtoSwagger {
 	cpf: string;
 
 	@ApiProperty({
+			example: 'johndoe@test.com',
+			description: 'User email',
+		})
+	email: string;
+
+	@ApiProperty({
 		example: 'Dermatologist',
 		description: 'Profession of the user',
 	})
