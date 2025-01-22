@@ -29,6 +29,7 @@ describe('User Service', () => {
 
 		userService = module.get<UserService>(UserService);
 		userRepository = module.get<UserRepository>(UserRepository);
+		cacheService = module.get<CacheService>(CacheService);
 	});
 
 	afterEach(() => {
@@ -57,11 +58,11 @@ describe('User Service', () => {
 				.mockResolvedValue(userPayload);
 
 			const spyFindUserByCpfMethodRepo = jest
-				.spyOn(userRepository, 'getUserByCpf')
+				.spyOn(userRepository, 'findUserByCpf')
 				.mockResolvedValue(null);
 
 			const spyFindUserByEmailMethodRepo = jest
-				.spyOn(userRepository, 'getUserByEmail')
+				.spyOn(userRepository, 'findUserByEmail')
 				.mockResolvedValue(null);
 
 			const newUser = await userService.newUser(userPayload);
@@ -90,6 +91,49 @@ describe('User Service', () => {
 			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(1);
 			expect(spyCreateUserRepo).toHaveBeenCalledTimes(1);
 		});
+
+		it('Should return a user by their id', async () => {
+			const userIdMock = '6767097fc93116ce0f5a9509';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyGetCacheValue = jest
+				.spyOn(cacheService, 'getCacheValue')
+				.mockResolvedValue(null);
+
+			const spyCacheValue = jest
+				.spyOn(cacheService, 'cacheValue')
+				.mockResolvedValue(true);
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(userPayloadResponse);
+
+			const spyFindUserByIdService = jest.spyOn(userService, 'findUserById');
+
+			const findUserById = await userService.findUserById(userIdMock);
+
+			expect(findUserById).toEqual(userPayloadResponse);
+
+			expect(spyGetCacheValue).toHaveBeenCalledTimes(1);
+			expect(spyCacheValue).toHaveBeenCalledTimes(1);
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
+			expect(spyFindUserByIdService).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe('Error Cases', () => {
@@ -110,7 +154,7 @@ describe('User Service', () => {
 			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
 
 			const spyFindUserByCpfMethodRepo = jest
-				.spyOn(userRepository, 'getUserByCpf')
+				.spyOn(userRepository, 'findUserByCpf')
 				.mockResolvedValue(userPayload);
 
 			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
@@ -150,11 +194,11 @@ describe('User Service', () => {
 			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
 
 			const spyFindUserByCpfMethodRepo = jest
-				.spyOn(userRepository, 'getUserByCpf')
+				.spyOn(userRepository, 'findUserByCpf')
 				.mockResolvedValue(null);
 
 			const spyFindUserByEmailMethodRepo = jest
-				.spyOn(userRepository, 'getUserByEmail')
+				.spyOn(userRepository, 'findUserByEmail')
 				.mockResolvedValue(userPayload);
 
 			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
