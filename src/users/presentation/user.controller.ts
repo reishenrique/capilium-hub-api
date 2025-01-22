@@ -71,7 +71,7 @@ export class UserController {
 		@Param('id') id: string,
 	): Promise<Partial<UserResponseDto>> {
 		try {
-			const user = await this.userService.getUserById(id);
+			const user = await this.userService.findUserById(id);
 
 			return user;
 		} catch (error) {
@@ -94,7 +94,7 @@ export class UserController {
 		@Param('cpf') cpf: string,
 	): Promise<Partial<UserResponseDto>> {
 		try {
-			const user = await this.userService.getUserByCpf(cpf);
+			const user = await this.userService.findUserByCpf(cpf);
 
 			return user;
 		} catch (error) {

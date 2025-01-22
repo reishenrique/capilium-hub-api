@@ -17,7 +17,7 @@ export class AuthService {
 	constructor(private readonly userRepository: UserRepository) {}
 
 	async login(login: LoginDto): Promise<LoginResponseDto> {
-		const user = await this.userRepository.getUserByEmail(login.email);
+		const user = await this.userRepository.findUserByEmail(login.email);
 
 		if (!user) throw new UnauthorizedException('Unauthorized');
 
@@ -45,7 +45,7 @@ export class AuthService {
 			);
 		}
 
-		const user = await this.userRepository.getUserByEmail(
+		const user = await this.userRepository.findUserByEmail(
 			refreshAuthCredentials.email,
 		);
 

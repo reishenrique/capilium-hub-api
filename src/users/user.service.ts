@@ -25,12 +25,12 @@ export class UserService {
 		const formattedCpf = removeNonNumeric(cpf);
 
 		const userExistsByCpf =
-			await this.userRepository.getUserByCpf(formattedCpf);
+			await this.userRepository.findUserByCpf(formattedCpf);
 
 		if (userExistsByCpf)
 			throw new ConflictException('CPF already registered in the system');
 
-		const userExistsByEmail = await this.userRepository.getUserByEmail(email);
+		const userExistsByEmail = await this.userRepository.findUserByEmail(email);
 
 		if (userExistsByEmail)
 			throw new ConflictException('Email already registered in the system');
@@ -45,13 +45,13 @@ export class UserService {
 		return newUser;
 	}
 
-	async getUserById(id: string): Promise<Partial<UserResponseDto>> {
+	async findUserById(id: string): Promise<Partial<UserResponseDto>> {
 		const cacheKey = `user:${id}`;
 
 		let getUserById = await this.cacheService.getCacheValue(cacheKey);
 
 		if (!getUserById) {
-			getUserById = await this.userRepository.getUserById(id);
+			getUserById = await this.userRepository.findUserById(id);
 
 			if (!getUserById) {
 				throw new NotFoundException('User not found by id');
@@ -63,8 +63,8 @@ export class UserService {
 		return getUserById;
 	}
 
-	async getUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
-		const user = await this.userRepository.getUserByCpf(cpf);
+	async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
+		const user = await this.userRepository.findUserByCpf(cpf);
 
 		if (!user) {
 			throw new NotFoundException('User not found by CPF');
@@ -74,7 +74,7 @@ export class UserService {
 	}
 
 	async deleteUserById(id: string): Promise<void> {
-		const user = await this.userRepository.getUserById(id);
+		const user = await this.userRepository.findUserById(id);
 
 		if (!user) {
 			throw new NotFoundException('User not found to delete');

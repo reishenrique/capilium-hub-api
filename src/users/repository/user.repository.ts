@@ -16,17 +16,17 @@ export class UserRepository {
 		return newUser;
 	}
 
-	async getUserById(id: string): Promise<UserEntity> {
+	async findUserById(id: string): Promise<UserEntity> {
 		const user = await this.userModel.findById(id).exec();
 		return user;
 	}
 
-	async getUserByCpf(cpf: string): Promise<UserEntity> {
+	async findUserByCpf(cpf: string): Promise<UserEntity> {
 		const user = await this.userModel.findOne({ cpf }).exec();
 		return user;
 	}
 
-	async getUserByEmail(email: string): Promise<UserEntity> {
+	async findUserByEmail(email: string): Promise<UserEntity> {
 		const user = await this.userModel.findOne({ email }).exec();
 		return user;
 	}
