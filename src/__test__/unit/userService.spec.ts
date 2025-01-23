@@ -134,6 +134,39 @@ describe('User Service', () => {
 			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
 			expect(spyFindUserByIdService).toHaveBeenCalledTimes(1);
 		});
+
+		it('Should return a user by their cpf', async () => {
+			const mockUserCpf = '11122233345';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyFindUserByCpfRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(userPayloadResponse);
+
+			const spyFindUserByCpfService = jest.spyOn(userService, 'findUserByCpf');
+
+			const findUserById = await userService.findUserByCpf(mockUserCpf);
+
+			expect(findUserById).toEqual(userPayloadResponse);
+
+			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(1);
+			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe('Error Cases', () => {
