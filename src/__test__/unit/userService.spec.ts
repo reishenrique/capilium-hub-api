@@ -167,6 +167,46 @@ describe('User Service', () => {
 			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(1);
 			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(1);
 		});
+
+		it('Should delete a user by their id', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(userPayloadResponse);
+
+			const spyDeleteUserByIdRepo = jest.spyOn(
+				userRepository,
+				'deleteUserById',
+			);
+
+			const spyDeleteUserByIdService = jest.spyOn(
+				userService,
+				'deleteUserById',
+			);
+
+			const deleteUserById = await userService.deleteUserById(id);
+
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
+			expect(spyDeleteUserByIdRepo).toHaveBeenCalledTimes(1);
+			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe('Error Cases', () => {
