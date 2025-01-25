@@ -349,12 +349,12 @@ describe('User Service', () => {
 				response: {
 					message: 'User not found to delete',
 					error: 'Not Found',
-					statusCode: 404
+					statusCode: 404,
 				},
 			});
 
-			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2)
-			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(2)
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2);
+			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(2);
 		});
 	});
 });
