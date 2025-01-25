@@ -49,9 +49,7 @@ describe('User Service', () => {
 				availabilityStatus: AvailabilityStatusEnum.Available,
 				professionalExperience: '3 years',
 				portfolio: 'www.teste.com.br',
-			};
-
-			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
+			}
 
 			const spyCreateUserRepo = jest
 				.spyOn(userRepository, 'createUser')
@@ -86,7 +84,6 @@ describe('User Service', () => {
 				}),
 			);
 
-			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(1);
 			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(1);
 			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(1);
 			expect(spyCreateUserRepo).toHaveBeenCalledTimes(1);
@@ -123,8 +120,6 @@ describe('User Service', () => {
 				.spyOn(userRepository, 'findUserById')
 				.mockResolvedValue(userPayloadResponse);
 
-			const spyFindUserByIdService = jest.spyOn(userService, 'findUserById');
-
 			const findUserById = await userService.findUserById(userIdMock);
 
 			expect(findUserById).toEqual(userPayloadResponse);
@@ -132,7 +127,6 @@ describe('User Service', () => {
 			expect(spyGetCacheValue).toHaveBeenCalledTimes(1);
 			expect(spyCacheValue).toHaveBeenCalledTimes(1);
 			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
-			expect(spyFindUserByIdService).toHaveBeenCalledTimes(1);
 		});
 
 		it('Should return a user by their cpf', async () => {
@@ -158,14 +152,11 @@ describe('User Service', () => {
 				.spyOn(userRepository, 'findUserByCpf')
 				.mockResolvedValue(userPayloadResponse);
 
-			const spyFindUserByCpfService = jest.spyOn(userService, 'findUserByCpf');
-
 			const findUserById = await userService.findUserByCpf(mockUserCpf);
 
 			expect(findUserById).toEqual(userPayloadResponse);
 
 			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(1);
-			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(1);
 		});
 
 		it('Should delete a user by their id', async () => {
@@ -196,16 +187,10 @@ describe('User Service', () => {
 				'deleteUserById',
 			);
 
-			const spyDeleteUserByIdService = jest.spyOn(
-				userService,
-				'deleteUserById',
-			);
-
-			const deleteUserById = await userService.deleteUserById(id);
+			await userService.deleteUserById(id);
 
 			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
 			expect(spyDeleteUserByIdRepo).toHaveBeenCalledTimes(1);
-			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(1);
 		});
 	});
 
@@ -230,8 +215,6 @@ describe('User Service', () => {
 				.spyOn(userRepository, 'findUserByCpf')
 				.mockResolvedValue(userPayload);
 
-			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
-
 			await expect(userService.newUser(userPayload)).rejects.toThrow(
 				'CPF already registered in the system',
 			);
@@ -245,7 +228,6 @@ describe('User Service', () => {
 			});
 
 			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
-			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(2);
 
 			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
 		});
@@ -274,8 +256,6 @@ describe('User Service', () => {
 				.spyOn(userRepository, 'findUserByEmail')
 				.mockResolvedValue(userPayload);
 
-			const spyCreateUserMethodService = jest.spyOn(userService, 'newUser');
-
 			await expect(userService.newUser(userPayload)).rejects.toThrow(
 				'Email already registered in the system',
 			);
@@ -290,7 +270,6 @@ describe('User Service', () => {
 
 			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
 			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(2);
-			expect(spyCreateUserMethodService).toHaveBeenCalledTimes(2);
 
 			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
 		});
