@@ -328,5 +328,33 @@ describe('User Service', () => {
 			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(2);
 			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(2);
 		});
+
+		it('Should throw an error if the user if not found by id to delete', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(null);
+
+			const spyDeleteUserByIdService = jest.spyOn(
+				userService,
+				'deleteUserById',
+			);
+
+			await expect(userService.deleteUserById(id)).rejects.toThrow(
+				'User not found to delete',
+			);
+
+			await expect(userService.deleteUserById(id)).rejects.toMatchObject({
+				response: {
+					message: 'User not found to delete',
+					error: 'Not Found',
+					statusCode: 404
+				},
+			});
+
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2)
+			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(2)
+		});
 	});
 });
