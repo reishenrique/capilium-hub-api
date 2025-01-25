@@ -49,7 +49,7 @@ describe('User Service', () => {
 				availabilityStatus: AvailabilityStatusEnum.Available,
 				professionalExperience: '3 years',
 				portfolio: 'www.teste.com.br',
-			}
+			};
 
 			const spyCreateUserRepo = jest
 				.spyOn(userRepository, 'createUser')
@@ -285,6 +285,8 @@ describe('User Service', () => {
 				.spyOn(cacheService, 'getCacheValue')
 				.mockResolvedValue(null);
 
+			const spyFindUserByIdService = jest.spyOn(userService, 'findUserById');
+
 			await expect(userService.findUserById(id)).rejects.toThrow(
 				'User not found by id',
 			);
@@ -293,12 +295,38 @@ describe('User Service', () => {
 				response: {
 					message: 'User not found by id',
 					error: 'Not Found',
-					statusCode: 404
+					statusCode: 404,
 				},
 			});
 
+			expect(spyFindUserByIdService).toHaveBeenCalledTimes(2);
 			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2);
 			expect(spyGetCacheValue).toHaveBeenCalledTimes(2);
+		});
+
+		it('Should throw an error if the user is not found by cpf', async () => {
+			const cpf = '11122233345';
+
+			const spyFindUserByCpfRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(null);
+
+			const spyFindUserByCpfService = jest.spyOn(userService, 'findUserByCpf');
+
+			await expect(userService.findUserByCpf(cpf)).rejects.toThrow(
+				'User not found by CPF',
+			);
+
+			await expect(userService.findUserByCpf(cpf)).rejects.toMatchObject({
+				response: {
+					message: 'User not found by CPF',
+					error: 'Not Found',
+					statusCode: 404,
+				},
+			});
+
+			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(2);
+			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(2);
 		});
 	});
 });
