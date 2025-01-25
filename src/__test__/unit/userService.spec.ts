@@ -294,5 +294,32 @@ describe('User Service', () => {
 
 			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
 		});
+
+		it('Should throw an error if the user is not found by id', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(null);
+
+			const spyGetCacheValue = jest
+				.spyOn(cacheService, 'getCacheValue')
+				.mockResolvedValue(null);
+
+			await expect(userService.findUserById(id)).rejects.toThrow(
+				'User not found by id',
+			);
+
+			await expect(userService.findUserById(id)).rejects.toMatchObject({
+				response: {
+					message: 'User not found by id',
+					error: 'Not Found',
+					statusCode: 404
+				},
+			});
+
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2);
+			expect(spyGetCacheValue).toHaveBeenCalledTimes(2);
+		});
 	});
 });
