@@ -5,9 +5,9 @@ import {
 	IsOptional,
 	IsString,
 } from 'class-validator';
-import { ProfessionEnum } from '../enum/profession.enum';
-import { SpecializationEnum } from '../enum/specialization.enum';
-import { AvailabilityStatusEnum } from '../enum/availability.enum';
+import { ProfessionEnum } from '../../common/enums/profession.enum';
+import { SpecializationEnum } from '../../common/enums/specialization.enum';
+import { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {

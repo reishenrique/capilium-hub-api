@@ -1,6 +1,6 @@
-import { AvailabilityStatusEnum } from 'src/users/enum/availability.enum';
-import { ProfessionEnum } from 'src/users/enum/profession.enum';
-import { SpecializationEnum } from 'src/users/enum/specialization.enum';
+import { AvailabilityStatusEnum } from 'src/common/enums/availability.enum';
+import { ProfessionEnum } from 'src/common/enums/profession.enum';
+import { SpecializationEnum } from 'src/common/enums/specialization.enum';
 import { UserRepository } from 'src/users/repository/user.repository';
 import { UserService } from 'src/users/user.service';
 import { Test, TestingModule } from '@nestjs/testing';

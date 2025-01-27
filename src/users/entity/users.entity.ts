@@ -1,8 +1,8 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import type { AvailabilityStatusEnum } from '../enum/availability.enum';
-import type { ProfessionEnum } from '../enum/profession.enum';
-import type { SpecializationEnum } from '../enum/specialization.enum';
+import type { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
+import type { ProfessionEnum } from '../../common/enums/profession.enum';
+import type { SpecializationEnum } from '../../common/enums/specialization.enum';
 
 @Schema({ timestamps: true })
 export class UserEntity {
