@@ -1,6 +1,7 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { SocialNetworksEnum } from 'src/common/enums/social-networks.enum';
+import { SpecializationEnum } from 'src/common/enums/specialization.enum';
 
 @Schema({ timestamps: true })
 export class ClinicEntity {
@@ -22,7 +23,7 @@ export class ClinicEntity {
 
 	@ApiProperty()
 	@Prop()
-	specializations: string;
+	specializations: SpecializationEnum;
 
 	@ApiProperty()
 	@Prop()
