@@ -26,7 +26,7 @@ export class UserRepository {
 		return user;
 	}
 
-	async findUserByEmail(email: string): Promise<Omit<UserEntity, 'password'>> {
+	async findUserByEmail(email: string): Promise<UserEntity> {
 		const user = await this.userModel.findOne({ email }).exec();
 		return user;
 	}

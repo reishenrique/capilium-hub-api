@@ -57,7 +57,7 @@ export class UserController {
 			}
 
 			this._logger.error('Error when trying to created a new user');
-			throw new BadRequestException(error.message);
+			throw new InternalServerErrorException(error.message);
 		}
 	}
 
