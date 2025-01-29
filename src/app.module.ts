@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './users/user.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
+import { ClinicModule } from './clinic/clinic.module';
 
 @Module({
 	imports: [
@@ -24,6 +25,7 @@ import { CacheModule } from './infrastructure/cache/cache.module';
 		]),
 		UserModule,
 		CacheModule,
+		ClinicModule,
 	],
 	controllers: [],
 	providers: [],
