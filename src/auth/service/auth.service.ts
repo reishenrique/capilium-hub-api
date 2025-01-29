@@ -8,7 +8,10 @@ import { UserRepository } from 'src/users/repository/user.repository';
 import { RefreshAuthCredentialsDto } from '../dto/refreshAuthCredentialsDto';
 import { RefreshAuthResponseDto } from '../dto/refreshAuthResponseDto';
 import { LoginDto } from '../dto/loginDto';
-import { generateAccessToken, refreshAccessToken } from 'src/helpers/jwt';
+import {
+	generateAccessToken,
+	refreshAccessToken,
+} from 'src/common/helpers/jwtHelper';
 import bcrypt from 'bcrypt';
 import { LoginResponseDto } from '../dto/loginResponseDto';
 
