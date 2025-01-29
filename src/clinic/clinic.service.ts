@@ -8,7 +8,7 @@ export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
 	constructor(private readonly clinicRepository: ClinicRepository) {}
 
-	async newClinic(clinicPayload: CreateClinicDto): Promise<object> {
+	async create(clinicPayload: CreateClinicDto): Promise<object> {
 		const findClinicByCnpj = await this.clinicRepository.findClinicByCnpj(
 			clinicPayload.cnpj,
 		);
