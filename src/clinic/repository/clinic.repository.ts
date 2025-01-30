@@ -25,4 +25,9 @@ export class ClinicRepository {
 		const clinic = await this.clinicModel.findOne({ cnpj }).exec();
 		return clinic;
 	}
+	
+	async findAllClinics(): Promise<ClinicEntity[]> {
+		const clinics = await this.clinicModel.find()
+		return clinics
+	}
 }
