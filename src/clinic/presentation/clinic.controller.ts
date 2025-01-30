@@ -2,10 +2,12 @@ import {
 	Body,
 	ConflictException,
 	Controller,
+	Get,
 	HttpCode,
 	HttpStatus,
 	InternalServerErrorException,
 	Logger,
+	NotFoundException,
 	Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -42,6 +44,24 @@ export class ClinicController {
 			if (error instanceof ConflictException) throw error;
 
 			this._logger.error('Error when trying to created a new clinic');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Get('findAll/')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Listing the clinics' })
+	@ApiResponse({ status: 200, type: [ClinicResponseDtoSwagger] })
+	@ApiResponse({ status: 404, description: 'No clinics found' })
+	public async findAll(): Promise<ClinicResponseDtoSwagger[]> {
+		try {
+			const findAllClinics = await this.clinicService.findAll();
+
+			return findAllClinics;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error when trying to listing all clinics');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
