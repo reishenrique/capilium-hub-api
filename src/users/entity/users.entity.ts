@@ -5,7 +5,7 @@ import type { ProfessionEnum } from '../../common/enums/profession.enum';
 import type { SpecializationEnum } from '../../common/enums/specialization.enum';
 
 @Schema({ timestamps: true })
-export class UserEntity {
+export class User {
 	@ApiProperty()
 	@Prop()
 	firstName: string;

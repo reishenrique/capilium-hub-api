@@ -1,7 +1,7 @@
-import { UserEntity } from '../entity/users.entity';
+import { User } from '../entity/users.entity';
 
 export interface IUserRepository {
-	createUser(newUser: UserEntity);
+	createUser(newUser: User);
 	getUserById(id: string);
 	getUserByCpf(cpf: string);
 	getUserByEmail(email: string);
