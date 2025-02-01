@@ -1,0 +1,360 @@
+import { AvailabilityStatusEnum } from 'src/common/enums/availability.enum';
+import { ProfessionEnum } from 'src/common/enums/profession.enum';
+import { SpecializationEnum } from 'src/common/enums/specialization.enum';
+import { UserRepository } from 'src/users/repository/user.repository';
+import { UserService } from 'src/users/user.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import { createMock } from '@golevelup/ts-jest';
+import { CacheService } from 'src/infrastructure/cache/cache.service';
+
+describe('User Service', () => {
+	let userService: UserService;
+	let userRepository: UserRepository;
+	let cacheService: CacheService;
+
+	beforeEach(async () => {
+		const module: TestingModule = await Test.createTestingModule({
+			providers: [
+				UserService,
+				{
+					provide: UserRepository,
+					useValue: createMock<UserRepository>(),
+				},
+				{
+					provide: CacheService,
+					useValue: createMock<CacheService>(),
+				},
+			],
+		}).compile();
+
+		userService = module.get<UserService>(UserService);
+		userRepository = module.get<UserRepository>(UserRepository);
+		cacheService = module.get<CacheService>(CacheService);
+	});
+
+	afterEach(() => {
+		jest.clearAllMocks();
+	});
+
+	describe('Success Cases', () => {
+		it('Should create a new user', async () => {
+			const userPayload = {
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233344',
+				email: 'johndoe@test.com',
+				password: 'TestPassword',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+			};
+
+			const spyCreateUserRepo = jest
+				.spyOn(userRepository, 'createUser')
+				.mockResolvedValue(userPayload);
+
+			const spyFindUserByCpfMethodRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(null);
+
+			const spyFindUserByEmailMethodRepo = jest
+				.spyOn(userRepository, 'findUserByEmail')
+				.mockResolvedValue(null);
+
+			const newUser = await userService.newUser(userPayload);
+
+			expect(newUser.firstName).toBe(userPayload.firstName);
+			expect(newUser.lastName).toBe(userPayload.lastName);
+			expect(newUser.email).toBe(userPayload.email);
+
+			expect(newUser).toEqual(
+				expect.objectContaining({
+					firstName: expect.any(String),
+					lastName: expect.any(String),
+					cpf: expect.any(String),
+					email: expect.any(String),
+					password: expect.any(String),
+					profession: expect.any(String),
+					specialization: expect.any(Array),
+					availabilityStatus: expect.any(String),
+					professionalExperience: expect.any(String),
+					portfolio: expect.any(String),
+				}),
+			);
+
+			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(1);
+			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(1);
+			expect(spyCreateUserRepo).toHaveBeenCalledTimes(1);
+		});
+
+		it('Should return a user by their id', async () => {
+			const userIdMock = '6767097fc93116ce0f5a9509';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyGetCacheValue = jest
+				.spyOn(cacheService, 'getCacheValue')
+				.mockResolvedValue(null);
+
+			const spyCacheValue = jest
+				.spyOn(cacheService, 'cacheValue')
+				.mockResolvedValue(true);
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(userPayloadResponse);
+
+			const findUserById = await userService.findUserById(userIdMock);
+
+			expect(findUserById).toEqual(userPayloadResponse);
+
+			expect(spyGetCacheValue).toHaveBeenCalledTimes(1);
+			expect(spyCacheValue).toHaveBeenCalledTimes(1);
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
+		});
+
+		it('Should return a user by their cpf', async () => {
+			const mockUserCpf = '11122233345';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyFindUserByCpfRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(userPayloadResponse);
+
+			const findUserById = await userService.findUserByCpf(mockUserCpf);
+
+			expect(findUserById).toEqual(userPayloadResponse);
+
+			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(1);
+		});
+
+		it('Should delete a user by their id', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const userPayloadResponse = {
+				_id: '6767097fc93116ce0f5a9509',
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233345',
+				email: 'johndoe@test.com',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2024-12-21T18:31:27.286Z',
+				updatedAt: '2024-12-21T18:31:27.286Z',
+				__v: 0,
+			};
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(userPayloadResponse);
+
+			const spyDeleteUserByIdRepo = jest.spyOn(
+				userRepository,
+				'deleteUserById',
+			);
+
+			await userService.deleteUserById(id);
+
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(1);
+			expect(spyDeleteUserByIdRepo).toHaveBeenCalledTimes(1);
+		});
+	});
+
+	describe('Error Cases', () => {
+		it('Should throw an error if CPF already exists', async () => {
+			const userPayload = {
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '11122233344',
+				email: 'johndoe@test.com',
+				password: 'TestPassword',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+			};
+
+			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
+
+			const spyFindUserByCpfMethodRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(userPayload);
+
+			await expect(userService.newUser(userPayload)).rejects.toThrow(
+				'CPF already registered in the system',
+			);
+
+			await expect(userService.newUser(userPayload)).rejects.toMatchObject({
+				response: {
+					message: 'CPF already registered in the system',
+					error: 'Conflict',
+					statusCode: 409,
+				},
+			});
+
+			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
+
+			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
+		});
+
+		it('Should throw an error if email already exists', async () => {
+			const userPayload = {
+				firstName: 'John',
+				lastName: 'Doe',
+				cpf: '5556667780',
+				email: 'johndoe@test.com',
+				password: 'TestPassword',
+				profession: ProfessionEnum.Anesthesiologist,
+				specialization: [SpecializationEnum.HairTransplant],
+				availabilityStatus: AvailabilityStatusEnum.Available,
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+			};
+
+			const spyCreateUserMethodRepo = jest.spyOn(userRepository, 'createUser');
+
+			const spyFindUserByCpfMethodRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(null);
+
+			const spyFindUserByEmailMethodRepo = jest
+				.spyOn(userRepository, 'findUserByEmail')
+				.mockResolvedValue(userPayload);
+
+			await expect(userService.newUser(userPayload)).rejects.toThrow(
+				'Email already registered in the system',
+			);
+
+			await expect(userService.newUser(userPayload)).rejects.toMatchObject({
+				response: {
+					message: 'Email already registered in the system',
+					error: 'Conflict',
+					statusCode: 409,
+				},
+			});
+
+			expect(spyFindUserByCpfMethodRepo).toHaveBeenCalledTimes(2);
+			expect(spyFindUserByEmailMethodRepo).toHaveBeenCalledTimes(2);
+
+			expect(spyCreateUserMethodRepo).not.toHaveBeenCalled();
+		});
+
+		it('Should throw an error if the user is not found by id', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(null);
+
+			const spyGetCacheValue = jest
+				.spyOn(cacheService, 'getCacheValue')
+				.mockResolvedValue(null);
+
+			const spyFindUserByIdService = jest.spyOn(userService, 'findUserById');
+
+			await expect(userService.findUserById(id)).rejects.toThrow(
+				'User not found by id',
+			);
+
+			await expect(userService.findUserById(id)).rejects.toMatchObject({
+				response: {
+					message: 'User not found by id',
+					error: 'Not Found',
+					statusCode: 404,
+				},
+			});
+
+			expect(spyFindUserByIdService).toHaveBeenCalledTimes(2);
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2);
+			expect(spyGetCacheValue).toHaveBeenCalledTimes(2);
+		});
+
+		it('Should throw an error if the user is not found by cpf', async () => {
+			const cpf = '11122233345';
+
+			const spyFindUserByCpfRepo = jest
+				.spyOn(userRepository, 'findUserByCpf')
+				.mockResolvedValue(null);
+
+			const spyFindUserByCpfService = jest.spyOn(userService, 'findUserByCpf');
+
+			await expect(userService.findUserByCpf(cpf)).rejects.toThrow(
+				'User not found by CPF',
+			);
+
+			await expect(userService.findUserByCpf(cpf)).rejects.toMatchObject({
+				response: {
+					message: 'User not found by CPF',
+					error: 'Not Found',
+					statusCode: 404,
+				},
+			});
+
+			expect(spyFindUserByCpfRepo).toHaveBeenCalledTimes(2);
+			expect(spyFindUserByCpfService).toHaveBeenCalledTimes(2);
+		});
+
+		it('Should throw an error if the user if not found by id to delete', async () => {
+			const id = '6767097fc93116ce0f5a9509';
+
+			const spyFindUserByIdRepo = jest
+				.spyOn(userRepository, 'findUserById')
+				.mockResolvedValue(null);
+
+			const spyDeleteUserByIdService = jest.spyOn(
+				userService,
+				'deleteUserById',
+			);
+
+			await expect(userService.deleteUserById(id)).rejects.toThrow(
+				'User not found to delete',
+			);
+
+			await expect(userService.deleteUserById(id)).rejects.toMatchObject({
+				response: {
+					message: 'User not found to delete',
+					error: 'Not Found',
+					statusCode: 404,
+				},
+			});
+
+			expect(spyFindUserByIdRepo).toHaveBeenCalledTimes(2);
+			expect(spyDeleteUserByIdService).toHaveBeenCalledTimes(2);
+		});
+	});
+});
