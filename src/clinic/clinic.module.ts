@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ClinicController } from './presentation/clinic.controller';
-import { ClinicEntity } from './entity/clinic.entity';
+import { Clinic } from './entity/clinic.entity';
 import { ClinicRepository } from './repository/clinic.repository';
 import { ClinicService } from './clinic.service';
 import { ClinicSchema } from './schemas/clinic.schema';
@@ -10,7 +10,7 @@ import { ClinicSchema } from './schemas/clinic.schema';
 	imports: [
 		MongooseModule.forFeature([
 			{
-				name: ClinicEntity.name,
+				name: Clinic.name,
 				schema: ClinicSchema,
 			},
 		]),
