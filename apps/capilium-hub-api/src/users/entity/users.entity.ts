@@ -1,8 +1,8 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import type { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
-import type { ProfessionEnum } from '../../common/enums/profession.enum';
-import type { SpecializationEnum } from '../../common/enums/specialization.enum';
+import { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
+import { ProfessionEnum } from '../../common/enums/profession.enum';
+import { SpecializationEnum } from '../../common/enums/specialization.enum';
 
 @Schema({ timestamps: true })
 export class User {
@@ -27,7 +27,7 @@ export class User {
 	password: string;
 
 	@ApiProperty()
-	@Prop()
+	@Prop({ type: String, enum: ProfessionEnum })
 	profession: ProfessionEnum;
 
 	@ApiProperty()
@@ -35,7 +35,7 @@ export class User {
 	specialization: SpecializationEnum[];
 
 	@ApiProperty()
-	@Prop()
+	@Prop({ type: String, enum: AvailabilityStatusEnum })
 	availabilityStatus: AvailabilityStatusEnum;
 
 	@ApiProperty()
