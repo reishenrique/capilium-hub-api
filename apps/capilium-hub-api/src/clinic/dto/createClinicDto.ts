@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { SocialNetworksEnum } from 'src/common/enums/social-networks.enum';
-import { SpecializationEnum } from 'src/common/enums/specialization.enum';
+import { SocialNetworksEnum } from '../../common/enums/social-networks.enum';
+import { SpecializationEnum } from '../../common/enums/specialization.enum';
+
 
 export class CreateClinicDto {
 	@ApiProperty()
