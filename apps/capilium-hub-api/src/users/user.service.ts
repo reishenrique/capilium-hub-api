@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUserDto';
 import { UserResponseDto } from './dto/responseUserDto';
-import { removeNonNumeric } from 'src/common/helpers/cleanersHelper';
 import bcrypt from 'bcrypt';
-import { CacheService } from 'src/infrastructure/cache/cache.service';
 import { UserRepository } from './repository/user.repository';
+import { removeNonNumeric } from '../common/helpers/cleanersHelper';
+import { CacheService } from '../infrastructure/cache/cache.service';
 
 @Injectable()
 export class UserService {
