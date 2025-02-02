@@ -3,8 +3,8 @@ services:
     container_name: 'redis'
     image: bitnami/redis:latest
     environment:
-      - REDIS_PASSWORD=23b745f3d9ef77236e3e
-      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=${REDIS_PORT}
     command: /opt/bitnami/scripts/redis/run.sh
     restart: unless-stopped
     ports:
