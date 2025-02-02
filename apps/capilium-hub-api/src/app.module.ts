@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './users/user.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { ClinicModule } from './clinic/clinic.module';
+import { SharedModule } from '@app/shared';
 
 @Module({
 	imports: [
@@ -28,6 +29,6 @@ import { ClinicModule } from './clinic/clinic.module';
 		ClinicModule,
 	],
 	controllers: [],
-	providers: [],
+	providers: [SharedModule],
 })
 export class AppModule {}
