@@ -6,6 +6,7 @@ import { UserModule } from './users/user.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { SharedModule } from '@app/shared';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
 	imports: [
@@ -27,6 +28,7 @@ import { SharedModule } from '@app/shared';
 		UserModule,
 		CacheModule,
 		ClinicModule,
+		SharedModule,
 	],
 	controllers: [],
 	providers: [SharedModule],
