@@ -1,6 +1,7 @@
 import {
 	ConflictException,
 	Injectable,
+	InternalServerErrorException,
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
@@ -10,11 +11,16 @@ import bcrypt from 'bcrypt';
 import { UserRepository } from './repository/user.repository';
 import { removeNonNumeric } from '../common/helpers/cleanersHelper';
 import { CacheService } from '../infrastructure/cache/cache.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { send } from '../common/utils/mailerUtils';
+import { EMAIL_QUEUE } from '@app/shared';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(
+		@InjectQueue(EMAIL_QUEUE) private readonly emailQueue: Queue,
 		private readonly userRepository: UserRepository,
 		private readonly cacheService?: CacheService,
 	) {}
@@ -41,6 +47,13 @@ export class UserService {
 		const user = { ...userPayload, password: hashPassword };
 
 		const newUser = await this.userRepository.createUser(user);
+
+		const emailData = {
+			subject: `Welcome ${newUser.firstName}!`,
+			body: "We're happy to have you here. ",
+		};
+
+		await send(user.email, emailData.subject, emailData.body);
 
 		return newUser;
 	}
