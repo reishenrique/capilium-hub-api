@@ -52,7 +52,7 @@ export class UserController {
 
 			return newUser;
 		} catch (error) {
-			if (error instanceof ConflictException) {
+			if (error instanceof ConflictException || error instanceof Error) {
 				throw error;
 			}
 
