@@ -6,6 +6,8 @@ import { UsersSchema } from './schemas/users.schema';
 import { UserService } from './user.service';
 import { UserRepository } from './repository/user.repository';
 import { CacheModule } from '../infrastructure/cache/cache.module';
+import { BullModule } from '@nestjs/bull';
+import { EMAIL_QUEUE, SharedModule } from '@app/shared';
 
 @Module({
 	imports: [
@@ -16,6 +18,10 @@ import { CacheModule } from '../infrastructure/cache/cache.module';
 				schema: UsersSchema,
 			},
 		]),
+		BullModule.registerQueue({
+			name: EMAIL_QUEUE,
+		}),
+		SharedModule,
 	],
 	controllers: [UserController],
 	providers: [UserService, UserRepository],
