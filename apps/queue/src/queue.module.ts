@@ -1,10 +1,13 @@
+import { EMAIL_QUEUE, SharedModule } from '@app/shared';
+import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { QueueController } from './queue.controller';
-import { QueueService } from './queue.service';
 
 @Module({
-  imports: [],
-  controllers: [QueueController],
-  providers: [QueueService],
+	imports: [
+		SharedModule,
+		BullModule.registerQueue({
+			name: EMAIL_QUEUE,
+		}),
+	],
 })
 export class QueueModule {}
