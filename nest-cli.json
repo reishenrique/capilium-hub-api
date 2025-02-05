@@ -1,8 +1,41 @@
 {
-	"$schema": "https://json.schemastore.org/nest-cli",
-	"collection": "@nestjs/schematics",
-	"sourceRoot": "src",
-	"compilerOptions": {
-		"deleteOutDir": true
-	}
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/capilium-hub-api/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/capilium-hub-api/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/capilium-hub-api",
+  "projects": {
+    "capilium-hub-api": {
+      "type": "application",
+      "root": "apps/capilium-hub-api",
+      "entryFile": "main",
+      "sourceRoot": "apps/capilium-hub-api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/capilium-hub-api/tsconfig.app.json"
+      }
+    },
+    "queue": {
+      "type": "application",
+      "root": "apps/queue",
+      "entryFile": "main",
+      "sourceRoot": "apps/queue/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/queue/tsconfig.app.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    }
+  }
 }
