@@ -1,6 +1,7 @@
 import { EMAIL_QUEUE, SharedModule } from '@app/shared';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
+import { EmailProcessor } from './mailer/mailer.processor';
 
 @Module({
 	imports: [
@@ -9,5 +10,6 @@ import { Module } from '@nestjs/common';
 			name: EMAIL_QUEUE,
 		}),
 	],
+	providers: [EmailProcessor],
 })
 export class QueueModule {}
