@@ -29,8 +29,9 @@ export class ClinicService {
 		return newClinic;
 	}
 
-	async findAll(): Promise<ClinicResponseDtoSwagger[]> {
-		const findAllClinics = await this.clinicRepository.findAllClinics();
+	async findAllActivatedClinics(): Promise<ClinicResponseDtoSwagger[]> {
+		const findAllClinics =
+			await this.clinicRepository.findAllActivatedClinics();
 
 		if (!findAllClinics.length) {
 			throw new NotFoundException('No clinics found');
