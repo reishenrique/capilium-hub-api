@@ -40,4 +40,8 @@ export class Clinic {
 	@ApiProperty()
 	@Prop()
 	technicalManager: string;
+
+	@ApiProperty()
+	@Prop()
+	active: boolean;
 }
