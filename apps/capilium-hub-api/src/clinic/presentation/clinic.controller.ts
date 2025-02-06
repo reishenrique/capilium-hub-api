@@ -48,9 +48,9 @@ export class ClinicController {
 		}
 	}
 
-	@Get('findAll/')
+	@Get('findAllActivatedClinics/')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Listing the clinics' })
+	@ApiOperation({ summary: 'Listing active clinics' })
 	@ApiResponse({ status: 200, type: [ClinicResponseDtoSwagger] })
 	@ApiResponse({ status: 404, description: 'No clinics found' })
 	public async findAll(): Promise<ClinicResponseDtoSwagger[]> {
