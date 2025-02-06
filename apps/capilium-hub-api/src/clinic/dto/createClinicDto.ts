@@ -1,8 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+	IsBoolean,
+	IsEnum,
+	IsNotEmpty,
+	IsNumber,
+	IsString,
+} from 'class-validator';
 import { SocialNetworksEnum } from '../../common/enums/social-networks.enum';
 import { SpecializationEnum } from '../../common/enums/specialization.enum';
-
 
 export class CreateClinicDto {
 	@ApiProperty()
@@ -49,4 +54,9 @@ export class CreateClinicDto {
 	@IsNotEmpty()
 	@IsString()
 	technicalManager: string;
+
+	@ApiProperty()
+	@IsNotEmpty()
+	@IsBoolean()
+	active: boolean;
 }
