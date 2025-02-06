@@ -55,7 +55,7 @@ export class ClinicController {
 	@ApiResponse({ status: 404, description: 'No clinics found' })
 	public async findAll(): Promise<ClinicResponseDtoSwagger[]> {
 		try {
-			const findAllClinics = await this.clinicService.findAll();
+			const findAllClinics = await this.clinicService.findAllActivatedClinics();
 
 			return findAllClinics;
 		} catch (error) {
