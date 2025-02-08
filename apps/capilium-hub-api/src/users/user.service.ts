@@ -23,7 +23,9 @@ export class UserService {
 		private readonly cacheService?: CacheService,
 	) {}
 
-	async newUser(userPayload: CreateUserDto): Promise<Partial<UserResponseDto>> {
+	public async newUser(
+		userPayload: CreateUserDto,
+	): Promise<Partial<UserResponseDto>> {
 		const { cpf, email }: { cpf: string; email: string } = userPayload;
 
 		const formattedCpf = removeNonNumeric(cpf);
@@ -61,7 +63,7 @@ export class UserService {
 		return newUser;
 	}
 
-	async findUserById(id: string): Promise<Partial<UserResponseDto>> {
+	public async findUserById(id: string): Promise<Partial<UserResponseDto>> {
 		const cacheKey = `user:${id}`;
 
 		let getUserById = await this.cacheService.getCacheValue(cacheKey);
@@ -79,7 +81,7 @@ export class UserService {
 		return getUserById;
 	}
 
-	async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
+	public async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
 		const user = await this.userRepository.findUserByCpf(cpf);
 
 		if (!user) {
@@ -89,7 +91,7 @@ export class UserService {
 		return user;
 	}
 
-	async deleteUserById(id: string): Promise<void> {
+	public async deleteUserById(id: string): Promise<void> {
 		const user = await this.userRepository.findUserById(id);
 
 		if (!user) {
@@ -99,7 +101,7 @@ export class UserService {
 		await this.userRepository.deleteUserById(id);
 	}
 
-	async upgradeUserById(
+	public async upgradeUserById(
 		id: string,
 		newUserData: object,
 	): Promise<Partial<UserResponseDto>> {

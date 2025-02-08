@@ -13,7 +13,7 @@ export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
 	constructor(private readonly clinicRepository: ClinicRepository) {}
 
-	async create(
+	public async create(
 		clinicPayload: CreateClinicDto,
 	): Promise<Partial<ClinicResponseDtoSwagger>> {
 		const findClinicByCnpj = await this.clinicRepository.findClinicByCnpj(
@@ -29,7 +29,7 @@ export class ClinicService {
 		return newClinic;
 	}
 
-	async findAllActivatedClinics(): Promise<ClinicResponseDtoSwagger[]> {
+	public async findAllActivatedClinics(): Promise<ClinicResponseDtoSwagger[]> {
 		const findAllClinics =
 			await this.clinicRepository.findAllActivatedClinics();
 
