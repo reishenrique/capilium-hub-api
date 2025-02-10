@@ -48,17 +48,7 @@ export class UserService {
 
 		const newUser = await this.userRepository.createUser(user);
 
-		const emailData = {
-			to: newUser.email,
-			subject: `Welcome ${newUser.firstName}!`,
-			body: "We're happy to have you here. ",
-		};
-
-		await this.emailQueue.add('send-email', {
-			to: emailData.to,
-			subject: emailData.subject,
-			body: emailData.body,
-		});
+		await this.sendWelcomeEmailToUser(newUser.email, newUser.firstName);
 
 		return newUser;
 	}
@@ -115,5 +105,22 @@ export class UserService {
 		}
 
 		return findUserAndUpdate;
+	}
+
+	private async sendWelcomeEmailToUser(
+		userEmail: string,
+		firstName: string,
+	): Promise<void> {
+		const emailData = {
+			to: userEmail,
+			subject: `Welcome ${firstName}!`,
+			body: "We're happy to have you here. ",
+		};
+
+		await this.emailQueue.add('send-email', {
+			to: emailData.to,
+			subject: emailData.subject,
+			body: emailData.body,
+		});
 	}
 }
