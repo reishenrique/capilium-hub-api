@@ -1,7 +1,7 @@
 import { EMAIL_QUEUE } from '@app/shared';
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { send } from 'apps/capilium-hub-api/src/common/utils/mailerUtils';
+import { send } from 'apps/queue/common/utils/mailerUtils';
 import { Job } from 'bull';
 
 @Processor(EMAIL_QUEUE)
