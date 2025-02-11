@@ -1,11 +1,13 @@
-import { AvailabilityStatusEnum } from 'src/common/enums/availability.enum';
-import { ProfessionEnum } from 'src/common/enums/profession.enum';
-import { SpecializationEnum } from 'src/common/enums/specialization.enum';
-import { UserRepository } from 'src/users/repository/user.repository';
-import { UserService } from 'src/users/user.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest';
-import { CacheService } from 'src/infrastructure/cache/cache.service';
+import { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
+import { ProfessionEnum } from '../../common/enums/profession.enum';
+import { SpecializationEnum } from '../../common/enums/specialization.enum';
+import { CacheService } from '../../infrastructure/cache/cache.service';
+import { UserRepository } from '../../users/repository/user.repository';
+import { UserService } from '../../users/user.service';
+import { getQueueToken } from '@nestjs/bull';
+import { EMAIL_QUEUE } from '@app/shared';
 
 describe('User Service', () => {
 	let userService: UserService;
@@ -23,6 +25,12 @@ describe('User Service', () => {
 				{
 					provide: CacheService,
 					useValue: createMock<CacheService>(),
+				},
+				{
+					provide: getQueueToken(EMAIL_QUEUE),
+					useValue: {
+						add: jest.fn(),
+					},
 				},
 			],
 		}).compile();
