@@ -131,8 +131,47 @@ describe('Clinic Service', () => {
 
 			expect(spyFindAllActivatedClinicsRepo).toHaveBeenCalledTimes(1);
 			expect(spyClinicService).toHaveBeenCalledTimes(1);
-
 		});
 	});
-	describe('Failure Cases', () => {});
+	describe('Failure Cases', () => {
+		it('Should throw a conflict exception when cnpj already registered', async () => {
+			const clinicPayload = {
+				clinicName: 'Teste',
+				address: 'Teste numero 3',
+				contact: '1111112222',
+				socialNetworks: SocialNetworksEnum.INSTAGRAM,
+				specializations: SpecializationEnum.HairTransplant,
+				corporateName: 'Nome Generico',
+				cnpj: '22345652912348',
+				openingDays: 7,
+				technicalManager: 'Test',
+				active: true,
+			};
+
+			const spyService = jest.spyOn(clinicService, 'create');
+
+			const spyCreateClinicRepo = jest.spyOn(clinicRepository, 'createClinic');
+
+			const spyFindClinicByCnpjRepo = jest
+				.spyOn(clinicRepository, 'findClinicByCnpj')
+				.mockResolvedValue(clinicPayload);
+
+			await expect(clinicService.create(clinicPayload)).rejects.toThrow(
+				'CNPJ already registered in the system',
+			);
+
+			await expect(clinicService.create(clinicPayload)).rejects.toMatchObject({
+				response: {
+					message: 'CNPJ already registered in the system',
+					error: 'Conflict',
+					statusCode: 409,
+				},
+			});
+
+			expect(spyCreateClinicRepo).not.toHaveBeenCalled();
+
+			expect(spyFindClinicByCnpjRepo).toHaveBeenCalledTimes(2);
+			expect(spyService).toHaveBeenCalledTimes(2);
+		});
+	});
 });
