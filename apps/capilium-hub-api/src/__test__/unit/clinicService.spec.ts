@@ -173,5 +173,30 @@ describe('Clinic Service', () => {
 			expect(spyFindClinicByCnpjRepo).toHaveBeenCalledTimes(2);
 			expect(spyService).toHaveBeenCalledTimes(2);
 		});
+
+		it('Should throw a not found exception when no active clinics were found', async () => {
+			const mockActiveClinics = [];
+
+			const spyService = jest.spyOn(clinicService, 'findAllActivatedClinics');
+
+			const spyFindAllActivatedClinicsRepo = jest
+				.spyOn(clinicRepository, 'findAllActivatedClinics')
+				.mockResolvedValue(mockActiveClinics);
+
+			await expect(clinicService.findAllActivatedClinics()).rejects.toThrow(
+				'No clinics found',
+			);
+
+			await expect(clinicService.findAllActivatedClinics()).rejects.toMatchObject({
+				response: {
+					message: 'No clinics found',
+					error: 'Not Found',
+					statusCode: 404
+				}
+			})
+
+			expect(spyService).toHaveBeenCalledTimes(2)
+			expect(spyFindAllActivatedClinicsRepo).toHaveBeenCalledTimes(2)
+		});
 	});
 });
