@@ -7,7 +7,7 @@ import {
 import { ClinicRepository } from './repository/clinic.repository';
 import { Logger } from '@nestjs/common';
 import { CreateClinicDto } from './dto/createClinicDto';
-import { ClinicResponseDtoSwagger } from './dto/clinicResponseDto';
+import { ClinicResponseDto } from './dto/clinicResponseDto';
 
 @Injectable()
 export class ClinicService {
@@ -16,7 +16,7 @@ export class ClinicService {
 
 	public async create(
 		clinicPayload: CreateClinicDto,
-	): Promise<Partial<ClinicResponseDtoSwagger>> {
+	): Promise<Partial<ClinicResponseDto>> {
 		const findClinicByCnpj = await this.clinicRepository.findClinicByCnpj(
 			clinicPayload.cnpj,
 		);
@@ -30,7 +30,7 @@ export class ClinicService {
 		return newClinic;
 	}
 
-	public async findAllActivatedClinics(): Promise<ClinicResponseDtoSwagger[]> {
+	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
 		const findAllClinics =
 			await this.clinicRepository.findAllActivatedClinics();
 
@@ -41,7 +41,7 @@ export class ClinicService {
 		return findAllClinics;
 	}
 
-	public async findClinicById(id: string): Promise<ClinicResponseDtoSwagger> {
+	public async findClinicById(id: string): Promise<ClinicResponseDto> {
 		if (!id) throw new BadRequestException('Invalid ID');
 
 		const findClinicById = await this.clinicRepository.findClinicById(id);
@@ -54,7 +54,7 @@ export class ClinicService {
 	public async upgradeClinicById(
 		id: string,
 		newClinicData: object,
-	): Promise<ClinicResponseDtoSwagger> {
+	): Promise<ClinicResponseDto> {
 		const findClinicByIdAndUpdate =
 			await this.clinicRepository.findClinicByIdAndUpdate(id, newClinicData);
 
