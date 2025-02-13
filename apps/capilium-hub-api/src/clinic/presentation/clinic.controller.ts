@@ -10,6 +10,7 @@ import {
 	NotFoundException,
 	Param,
 	Post,
+	Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
@@ -83,6 +84,31 @@ export class ClinicController {
 			if (error instanceof NotFoundException) throw error;
 
 			this._logger.error('Error when searching for a clinic by id');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Put('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Upgrade a user by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'Clinic not found to update' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async upgradeClinicById(
+		@Param('id') id: string,
+		@Body() newClinicData: Partial<CreateClinicDto>,
+	): Promise<ClinicResponseDtoSwagger> {
+		try {
+			const upgradeClinic = this.clinicService.upgradeClinicById(
+				id,
+				newClinicData,
+			);
+
+			return upgradeClinic;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error trying to update a clinic by id ');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
