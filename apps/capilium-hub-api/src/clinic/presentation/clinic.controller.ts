@@ -16,7 +16,7 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
 import { CreateClinicDto } from '../dto/createClinicDto';
-import { ClinicResponseDtoSwagger } from '../dto/clinicResponseDto';
+import { ClinicResponseDto } from '../dto/clinicResponseDto';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -27,7 +27,7 @@ export class ClinicController {
 	@Post('/')
 	@HttpCode(HttpStatus.CREATED)
 	@ApiOperation({ summary: 'Create a new clinic' })
-	@ApiResponse({ status: 201, type: ClinicResponseDtoSwagger })
+	@ApiResponse({ status: 201, type: ClinicResponseDto })
 	@ApiResponse({
 		status: 409,
 		description: 'CNPJ already registered in the system',
@@ -38,7 +38,7 @@ export class ClinicController {
 	})
 	public async create(
 		@Body() clinic: CreateClinicDto,
-	): Promise<Partial<ClinicResponseDtoSwagger>> {
+	): Promise<Partial<ClinicResponseDto>> {
 		try {
 			const newClinic = await this.clinicService.create(clinic);
 
@@ -54,9 +54,9 @@ export class ClinicController {
 	@Get('findAllActivatedClinics')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Listing active clinics' })
-	@ApiResponse({ status: 200, type: [ClinicResponseDtoSwagger] })
+	@ApiResponse({ status: 200, type: [ClinicResponseDto] })
 	@ApiResponse({ status: 404, description: 'No clinics found' })
-	public async findAll(): Promise<ClinicResponseDtoSwagger[]> {
+	public async findAll(): Promise<ClinicResponseDto[]> {
 		try {
 			const findAllClinics = await this.clinicService.findAllActivatedClinics();
 
@@ -72,11 +72,9 @@ export class ClinicController {
 	@Get('/:id')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Getting clinic by id' })
-	@ApiResponse({ status: 200, type: ClinicResponseDtoSwagger })
+	@ApiResponse({ status: 200, type: ClinicResponseDto })
 	@ApiResponse({ status: 404, description: 'Clinic not found' })
-	public async findById(
-		@Param('id') id: string,
-	): Promise<ClinicResponseDtoSwagger> {
+	public async findById(@Param('id') id: string): Promise<ClinicResponseDto> {
 		try {
 			const findClinicById = await this.clinicService.findClinicById(id);
 
@@ -98,7 +96,7 @@ export class ClinicController {
 	public async upgradeClinicById(
 		@Param('id') id: string,
 		@Body() newClinicData: Partial<CreateClinicDto>,
-	): Promise<ClinicResponseDtoSwagger> {
+	): Promise<ClinicResponseDto> {
 		try {
 			const upgradeClinic = this.clinicService.upgradeClinicById(
 				id,
