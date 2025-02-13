@@ -50,4 +50,17 @@ export class ClinicService {
 
 		return findClinicById;
 	}
+
+	public async upgradeClinicById(
+		id: string,
+		newClinicData: object,
+	): Promise<ClinicResponseDtoSwagger> {
+		const findClinicByIdAndUpdate =
+			await this.clinicRepository.findClinicByIdAndUpdate(id, newClinicData);
+
+		if (!findClinicByIdAndUpdate)
+			throw new NotFoundException('Clinic not found to update');
+
+		return findClinicByIdAndUpdate;
+	}
 }
