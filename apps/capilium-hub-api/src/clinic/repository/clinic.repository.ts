@@ -30,4 +30,17 @@ export class ClinicRepository {
 		const clinics = await this.clinicModel.find({ active: true });
 		return clinics;
 	}
+
+	async findClinicByIdAndUpdate(
+		id: string,
+		newClinicData: object,
+	): Promise<Clinic> {
+		const findClinicAndUpdate = await this.clinicModel.findByIdAndUpdate(
+			id,
+			newClinicData,
+			{ new: true },
+		);
+
+		return findClinicAndUpdate;
+	}
 }
