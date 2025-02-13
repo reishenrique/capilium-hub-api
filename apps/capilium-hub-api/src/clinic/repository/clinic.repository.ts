@@ -43,4 +43,8 @@ export class ClinicRepository {
 
 		return findClinicAndUpdate;
 	}
+
+	async deleteClinicById(id: string): Promise<void> {
+		await this.clinicModel.deleteOne({ _id: id }).exec();
+	}
 }
