@@ -101,7 +101,7 @@ export class UserService {
 		);
 
 		if (!findUserAndUpdate) {
-			throw new NotFoundException('User not found for update');
+			throw new NotFoundException('User not found to update');
 		}
 
 		return findUserAndUpdate;

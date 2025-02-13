@@ -132,7 +132,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Upgrade a user by id' })
 	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'User not found to delete' })
+	@ApiResponse({ status: 400, description: 'User not found to upgrade' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	public async upgradeUserById(
 		@Param('id') id: string,
