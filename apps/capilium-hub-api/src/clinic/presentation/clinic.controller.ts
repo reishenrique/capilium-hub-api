@@ -2,6 +2,7 @@ import {
 	Body,
 	ConflictException,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
@@ -90,7 +91,7 @@ export class ClinicController {
 
 	@Put('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Upgrade a user by id' })
+	@ApiOperation({ summary: 'Upgrade a clinic by id' })
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 400, description: 'Clinic not found to update' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
@@ -109,6 +110,26 @@ export class ClinicController {
 			if (error instanceof NotFoundException) throw error;
 
 			this._logger.error('Error trying to update a clinic by id ');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Delete('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Delete clinic by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'Clinic not found to delete' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
+	public async deleteClinicById(id: string): Promise<void> {
+		try {
+			const deleteClinicById =
+				await this.clinicService.findClinicByIdAndDelete(id);
+
+			return deleteClinicById;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error trying delete a clinic by id ');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
