@@ -8,6 +8,7 @@ import {
 	InternalServerErrorException,
 	Logger,
 	NotFoundException,
+	Param,
 	Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -48,7 +49,7 @@ export class ClinicController {
 		}
 	}
 
-	@Get('findAllActivatedClinics/')
+	@Get('findAllActivatedClinics')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Listing active clinics' })
 	@ApiResponse({ status: 200, type: [ClinicResponseDtoSwagger] })
@@ -62,6 +63,26 @@ export class ClinicController {
 			if (error instanceof NotFoundException) throw error;
 
 			this._logger.error('Error when trying to listing all clinics');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Get('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Getting clinic by id' })
+	@ApiResponse({ status: 200, type: ClinicResponseDtoSwagger })
+	@ApiResponse({ status: 404, description: 'Clinic not found' })
+	public async findById(
+		@Param('id') id: string,
+	): Promise<ClinicResponseDtoSwagger> {
+		try {
+			const findClinicById = await this.clinicService.findClinicById(id);
+
+			return findClinicById;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error when searching for a clinic by id');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
