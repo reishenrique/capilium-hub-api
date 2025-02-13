@@ -63,4 +63,13 @@ export class ClinicService {
 
 		return findClinicByIdAndUpdate;
 	}
+
+	async findClinicByIdAndDelete(id: string): Promise<void> {
+		const findClinicById = await this.clinicRepository.findClinicById(id);
+
+		if (!findClinicById)
+			throw new NotFoundException('Clinic not found to delete');
+
+		await this.clinicRepository.deleteClinicById(id);
+	}
 }
