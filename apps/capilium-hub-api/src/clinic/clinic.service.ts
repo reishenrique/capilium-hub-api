@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	ConflictException,
 	Injectable,
 	NotFoundException,
@@ -38,5 +39,15 @@ export class ClinicService {
 		}
 
 		return findAllClinics;
+	}
+
+	public async findClinicById(id: string): Promise<ClinicResponseDtoSwagger> {
+		if (!id) throw new BadRequestException('Invalid ID');
+
+		const findClinicById = await this.clinicRepository.findClinicById(id);
+
+		if (!findClinicById) throw new NotFoundException('Clinic not found');
+
+		return findClinicById;
 	}
 }
