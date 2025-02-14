@@ -41,8 +41,7 @@ export class UserService {
 		if (userExistsByEmail)
 			throw new ConflictException('Email already registered in the system');
 
-		const saltRounds = await bcrypt.genSalt(10);
-		const hashPassword = await bcrypt.hash(userPayload.password, saltRounds);
+		const hashPassword = await this.saltAndHashPassword(userPayload.password);
 
 		const user = { ...userPayload, password: hashPassword };
 
@@ -122,5 +121,12 @@ export class UserService {
 			subject: emailData.subject,
 			body: emailData.body,
 		});
+	}
+
+	private async saltAndHashPassword(userPassword: string): Promise<string> {
+		const salt = await bcrypt.genSalt(10);
+		const hashPassword: string = await bcrypt.hash(userPassword, salt);
+
+		return hashPassword;
 	}
 }
