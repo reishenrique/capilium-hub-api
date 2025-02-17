@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Clinic } from '../entity/clinic.entity';
 import { ClinicDocument } from '../schemas/clinic.schema';
 import { Model } from 'mongoose';
+import { IPaginationResult } from '../interface/IPaginationResult';
 
 @Injectable()
 export class ClinicRepository {
@@ -46,5 +47,23 @@ export class ClinicRepository {
 
 	async deleteClinicById(id: string): Promise<void> {
 		await this.clinicModel.deleteOne({ _id: id }).exec();
+	}
+
+	async getPaginatedClinics(
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		model: Model<any>,
+		page: number,
+		limit: number,
+	): Promise<IPaginationResult<Clinic>> {
+		const skip = (page - 1) * limit;
+
+		const [results, totalDocuments] = await Promise.all([
+			model.find().skip(skip).limit(limit).exec(),
+			model.countDocuments().exec(),
+		]);
+
+		const totalPages = Math.ceil(totalDocuments / limit);
+
+		return { totalDocuments, totalPages, currentPage: page, results };
 	}
 }
