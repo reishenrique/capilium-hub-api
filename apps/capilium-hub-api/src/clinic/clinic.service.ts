@@ -64,7 +64,7 @@ export class ClinicService {
 		return findClinicByIdAndUpdate;
 	}
 
-	async findClinicByIdAndDelete(id: string): Promise<void> {
+	public async findClinicByIdAndDelete(id: string): Promise<void> {
 		const findClinicById = await this.clinicRepository.findClinicById(id);
 
 		if (!findClinicById)
