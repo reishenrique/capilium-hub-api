@@ -8,6 +8,7 @@ import { ClinicRepository } from './repository/clinic.repository';
 import { Logger } from '@nestjs/common';
 import { CreateClinicDto } from './dto/createClinicDto';
 import { ClinicResponseDto } from './dto/clinicResponseDto';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class ClinicService {
@@ -71,5 +72,23 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found to delete');
 
 		await this.clinicRepository.deleteClinicById(id);
+	}
+
+	public async getPagedAllClinics(
+		clinicModel: Model<ClinicResponseDto>,
+		page: number,
+		limit: number,
+	) {
+		if (page < 1 || limit < 1) {
+			throw new BadRequestException('Page and limit must be positive integer');
+		}
+
+		const result = await this.clinicRepository.getPaginatedClinics(
+			clinicModel,
+			page,
+			limit,
+		);
+
+		return result;
 	}
 }
