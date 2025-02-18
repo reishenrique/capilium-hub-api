@@ -8,7 +8,8 @@ import { ClinicRepository } from './repository/clinic.repository';
 import { Logger } from '@nestjs/common';
 import { CreateClinicDto } from './dto/createClinicDto';
 import { ClinicResponseDto } from './dto/clinicResponseDto';
-import { Model } from 'mongoose';
+import { Clinic } from './entity/clinic.entity';
+import { IPaginationResult } from './interface/IPaginationResult';
 
 @Injectable()
 export class ClinicService {
@@ -75,19 +76,14 @@ export class ClinicService {
 	}
 
 	public async getPagedAllClinics(
-		clinicModel: Model<ClinicResponseDto>,
 		page: number,
 		limit: number,
-	) {
+	): Promise<IPaginationResult<Clinic>> {
 		if (page < 1 || limit < 1) {
 			throw new BadRequestException('Page and limit must be positive integer');
 		}
 
-		const result = await this.clinicRepository.getPaginatedClinics(
-			clinicModel,
-			page,
-			limit,
-		);
+		const result = await this.clinicRepository.getPaginatedClinics(page, limit);
 
 		return result;
 	}
