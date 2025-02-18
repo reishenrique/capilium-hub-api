@@ -12,11 +12,15 @@ import {
 	Param,
 	Post,
 	Put,
+	Req,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
 import { CreateClinicDto } from '../dto/createClinicDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
+import { Request } from 'express'
+import { Clinic } from '../entity/clinic.entity';
+import { IPaginationResult } from '../interface/IPaginationResult';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -128,6 +132,31 @@ export class ClinicController {
 			if (error instanceof NotFoundException) throw error;
 
 			this._logger.error('Error trying delete a clinic by id ');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Get('paginated')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Getting clinics with pagination' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'Clinics not found' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async getPaginatedClinics(@Req() req: Request): Promise<IPaginationResult<ClinicResponseDto>> {
+		try {
+			const page = Number.parseInt(req.query.page as string) || 1;
+			const limit = Number.parseInt(req.query.limit as string) || 10;
+
+			const paginatedClinics = await this.clinicService.getPagedAllClinics(
+				page,
+				limit,
+			);
+			
+			return paginatedClinics;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error getting clinics with pagination');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
