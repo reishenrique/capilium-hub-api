@@ -50,16 +50,14 @@ export class ClinicRepository {
 	}
 
 	async getPaginatedClinics(
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		model: Model<any>,
 		page: number,
 		limit: number,
 	): Promise<IPaginationResult<Clinic>> {
 		const skip = (page - 1) * limit;
 
 		const [results, totalDocuments] = await Promise.all([
-			model.find().skip(skip).limit(limit).exec(),
-			model.countDocuments().exec(),
+			this.clinicModel.find().skip(skip).limit(limit).exec(),
+			this.clinicModel.countDocuments().exec(),
 		]);
 
 		const totalPages = Math.ceil(totalDocuments / limit);
