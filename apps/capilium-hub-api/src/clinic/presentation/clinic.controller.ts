@@ -160,7 +160,10 @@ export class ClinicController {
 
 			return paginatedClinics;
 		} catch (error) {
-			if (error instanceof NotFoundException || BadRequestException)
+			if (
+				error instanceof NotFoundException ||
+				error instanceof BadRequestException
+			)
 				throw error;
 
 			this._logger.error('Error getting clinics with pagination');
