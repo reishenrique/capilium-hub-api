@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	Body,
 	ConflictException,
 	Controller,
@@ -18,8 +19,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
 import { CreateClinicDto } from '../dto/createClinicDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
-import { Request } from 'express'
-import { Clinic } from '../entity/clinic.entity';
+import { Request } from 'express';
 import { IPaginationResult } from '../interface/IPaginationResult';
 
 @ApiTags('clinic')
@@ -140,9 +140,15 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Getting clinics with pagination' })
 	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'Clinics not found' })
+	@ApiResponse({ status: 404, description: 'Clinics not found' })
+	@ApiResponse({
+		status: 400,
+		description: 'Page and limit must be positive integer',
+	})
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
-	public async getPaginatedClinics(@Req() req: Request): Promise<IPaginationResult<ClinicResponseDto>> {
+	public async getPaginatedClinics(
+		@Req() req: Request,
+	): Promise<IPaginationResult<ClinicResponseDto>> {
 		try {
 			const page = Number.parseInt(req.query.page as string) || 1;
 			const limit = Number.parseInt(req.query.limit as string) || 10;
@@ -151,10 +157,11 @@ export class ClinicController {
 				page,
 				limit,
 			);
-			
+
 			return paginatedClinics;
 		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
+			if (error instanceof NotFoundException || BadRequestException)
+				throw error;
 
 			this._logger.error('Error getting clinics with pagination');
 			throw new InternalServerErrorException(error.message);
