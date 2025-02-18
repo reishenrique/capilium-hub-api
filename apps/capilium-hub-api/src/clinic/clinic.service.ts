@@ -83,8 +83,13 @@ export class ClinicService {
 			throw new BadRequestException('Page and limit must be positive integer');
 		}
 
-		const result = await this.clinicRepository.getPaginatedClinics(page, limit);
+		const paginatedResult = await this.clinicRepository.getPaginatedClinics(
+			page,
+			limit,
+		);
 
-		return result;
+		if (!paginatedResult) throw new NotFoundException('Clinics not found');
+
+		return paginatedResult;
 	}
 }
