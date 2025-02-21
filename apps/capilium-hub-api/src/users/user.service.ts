@@ -4,8 +4,8 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
-import { UserResponseDto } from './dto/responseUserDto';
+import { CreateUserDto } from './dto/userCreateDto';
+import { UserResponseDto } from './dto/userResponseDto';
 import bcrypt from 'bcrypt';
 import { UserRepository } from './repository/user.repository';
 import { removeNonNumeric } from '../common/helpers/cleanersHelper';
