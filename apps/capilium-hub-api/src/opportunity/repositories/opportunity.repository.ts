@@ -15,4 +15,11 @@ export class OpportunityRepository {
 		const opportunity = await this.opportunityModel.findById(id).exec();
 		return opportunity;
 	}
+
+	async createOpportunity(opportunity: Opportunity): Promise<Opportunity> {
+		const newOpportunity = (
+			await this.opportunityModel.create(opportunity)
+		).save();
+		return newOpportunity;
+	}
 }
