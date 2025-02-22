@@ -4,6 +4,7 @@ import {
 	IsEnum,
 	IsNotEmpty,
 	IsNumber,
+	IsOptional,
 	IsString,
 } from 'class-validator';
 import { StatusEnum } from '../../common/enums/status.enum';
@@ -40,7 +41,7 @@ export class OpportunityCreateDto {
 	clinicName: string;
 
 	@ApiProperty()
-	@IsNotEmpty()
+	@IsOptional()
 	@IsArray()
-	application: string[];
+	applicants?: string[];
 }
