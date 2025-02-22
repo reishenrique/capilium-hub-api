@@ -16,7 +16,7 @@ export class OpportunityRepository {
 		return opportunity;
 	}
 
-	async createOpportunity(opportunity: Opportunity): Promise<Opportunity> {
+	async create(opportunity: Opportunity): Promise<Opportunity> {
 		const newOpportunity = (
 			await this.opportunityModel.create(opportunity)
 		).save();
