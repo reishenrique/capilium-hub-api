@@ -6,8 +6,8 @@ import { UserModule } from './users/user.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { ClinicModule } from './clinic/clinic.module';
 import { SharedModule } from '@app/shared';
-import { BullModule } from '@nestjs/bull';
 import { OpportunityModule } from './opportunity/opportunity.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
 	imports: [
@@ -31,6 +31,7 @@ import { OpportunityModule } from './opportunity/opportunity.module';
 		ClinicModule,
 		OpportunityModule,
 		SharedModule,
+		AuthModule,
 	],
 	controllers: [],
 	providers: [SharedModule],
