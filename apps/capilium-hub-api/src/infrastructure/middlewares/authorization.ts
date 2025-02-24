@@ -1,9 +1,4 @@
-import {
-	Injectable,
-	Logger,
-	NestMiddleware,
-	UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
@@ -21,9 +16,9 @@ export class AuthorizationMiddleware implements NestMiddleware {
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
 			this.logger.warn('Authorization token not provided or invalid');
 
-			return next(
-				new UnauthorizedException('Authentication Token not provided'),
-			);
+			return res
+				.status(401)
+				.json({ message: 'Authentication Token not provided' });
 		}
 
 		const token = authHeader.split(' ')[1];
@@ -31,7 +26,9 @@ export class AuthorizationMiddleware implements NestMiddleware {
 		if (!token) {
 			this.logger.warn('Token is missing after "Bearer"');
 
-			return next(new UnauthorizedException('Token is missing after "Bearer"'));
+			return res
+				.status(401)
+				.json({ message: 'Token is missing after "Bearer"' });
 		}
 
 		try {
@@ -41,7 +38,7 @@ export class AuthorizationMiddleware implements NestMiddleware {
 			next();
 		} catch (error) {
 			this.logger.error(`Token validation failed: ${error.message}`);
-			next(new UnauthorizedException('Invalid or expired token'));
+			return res.status(401).json({ message: 'Invalid or expired token' });
 		}
 	}
 }
