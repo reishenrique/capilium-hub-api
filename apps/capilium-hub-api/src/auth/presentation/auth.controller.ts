@@ -11,7 +11,7 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from '../auth.service';
 import { LoginDto } from '../dto/loginDto';
 import { LoginResponseDto } from '../dto/loginResponseDto';
 import { RefreshAuthCredentialsDto } from '../dto/refreshAuthCredentialsDto';
