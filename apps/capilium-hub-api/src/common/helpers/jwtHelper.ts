@@ -24,7 +24,7 @@ export const refreshAccessToken = (refreshToken: string, user) => {
 
 	if (!verifyRefreshToken) return;
 
-	const { token }: { token: string } = generateAccessToken(user);
+	const token: string = generateAccessToken(user);
 
 	return token;
 };
