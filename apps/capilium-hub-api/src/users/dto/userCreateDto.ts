@@ -10,7 +10,7 @@ import { SpecializationEnum } from '../../common/enums/specialization.enum';
 import { AvailabilityStatusEnum } from '../../common/enums/availability.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class UserCreateDto {
 	@ApiProperty({
 		example: 'John',
 		description: 'First name of the user',
