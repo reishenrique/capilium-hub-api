@@ -14,7 +14,7 @@ import {
 	Put,
 } from '@nestjs/common';
 import { UserService } from '../user.service';
-import { CreateUserDto } from '../dto/userCreateDto';
+import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/userResponseDto';
 
@@ -41,7 +41,7 @@ export class UserController {
 		description: 'Error when trying to created a new user',
 	})
 	public async create(
-		@Body() user: CreateUserDto,
+		@Body() user: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
 		try {
 			const newUser = await this.userService.newUser(user);
@@ -132,7 +132,7 @@ export class UserController {
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	public async upgradeUserById(
 		@Param('id') id: string,
-		@Body() newUserData: Partial<CreateUserDto>,
+		@Body() newUserData: Partial<UserCreateDto>,
 	): Promise<Partial<UserResponseDto>> {
 		try {
 			const upgradeUser = await this.userService.upgradeUserById(
