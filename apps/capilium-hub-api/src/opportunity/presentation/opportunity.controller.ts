@@ -4,6 +4,8 @@ import {
 	Logger,
 	Post,
 	HttpStatus,
+	Param,
+	Get,
 	Body,
 	NotFoundException,
 	InternalServerErrorException,
@@ -39,6 +41,33 @@ export class OpportunityController {
 			if (error instanceof NotFoundException) throw error;
 
 			this._logger.error('Error when trying to create a new opportunity');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
+	@Get(':id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Listing opportunity by id' })
+	@ApiResponse({ status: 200, type: OpportunityCreateDto })
+	@ApiResponse({
+		status: 404,
+		description: 'Opportunity not found',
+	})
+	@ApiResponse({
+		status: 400,
+		description: 'Error when trying to list a opportunity by id',
+	})
+	public async findById(
+		@Param('id') id: string,
+	): Promise<Partial<OpportunityResponseDto>> {
+		try {
+			const findById = await this.opportunityService.findOpportunityById(id);
+
+			return findById;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Error when trying to list opportunity by id');
 			throw new InternalServerErrorException(error.message);
 		}
 	}
