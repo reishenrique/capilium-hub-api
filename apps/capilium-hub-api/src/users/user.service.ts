@@ -4,7 +4,7 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/userCreateDto';
+import { UserCreateDto } from './dto/userCreateDto';
 import { UserResponseDto } from './dto/userResponseDto';
 import bcrypt from 'bcrypt';
 import { UserRepository } from './repository/user.repository';
@@ -24,7 +24,7 @@ export class UserService {
 	) {}
 
 	public async newUser(
-		userPayload: CreateUserDto,
+		userPayload: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
 		const { cpf, email }: { cpf: string; email: string } = userPayload;
 
