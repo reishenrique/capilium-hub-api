@@ -102,6 +102,41 @@ describe('Opportunity Service', () => {
 			expect(spyCreateOpportunityRepo).toHaveBeenCalledTimes(1);
 			expect(spyOpportunityService).toHaveBeenCalledTimes(1);
 		});
+
+		it('Should list an opportunity by id', async () => {
+			const opportunityId = '67ba145c48ea4e5cdf5b5a0e';
+
+			const opportunityPayloadResponse = {
+				_id: '67ba145c48ea4e5cdf5b5a0e',
+				title: 'Teste',
+				description: 'Teste',
+				location: 'Teste',
+				salary: 100,
+				status: StatusEnum.Open,
+				clinicName: 'ClinicName',
+				applicants: [],
+				createdAt: '2025-02-22T18:15:56.550Z',
+				updatedAt: '2025-02-22T18:15:56.550Z',
+				__v: 0,
+			};
+
+			const spyFindOpportunityByIdRepo = jest
+				.spyOn(opportunityRepository, 'findOpportunityById')
+				.mockResolvedValue(opportunityPayloadResponse);
+
+			const spyOpportunityService = jest.spyOn(
+				opportunityService,
+				'findOpportunityById',
+			);
+
+			const findOpportunityById =
+				await opportunityService.findOpportunityById(opportunityId);
+
+			expect(findOpportunityById).toEqual(opportunityPayloadResponse);
+
+			expect(spyFindOpportunityByIdRepo).toHaveBeenCalledTimes(1);
+			expect(spyOpportunityService).toHaveBeenCalledTimes(1);
+		});
 	});
 	describe('Error Cases', () => {});
 });
