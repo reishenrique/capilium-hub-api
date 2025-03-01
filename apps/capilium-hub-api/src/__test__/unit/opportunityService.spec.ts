@@ -3,6 +3,7 @@ import { OpportunityService } from '../../opportunity/opportunity.service';
 import { OpportunityRepository } from '../../opportunity/repositories/opportunity.repository';
 import { createMock } from '@golevelup/ts-jest';
 import { StatusEnum } from '../../common/enums/status.enum';
+import { NotFoundException } from '@nestjs/common';
 
 describe('Opportunity Service', () => {
 	let opportunityService: OpportunityService;
@@ -138,5 +139,34 @@ describe('Opportunity Service', () => {
 			expect(spyOpportunityService).toHaveBeenCalledTimes(1);
 		});
 	});
-	describe('Error Cases', () => {});
+	describe('Error Cases', () => {
+		it('Should return an exception when not returning a opportunity by id', async () => {
+			const opportunityId = '67ba145c48ea4e5cdf5b5a0e';
+
+			const spyFindOpportunityByIdRepo = jest
+				.spyOn(opportunityRepository, 'findOpportunityById')
+				.mockResolvedValue(null);
+
+			const spyService = jest
+				.spyOn(opportunityService, 'findOpportunityById')
+				.mockRejectedValue(new NotFoundException('Opportunity not found'));
+
+			await expect(
+				opportunityService.findOpportunityById(opportunityId),
+			).rejects.toThrow('Opportunity not found');
+
+			await expect(
+				opportunityService.findOpportunityById(opportunityId),
+			).rejects.toMatchObject({
+				response: {
+					message: 'Opportunity not found',
+					error: 'Not Found',
+					statusCode: 404,
+				},
+			});
+
+			expect(spyFindOpportunityByIdRepo).toHaveBeenCalledTimes(2);
+			expect(spyService).toHaveBeenCalledTimes(2);
+		});
+	});
 });
