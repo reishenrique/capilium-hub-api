@@ -90,7 +90,7 @@ export class UserService {
 		await this.userRepository.deleteUserById(id);
 	}
 
-	public async upgradeUserById(
+	public async updateUserById(
 		id: string,
 		newUserData: object,
 	): Promise<Partial<UserResponseDto>> {

@@ -130,12 +130,12 @@ export class UserController {
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 400, description: 'User not found to upgrade' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
-	public async upgradeUserById(
+	public async updateUserById(
 		@Param('id') id: string,
 		@Body() newUserData: Partial<UserCreateDto>,
 	): Promise<Partial<UserResponseDto>> {
 		try {
-			const upgradeUser = await this.userService.upgradeUserById(
+			const upgradeUser = await this.userService.updateUserById(
 				id,
 				newUserData,
 			);
