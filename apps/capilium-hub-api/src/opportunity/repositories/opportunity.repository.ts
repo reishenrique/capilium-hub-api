@@ -22,4 +22,8 @@ export class OpportunityRepository {
 		).save();
 		return newOpportunity;
 	}
+
+	async deleteOpportunity(opportunityId: string): Promise<void> {
+		await this.opportunityModel.deleteOne({ _id: opportunityId }).exec();
+	}
 }
