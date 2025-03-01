@@ -5,9 +5,11 @@ import { OpportunityRepository } from './repositories/opportunity.repository';
 import { OpportunityController } from './presentation/opportunity.controller';
 import { OpportunitySchema } from './schemas/opportunity.schema';
 import { OpportunityService } from './opportunity.service';
+import { UserModule } from '../users/user.module';
 
 @Module({
 	imports: [
+		UserModule,
 		MongooseModule.forFeature([
 			{
 				name: Opportunity.name,
