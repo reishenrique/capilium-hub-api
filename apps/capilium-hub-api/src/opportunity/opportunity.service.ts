@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { OpportunityResponseDto } from './dto/opportunityResponseDto';
 import { OpportunityRepository } from './repositories/opportunity.repository';
 import { OpportunityCreateDto } from './dto/opportunityCreateDto';
@@ -47,7 +51,18 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found to user apply');
 
 		if (opportunity.status !== StatusEnum.Open) {
-			throw new BadRequestException('Opportunity is not open for applications')
+			throw new BadRequestException('Opportunity is not open for applications');
 		}
+	}
+
+	async deleteOpportunityById(id: string): Promise<void> {
+		const opportunity =
+			await this.opportunityRepository.findOpportunityById(id);
+
+		if (!opportunity) {
+			throw new NotFoundException('Opportunity not found to delete');
+		}
+
+		await this.opportunityRepository.deleteOpportunity(id);
 	}
 }
