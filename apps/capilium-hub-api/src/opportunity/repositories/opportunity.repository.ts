@@ -23,7 +23,7 @@ export class OpportunityRepository {
 		return newOpportunity;
 	}
 
-	async deleteOpportunity(opportunityId: string): Promise<void> {
-		await this.opportunityModel.deleteOne({ _id: opportunityId }).exec();
+	async deleteOpportunity(id: string): Promise<void> {
+		await this.opportunityModel.deleteOne({ _id: id }).exec();
 	}
 }
