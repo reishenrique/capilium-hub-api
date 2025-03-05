@@ -73,11 +73,33 @@ export class OpportunityController {
 		}
 	}
 
+	@Get('findAllOpenedOpportunities')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Listing all oportunities with "open" status' })
+	@ApiResponse({ status: 200, type: [OpportunityResponseDto] })
+	@ApiResponse({ status: 400, description: 'No open opportunities' })
+	public async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
+		try {
+			const findOpenedOpportunities =
+				await this.opportunityService.findAllOpenedOpportunities();
+
+			return findOpenedOpportunities;
+		} catch (error) {
+			if (error instanceof NotFoundException) throw error;
+
+			this._logger.error('Eror trying to listing all open opportunities');
+			throw new InternalServerErrorException(error.message);
+		}
+	}
+
 	@Delete(':id')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Delete a opportunity by id' })
 	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 404, description: 'Opportunity not found to delete' })
+	@ApiResponse({
+		status: 404,
+		description: 'Opportunity not found to delete',
+	})
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
 		try {
 			const deleteOpportunity =

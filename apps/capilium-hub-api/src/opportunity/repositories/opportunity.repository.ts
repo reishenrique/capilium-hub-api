@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Opportunity } from '../entity/opportunity.entity';
 import { Model } from 'mongoose';
 import { OpportunityDocument } from '../schemas/opportunity.schema';
+import { StatusEnum } from '../../common/enums/status.enum';
 
 @Injectable()
 export class OpportunityRepository {
@@ -21,6 +22,14 @@ export class OpportunityRepository {
 			await this.opportunityModel.create(opportunity)
 		).save();
 		return newOpportunity;
+	}
+
+	async findAllOpenedOpportunities(): Promise<Opportunity[]> {
+		const openOpportunityes = await this.opportunityModel.find({
+			status: StatusEnum.Open,
+		});
+
+		return openOpportunityes;
 	}
 
 	async deleteOpportunity(id: string): Promise<void> {
