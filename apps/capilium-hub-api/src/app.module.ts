@@ -8,6 +8,7 @@ import { ClinicModule } from './clinic/clinic.module';
 import { SharedModule } from '@app/shared';
 import { OpportunityModule } from './opportunity/opportunity.module';
 import { AuthModule } from './auth/auth.module';
+import { ApplicationModule } from './application/application.module';
 
 @Module({
 	imports: [
@@ -32,6 +33,7 @@ import { AuthModule } from './auth/auth.module';
 		OpportunityModule,
 		SharedModule,
 		AuthModule,
+		ApplicationModule,
 	],
 	controllers: [],
 	providers: [SharedModule],
