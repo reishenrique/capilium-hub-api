@@ -31,4 +31,8 @@ export class ApplicationRepository {
 		const application = await this.applicationModel.findOne({ _id: id }).exec();
 		return application;
 	}
+
+	async deleteApplication(applicationId: string): Promise<void> {
+		await this.applicationModel.deleteOne({ _id: applicationId }).exec();
+	}
 }
