@@ -7,8 +7,6 @@ import {
 	Param,
 	Get,
 	Body,
-	NotFoundException,
-	InternalServerErrorException,
 	Delete,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -35,15 +33,7 @@ export class OpportunityController {
 		description: 'Error when trying to create a new opportunity',
 	})
 	public async create(@Body() opportunity: OpportunityCreateDto) {
-		try {
-			const newOpportunity = await this.opportunityService.create(opportunity);
-			return newOpportunity;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error when trying to create a new opportunity');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.opportunityService.create(opportunity);
 	}
 
 	@Get(':id')
@@ -61,16 +51,7 @@ export class OpportunityController {
 	public async findById(
 		@Param('id') id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
-		try {
-			const findById = await this.opportunityService.findOpportunityById(id);
-
-			return findById;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error when trying to list opportunity by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.opportunityService.findOpportunityById(id);
 	}
 
 	@Delete(':id')
@@ -79,16 +60,6 @@ export class OpportunityController {
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 404, description: 'Opportunity not found to delete' })
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
-		try {
-			const deleteOpportunity =
-				await this.opportunityService.deleteOpportunityById(id);
-
-			return deleteOpportunity;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error when trying to delete a opportunity by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.opportunityService.deleteOpportunityById(id);
 	}
 }
