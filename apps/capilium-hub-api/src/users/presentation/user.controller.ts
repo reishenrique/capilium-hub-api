@@ -8,7 +8,6 @@ import {
 	HttpStatus,
 	InternalServerErrorException,
 	Logger,
-	NotFoundException,
 	Param,
 	Post,
 	Put,
@@ -66,18 +65,7 @@ export class UserController {
 	public async findUserById(
 		@Param('id') id: string,
 	): Promise<Partial<UserResponseDto>> {
-		try {
-			const user = await this.userService.findUserById(id);
-
-			return user;
-		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error;
-			}
-
-			this._logger.error('Error when trying to get a user by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.userService.findUserById(id);
 	}
 
 	@Get('by-cpf/:cpf')
@@ -89,18 +77,7 @@ export class UserController {
 	public async findUserByCpf(
 		@Param('cpf') cpf: string,
 	): Promise<Partial<UserResponseDto>> {
-		try {
-			const user = await this.userService.findUserByCpf(cpf);
-
-			return user;
-		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error;
-			}
-
-			this._logger.error('Error when trying to get a user by cpf');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.userService.findUserByCpf(cpf);
 	}
 
 	@Delete('/:id')
@@ -110,18 +87,7 @@ export class UserController {
 	@ApiResponse({ status: 400, description: 'User not found to delete' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
-		try {
-			const user = await this.userService.deleteUserById(id);
-
-			return user;
-		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error;
-			}
-
-			this._logger.error('Error trying delete user by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.userService.deleteUserById(id);
 	}
 
 	@Put('/:id')
@@ -134,20 +100,6 @@ export class UserController {
 		@Param('id') id: string,
 		@Body() newUserData: Partial<UserCreateDto>,
 	): Promise<Partial<UserResponseDto>> {
-		try {
-			const upgradeUser = await this.userService.updateUserById(
-				id,
-				newUserData,
-			);
-
-			return upgradeUser;
-		} catch (error) {
-			if (error instanceof NotFoundException) {
-				throw error;
-			}
-
-			this._logger.error('Error trying upgrade a user by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.userService.updateUserById(id, newUserData);
 	}
 }
