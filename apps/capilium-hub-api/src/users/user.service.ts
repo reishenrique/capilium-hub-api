@@ -33,13 +33,17 @@ export class UserService {
 		const userExistsByCpf =
 			await this.userRepository.findUserByCpf(formattedCpf);
 
-		if (userExistsByCpf)
+		if (userExistsByCpf) {
+			this._logger.error(`User with CPF: ${cpf} already registered`);
 			throw new ConflictException('CPF already registered in the system');
+		}
 
 		const userExistsByEmail = await this.userRepository.findUserByEmail(email);
 
-		if (userExistsByEmail)
+		if (userExistsByEmail) {
+			this._logger.error(`User with Email: ${email} not found`);
 			throw new ConflictException('Email already registered in the system');
+		}
 
 		const hashPassword = await this.saltAndHashPassword(userPayload.password);
 
@@ -61,6 +65,7 @@ export class UserService {
 			getUserById = await this.userRepository.findUserById(id);
 
 			if (!getUserById) {
+				this._logger.error(`User with ID: ${id} not found`);
 				throw new NotFoundException('User not found by id');
 			}
 
@@ -74,6 +79,7 @@ export class UserService {
 		const user = await this.userRepository.findUserByCpf(cpf);
 
 		if (!user) {
+			this._logger.error(`User with CPF: ${cpf} not found`);
 			throw new NotFoundException('User not found by CPF');
 		}
 
@@ -84,6 +90,7 @@ export class UserService {
 		const user = await this.userRepository.findUserById(id);
 
 		if (!user) {
+			this._logger.error(`User with ID: ${id} not found to delete`);
 			throw new NotFoundException('User not found to delete');
 		}
 
@@ -100,6 +107,7 @@ export class UserService {
 		);
 
 		if (!findUserAndUpdate) {
+			this._logger.error(`User with ID: ${id} not found to update`);
 			throw new NotFoundException('User not found to update');
 		}
 
