@@ -24,6 +24,9 @@ export class ClinicService {
 		);
 
 		if (findClinicByCnpj) {
+			this._logger.error(
+				`Clinic CNPJ: ${clinicPayload.cnpj} already registered`,
+			);
 			throw new ConflictException('CNPJ already registered in the system');
 		}
 
@@ -37,6 +40,7 @@ export class ClinicService {
 			await this.clinicRepository.findAllActivatedClinics();
 
 		if (!findAllClinics.length) {
+			this._logger.error('Clinics not found');
 			throw new NotFoundException('No clinics found');
 		}
 
@@ -44,11 +48,17 @@ export class ClinicService {
 	}
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
-		if (!id) throw new BadRequestException('Invalid ID');
+		if (!id) {
+			this._logger.error(`Clinic ID: ${id} is invalid`);
+			throw new BadRequestException('Invalid ID');
+		}
 
 		const findClinicById = await this.clinicRepository.findClinicById(id);
 
-		if (!findClinicById) throw new NotFoundException('Clinic not found');
+		if (!findClinicById) {
+			this._logger.error(`Clinic ID: ${id} not found`);
+			throw new NotFoundException('Clinic not found');
+		}
 
 		return findClinicById;
 	}
@@ -60,8 +70,10 @@ export class ClinicService {
 		const findClinicByIdAndUpdate =
 			await this.clinicRepository.findClinicByIdAndUpdate(id, newClinicData);
 
-		if (!findClinicByIdAndUpdate)
+		if (!findClinicByIdAndUpdate) {
+			this._logger.error(`Clinic ID: ${id} not found to update`);
 			throw new NotFoundException('Clinic not found to update');
+		}
 
 		return findClinicByIdAndUpdate;
 	}
@@ -69,8 +81,10 @@ export class ClinicService {
 	public async findClinicByIdAndDelete(id: string): Promise<void> {
 		const findClinicById = await this.clinicRepository.findClinicById(id);
 
-		if (!findClinicById)
+		if (!findClinicById) {
+			this._logger.error(`Clinic ID: ${id} not found to delete`);
 			throw new NotFoundException('Clinic not found to delete');
+		}
 
 		await this.clinicRepository.deleteClinicById(id);
 	}
@@ -88,7 +102,10 @@ export class ClinicService {
 			limit,
 		);
 
-		if (!paginatedResult) throw new NotFoundException('Clinics not found');
+		if (!paginatedResult) {
+			this._logger.error('Clinics not found to paginate');
+			throw new NotFoundException('Clinics not found');
+		}
 
 		return paginatedResult;
 	}
