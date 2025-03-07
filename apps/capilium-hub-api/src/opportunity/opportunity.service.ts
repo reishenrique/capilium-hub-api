@@ -1,6 +1,7 @@
 import {
 	BadRequestException,
 	Injectable,
+	Logger,
 	NotFoundException,
 } from '@nestjs/common';
 import { OpportunityResponseDto } from './dto/opportunityResponseDto';
@@ -11,6 +12,7 @@ import { StatusEnum } from '../common/enums/status.enum';
 
 @Injectable()
 export class OpportunityService {
+	protected readonly _logger = new Logger('OpportunityService');
 	constructor(
 		private readonly opportunityRepository: OpportunityRepository,
 		private readonly userRepository: UserRepository,
@@ -23,6 +25,7 @@ export class OpportunityService {
 			await this.opportunityRepository.findOpportunityById(id);
 
 		if (!opportunity) {
+			this._logger.error(`Opportunity ID: ${id} not found`);
 			throw new NotFoundException('Opportunity not found');
 		}
 
@@ -41,16 +44,21 @@ export class OpportunityService {
 	async applyAtOpportunity(userId: string, opportunityId: string) {
 		const user = await this.userRepository.findUserById(userId);
 
-		if (!user)
+		if (!user) {
+			this._logger.error(`User ID: ${userId} not found to apply`);
 			throw new NotFoundException('User not found to opportunity apply');
+		}
 
 		const opportunity =
 			await this.opportunityRepository.findOpportunityById(opportunityId);
 
-		if (!opportunity)
+		if (!opportunity) {
+			this._logger.error(`Opportunity ID: ${opportunityId} not found`);
 			throw new NotFoundException('Opportunity not found to user apply');
+		}
 
 		if (opportunity.status !== StatusEnum.Open) {
+			this._logger.error('Opportunity status is different from active');
 			throw new BadRequestException('Opportunity is not open for applications');
 		}
 	}
@@ -60,6 +68,7 @@ export class OpportunityService {
 			await this.opportunityRepository.findOpportunityById(id);
 
 		if (!opportunity) {
+			this._logger.error(`Opportunity ID: ${id} not found to delete`);
 			throw new NotFoundException('Opportunity not found to delete');
 		}
 
