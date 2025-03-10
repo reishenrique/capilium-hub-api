@@ -1,15 +1,11 @@
 import {
-	BadRequestException,
 	Body,
-	ConflictException,
 	Controller,
 	Delete,
 	Get,
 	HttpCode,
 	HttpStatus,
-	InternalServerErrorException,
 	Logger,
-	NotFoundException,
 	Param,
 	Post,
 	Put,
@@ -43,16 +39,7 @@ export class ClinicController {
 	public async create(
 		@Body() clinic: CreateClinicDto,
 	): Promise<Partial<ClinicResponseDto>> {
-		try {
-			const newClinic = await this.clinicService.create(clinic);
-
-			return newClinic;
-		} catch (error) {
-			if (error instanceof ConflictException) throw error;
-
-			this._logger.error('Error when trying to created a new clinic');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.create(clinic);
 	}
 
 	@Get('findAllActivatedClinics')
@@ -61,16 +48,7 @@ export class ClinicController {
 	@ApiResponse({ status: 200, type: [ClinicResponseDto] })
 	@ApiResponse({ status: 404, description: 'No clinics found' })
 	public async findAll(): Promise<ClinicResponseDto[]> {
-		try {
-			const findAllClinics = await this.clinicService.findAllActivatedClinics();
-
-			return findAllClinics;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error when trying to listing all clinics');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.findAllActivatedClinics();
 	}
 
 	@Get('/:id')
@@ -79,16 +57,7 @@ export class ClinicController {
 	@ApiResponse({ status: 200, type: ClinicResponseDto })
 	@ApiResponse({ status: 404, description: 'Clinic not found' })
 	public async findById(@Param('id') id: string): Promise<ClinicResponseDto> {
-		try {
-			const findClinicById = await this.clinicService.findClinicById(id);
-
-			return findClinicById;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error when searching for a clinic by id');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.findClinicById(id);
 	}
 
 	@Put('/:id')
@@ -101,19 +70,7 @@ export class ClinicController {
 		@Param('id') id: string,
 		@Body() newClinicData: Partial<CreateClinicDto>,
 	): Promise<ClinicResponseDto> {
-		try {
-			const upgradeClinic = this.clinicService.upgradeClinicById(
-				id,
-				newClinicData,
-			);
-
-			return upgradeClinic;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error trying to update a clinic by id ');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.upgradeClinicById(id, newClinicData);
 	}
 
 	@Delete('/:id')
@@ -123,17 +80,7 @@ export class ClinicController {
 	@ApiResponse({ status: 400, description: 'Clinic not found to delete' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
 	public async deleteClinicById(id: string): Promise<void> {
-		try {
-			const deleteClinicById =
-				await this.clinicService.findClinicByIdAndDelete(id);
-
-			return deleteClinicById;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Error trying delete a clinic by id ');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.findClinicByIdAndDelete(id);
 	}
 
 	@Get('paginated')
@@ -149,25 +96,9 @@ export class ClinicController {
 	public async getPaginatedClinics(
 		@Req() req: Request,
 	): Promise<IPaginationResult<ClinicResponseDto>> {
-		try {
-			const page = Number.parseInt(req.query.page as string) || 1;
-			const limit = Number.parseInt(req.query.limit as string) || 10;
+		const page = Number.parseInt(req.query.page as string) || 1;
+		const limit = Number.parseInt(req.query.limit as string) || 10;
 
-			const paginatedClinics = await this.clinicService.getPagedAllClinics(
-				page,
-				limit,
-			);
-
-			return paginatedClinics;
-		} catch (error) {
-			if (
-				error instanceof NotFoundException ||
-				error instanceof BadRequestException
-			)
-				throw error;
-
-			this._logger.error('Error getting clinics with pagination');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.clinicService.getPagedAllClinics(page, limit);
 	}
 }
