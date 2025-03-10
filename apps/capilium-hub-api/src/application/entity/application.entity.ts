@@ -11,8 +11,4 @@ export class Application {
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
 	aplpliedUserId: Types.ObjectId;
-
-	@ApiProperty()
-	@Prop({ default: Date.now })
-	appliedAt: Date;
 }
