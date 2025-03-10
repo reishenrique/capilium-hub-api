@@ -6,11 +6,11 @@ import { Types } from 'mongoose';
 export class Application {
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, ref: 'Opportunity', required: true })
-	opportunity: Types.ObjectId;
+	opportunityId: Types.ObjectId;
 
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
-	applicant: Types.ObjectId;
+	aplpliedUserId: Types.ObjectId;
 
 	@ApiProperty()
 	@Prop({ default: Date.now })
