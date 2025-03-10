@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
-import { CreateClinicDto } from '../dto/createClinicDto';
+import { CliniCreateDto } from '../dto/clinicCreateDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
 import { Request } from 'express';
 import { IPaginationResult } from '../interface/IPaginationResult';
@@ -37,7 +37,7 @@ export class ClinicController {
 		description: 'Error when trying to created a new clinic',
 	})
 	public async create(
-		@Body() clinic: CreateClinicDto,
+		@Body() clinic: CliniCreateDto,
 	): Promise<Partial<ClinicResponseDto>> {
 		return await this.clinicService.create(clinic);
 	}
@@ -68,7 +68,7 @@ export class ClinicController {
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	public async upgradeClinicById(
 		@Param('id') id: string,
-		@Body() newClinicData: Partial<CreateClinicDto>,
+		@Body() newClinicData: Partial<CliniCreateDto>,
 	): Promise<ClinicResponseDto> {
 		return await this.clinicService.upgradeClinicById(id, newClinicData);
 	}
