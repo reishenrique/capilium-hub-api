@@ -9,7 +9,7 @@ import {
 import { SocialNetworksEnum } from '../../common/enums/social-networks.enum';
 import { SpecializationEnum } from '../../common/enums/specialization.enum';
 
-export class CreateClinicDto {
+export class CliniCreateDto {
 	@ApiProperty({
 		example: 'John Hair Clinic',
 		description: 'Name of the clinic you are registering with',
