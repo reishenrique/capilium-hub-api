@@ -5,6 +5,8 @@ import { Application } from './entity/application.entity';
 import { ApplicationController } from './presentation/application.controller';
 import { ApplicationRepository } from './repository/application.repository';
 import { ApplicationSchema } from './schemas/applications.schema';
+import { UserModule } from '../users/user.module';
+import { OpportunityModule } from '../opportunity/opportunity.module';
 
 @Module({
 	imports: [
@@ -14,6 +16,8 @@ import { ApplicationSchema } from './schemas/applications.schema';
 				schema: ApplicationSchema,
 			},
 		]),
+		UserModule,
+		OpportunityModule,
 	],
 	controllers: [ApplicationController],
 	providers: [ApplicationService, ApplicationRepository],
