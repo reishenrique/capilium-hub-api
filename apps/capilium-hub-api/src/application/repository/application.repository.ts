@@ -25,6 +25,20 @@ export class ApplicationRepository {
 		return createApplication;
 	}
 
+	async hasAppliedToOpportunity(
+		opportunityId: string,
+		userId: string,
+	): Promise<Application> {
+		const hasApplied = await this.applicationModel
+			.findOne({
+				opportunityId,
+				userId,
+			})
+			.exec();
+
+		return hasApplied;
+	}
+
 	async listApplicationByUser(id: string): Promise<Application> {
 		const application = await this.applicationModel.findOne({ _id: id }).exec();
 		return application;
