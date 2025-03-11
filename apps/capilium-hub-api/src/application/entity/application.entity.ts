@@ -10,5 +10,5 @@ export class Application {
 
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
-	aplpliedUserId: Types.ObjectId;
+	appliedUserId: Types.ObjectId;
 }
