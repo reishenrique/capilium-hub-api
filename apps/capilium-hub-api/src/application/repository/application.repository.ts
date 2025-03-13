@@ -39,6 +39,14 @@ export class ApplicationRepository {
 		return hasApplied;
 	}
 
+	async addUserToApplication(opportunityId: string, userId: string) {
+		return await this.applicationModel.findOneAndUpdate(
+			{ opportunityId },
+			{ $addToSet: { userIds: userId } },
+			{ new: true, upsert: true },
+		);
+	}
+
 	async listApplicationByUser(id: string): Promise<Application> {
 		const application = await this.applicationModel.findOne({ _id: id }).exec();
 		return application;
