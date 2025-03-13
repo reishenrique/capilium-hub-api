@@ -20,7 +20,7 @@ export class ApplicationResponseDto {
 		example: '67bcbbdb1477995f877ff4d1',
 		description: 'User ID',
 	})
-	userId: Types.ObjectId;
+	userIds: string[];
 
 	@ApiProperty({
 		example: '2024-12-16T18:50:18.436Z',
