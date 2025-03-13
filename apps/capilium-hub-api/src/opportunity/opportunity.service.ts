@@ -32,6 +32,16 @@ export class OpportunityService {
 		return opportunity;
 	}
 
+	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
+		const findOpportunities =
+			await this.opportunityRepository.findAllOpenedOpportunities();
+
+		if (!findOpportunities)
+			throw new NotFoundException('No open opportunities');
+
+		return findOpportunities;
+	}
+
 	async create(
 		opportunity: OpportunityCreateDto,
 	): Promise<Partial<OpportunityResponseDto>> {

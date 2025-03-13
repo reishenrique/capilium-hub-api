@@ -42,18 +42,7 @@ export class UserController {
 	public async create(
 		@Body() user: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
-		try {
-			const newUser = await this.userService.newUser(user);
-
-			return newUser;
-		} catch (error) {
-			if (error instanceof ConflictException || error instanceof Error) {
-				throw error;
-			}
-
-			this._logger.error('Error when trying to created a new user');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.userService.newUser(user);
 	}
 
 	@Get('by-id/:id')

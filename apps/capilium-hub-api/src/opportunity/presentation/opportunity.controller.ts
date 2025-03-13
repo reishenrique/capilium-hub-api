@@ -54,11 +54,23 @@ export class OpportunityController {
 		return await this.opportunityService.findOpportunityById(id);
 	}
 
+	@Get('findAllOpenedOpportunities')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Listing all oportunities with "open" status' })
+	@ApiResponse({ status: 200, type: [OpportunityResponseDto] })
+	@ApiResponse({ status: 400, description: 'No open opportunities' })
+	public async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
+		return await this.opportunityService.findAllOpenedOpportunities();
+	}
+
 	@Delete(':id')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Delete a opportunity by id' })
 	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 404, description: 'Opportunity not found to delete' })
+	@ApiResponse({
+		status: 404,
+		description: 'Opportunity not found to delete',
+	})
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
 		return await this.opportunityService.deleteOpportunityById(id);
 	}
