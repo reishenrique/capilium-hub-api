@@ -9,6 +9,7 @@ import {
 import { ApplicationService } from '../application.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplicationCreateDto } from '../dto/applicationCreateDto';
+import { ApplicationResponseDto } from '../dto/applicationResponseDto';
 
 @ApiTags('application')
 @Controller('application')
@@ -29,7 +30,7 @@ export class ApplicationController {
 	})
 	public async createApplication(
 		@Body() applicationPayload: ApplicationCreateDto,
-	) {
+	): Promise<ApplicationResponseDto> {
 		console.log('Recebido no controller: ', applicationPayload);
 		return await this.applicationService.createApplication(applicationPayload);
 	}
