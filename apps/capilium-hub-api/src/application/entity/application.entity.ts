@@ -9,6 +9,6 @@ export class Application {
 	opportunityId: Types.ObjectId;
 
 	@ApiProperty()
-	@Prop({ type: Types.ObjectId, required: true })
-	userId: Types.ObjectId;
+	@Prop({ type: [Types.ObjectId], required: true })
+	userIds: string[];
 }
