@@ -30,6 +30,7 @@ export class ApplicationController {
 	public async createApplication(
 		@Body() applicationPayload: ApplicationCreateDto,
 	) {
+		console.log('Recebido no controller: ', applicationPayload);
 		return await this.applicationService.createApplication(applicationPayload);
 	}
 }

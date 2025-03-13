@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 
 export class ApplicationCreateDto {
 	@ApiProperty({
@@ -7,8 +7,8 @@ export class ApplicationCreateDto {
 		description: 'Opportunity ID',
 		type: String,
 	})
-	@IsNotEmpty({ message: 'The "opportunity" id is required' })
-	@IsString({ message: 'The "opportunityId" field must be a string' })
+	@IsNotEmpty()
+	@IsMongoId({ message: 'This field is a object id' })
 	opportunityId: string;
 
 	@ApiProperty({
@@ -16,7 +16,7 @@ export class ApplicationCreateDto {
 		description: 'User ID',
 		type: String,
 	})
-	@IsNotEmpty({ message: 'The "appliedUser" id is required' })
-	@IsString({ message: 'The "appliedUserId" field must be a string' })
-	appliedUserId: string;
+	@IsNotEmpty()
+	@IsMongoId({ message: 'This field is a object id' })
+	userId: string;
 }

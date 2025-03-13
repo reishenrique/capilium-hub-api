@@ -5,10 +5,10 @@ import { Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class Application {
 	@ApiProperty()
-	@Prop({ type: Types.ObjectId, ref: 'Opportunity', required: true })
+	@Prop({ type: Types.ObjectId, required: true })
 	opportunityId: Types.ObjectId;
 
 	@ApiProperty()
-	@Prop({ type: Types.ObjectId, ref: 'User', required: true })
-	appliedUserId: Types.ObjectId;
+	@Prop({ type: Types.ObjectId, required: true })
+	userId: Types.ObjectId;
 }

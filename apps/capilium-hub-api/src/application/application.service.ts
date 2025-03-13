@@ -19,30 +19,32 @@ export class ApplicationService {
 	) {}
 
 	public async createApplication(applicationPayload: ApplicationCreateDto) {
-		const { opportunityId, appliedUserId } = applicationPayload;
-
-		// Verify if opportunity exists
-		const opportunityExists =
-			await this.opportunityService.findOpportunityById(opportunityId);
+		const opportunityExists = await this.opportunityService.findOpportunityById(
+			applicationPayload.opportunityId,
+		);
 
 		if (!opportunityExists) {
-			this._logger.error(`Opportunity with ${opportunityId} id not exists`);
+			this._logger.error(
+				`Opportunity with ${applicationPayload.opportunityId} id not exists`,
+			);
 			throw new NotFoundException('Opportunity not exists');
 		}
 
-		// Verify if user exists to apply
-		const userExists = await this.userService.findUserById(appliedUserId);
+		const userExists = await this.userService.findUserById(
+			applicationPayload.userId,
+		);
 
 		if (!userExists) {
-			this._logger.error(`User with ${appliedUserId} id not exists`);
+			this._logger.error(
+				`User with ${applicationPayload.userId} id not exists`,
+			);
 			throw new NotFoundException('User not exists');
 		}
 
-		// Verify if user already applied
 		const userAlreadyApplied =
 			await this.applicationRepository.hasAppliedToOpportunity(
-				opportunityId,
-				appliedUserId,
+				applicationPayload.opportunityId,
+				applicationPayload.userId,
 			);
 
 		if (userAlreadyApplied) {
@@ -52,11 +54,10 @@ export class ApplicationService {
 			);
 		}
 
-		// Create application
 		const createApplication =
 			await this.applicationRepository.createApplication(
-				opportunityId,
-				appliedUserId,
+				applicationPayload.opportunityId,
+				applicationPayload.userId,
 			);
 
 		return createApplication;
