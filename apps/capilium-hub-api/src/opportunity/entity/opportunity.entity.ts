@@ -2,7 +2,6 @@ import { Schema, Prop } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { StatusEnum } from '../../common/enums/status.enum';
 import { Types } from 'mongoose';
-import { Optional } from '@nestjs/common';
 
 @Schema({ timestamps: true })
 export class Opportunity {

@@ -60,17 +60,7 @@ export class OpportunityController {
 	@ApiResponse({ status: 200, type: [OpportunityResponseDto] })
 	@ApiResponse({ status: 400, description: 'No open opportunities' })
 	public async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
-		try {
-			const findOpenedOpportunities =
-				await this.opportunityService.findAllOpenedOpportunities();
-
-			return findOpenedOpportunities;
-		} catch (error) {
-			if (error instanceof NotFoundException) throw error;
-
-			this._logger.error('Eror trying to listing all open opportunities');
-			throw new InternalServerErrorException(error.message);
-		}
+		return await this.opportunityService.findAllOpenedOpportunities();
 	}
 
 	@Delete(':id')
