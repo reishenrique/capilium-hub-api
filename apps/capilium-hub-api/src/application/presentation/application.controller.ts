@@ -4,6 +4,7 @@ import {
 	HttpCode,
 	HttpStatus,
 	Logger,
+	Param,
 	Post,
 } from '@nestjs/common';
 import { ApplicationService } from '../application.service';
@@ -17,7 +18,7 @@ export class ApplicationController {
 	protected readonly _logger = new Logger(ApplicationController.name);
 	constructor(private readonly applicationService: ApplicationService) {}
 
-	@Post('/createApplication')
+	@Post(':opportunityId/apply')
 	@HttpCode(HttpStatus.CREATED)
 	@ApiOperation({
 		summary: 'Creates registry of user application for opportunity',
@@ -28,10 +29,14 @@ export class ApplicationController {
 		status: 409,
 		description: 'User has already applied for this opportunity',
 	})
-	public async createApplication(
+	public async apply(
+		@Param() opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
 	): Promise<ApplicationResponseDto> {
 		console.log('Recebido no controller: ', applicationPayload);
-		return await this.applicationService.createApplication(applicationPayload);
+		return await this.applicationService.createApplication({
+			opportunityId,
+			userId: applicationPayload.userId,
+		});
 	}
 }
