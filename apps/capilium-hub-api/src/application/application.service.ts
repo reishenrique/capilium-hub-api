@@ -19,46 +19,47 @@ export class ApplicationService {
 	) {}
 
 	public async createApplication(applicationPayload: ApplicationCreateDto) {
-		const opportunityExists = await this.opportunityService.findOpportunityById(
-			applicationPayload.opportunityId,
-		);
+		const { opportunityId, userId } = applicationPayload;
+
+		const opportunityExists =
+			await this.opportunityService.findOpportunityById(opportunityId);
 
 		if (!opportunityExists) {
-			this._logger.error(
-				`Opportunity with ${applicationPayload.opportunityId} id not exists`,
-			);
+			this._logger.error(`Opportunity with ${opportunityId} id not exists`);
 			throw new NotFoundException('Opportunity not exists');
 		}
 
-		const userExists = await this.userService.findUserById(
-			applicationPayload.userId,
-		);
+		const userExists = await this.userService.findUserById(userId);
 
 		if (!userExists) {
-			this._logger.error(
-				`User with ${applicationPayload.userId} id not exists`,
-			);
+			this._logger.error(`User with ${userId} id not exists`);
 			throw new NotFoundException('User not exists');
 		}
 
-		const userAlreadyApplied =
-			await this.applicationRepository.hasAppliedToOpportunity(
-				applicationPayload.opportunityId,
-				applicationPayload.userId,
+		const existingApplication =
+			await this.applicationRepository.listApplicationByOpportunity(
+				opportunityId,
 			);
 
-		if (userAlreadyApplied) {
-			this._logger.error('User has already applied for this opportunity');
-			throw new ConflictException(
-				'User has already applied to this opportunity',
-			);
+		if (existingApplication) {
+			if (existingApplication.userIds.includes(userId)) {
+				this._logger.error('User has already applied for this opportunity');
+				throw new ConflictException(
+					'User has already applied for this opportunity',
+				);
+			}
+
+			const addUserToApplication =
+				await this.applicationRepository.addUserToApplication(
+					opportunityId,
+					userId,
+				);
+
+			return addUserToApplication;
 		}
 
 		const createApplication =
-			await this.applicationRepository.createApplication(
-				applicationPayload.opportunityId,
-				applicationPayload.userId,
-			);
+			await this.applicationRepository.createApplication(opportunityId, userId);
 
 		return createApplication;
 	}
