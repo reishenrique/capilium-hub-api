@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ApplicationCreateDto {
 	@ApiProperty({
@@ -8,7 +8,7 @@ export class ApplicationCreateDto {
 		type: String,
 	})
 	@IsNotEmpty()
-	@IsMongoId({ message: 'This field is a object id' })
+	@IsString({ message: 'This field is a object id' })
 	opportunityId: string;
 
 	@ApiProperty({
@@ -17,6 +17,6 @@ export class ApplicationCreateDto {
 		type: String,
 	})
 	@IsNotEmpty()
-	@IsMongoId({ message: 'This field is a object id' })
+	@IsString({ message: 'This field is a object id' })
 	userId: string;
 }
