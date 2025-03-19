@@ -25,32 +25,19 @@ export class ApplicationService {
 
 		await this.validateUserExists(userId);
 
-		const existingApplication =
-			await this.applicationRepository.listApplicationByOpportunity(
-				opportunityId,
-			);
+		const existingApplication = await this.checkExistingApplication(
+			opportunityId,
+			userId,
+		);
 
 		if (existingApplication) {
-			if (existingApplication?.userIds?.includes(userId)) {
-				this._logger.error('User has already applied for this opportunity');
-				throw new ConflictException(
-					'User has already applied for this opportunity',
-				);
-			}
-
-			const addUserToApplication =
-				await this.applicationRepository.addUserToApplication(
-					opportunityId,
-					userId,
-				);
-
-			return addUserToApplication;
+			return this.applicationRepository.addUserToApplication(
+				opportunityId,
+				userId,
+			);
 		}
 
-		const createApplication =
-			await this.applicationRepository.createApplication(opportunityId, userId);
-
-		return createApplication;
+		return this.applicationRepository.createApplication(opportunityId, userId);
 	}
 
 	private async validateOpportunityExists(opportunityId: string) {
@@ -73,5 +60,22 @@ export class ApplicationService {
 		}
 
 		throw new NotFoundException('User not exists');
+	}
+
+	private async checkExistingApplication(
+		opportunityId: string,
+		userId: string,
+	) {
+		const existingApplication =
+			await this.applicationRepository.listApplicationByOpportunity(
+				opportunityId,
+			);
+
+		if (existingApplication?.userIds?.includes(userId)) {
+			this._logger.error('User has already applied for this opportunity');
+			throw new ConflictException('User already applied for this opportunity');
+		}
+
+		return existingApplication;
 	}
 }
