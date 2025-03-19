@@ -33,7 +33,6 @@ export class ApplicationController {
 		@Param() opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
 	): Promise<ApplicationResponseDto> {
-		console.log('Recebido no controller: ', applicationPayload);
 		return await this.applicationService.createApplication({
 			opportunityId,
 			userId: applicationPayload.userId,
