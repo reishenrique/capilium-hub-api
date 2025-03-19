@@ -21,13 +21,7 @@ export class ApplicationService {
 	public async createApplication(applicationPayload: ApplicationCreateDto) {
 		const { opportunityId, userId } = applicationPayload;
 
-		const opportunityExists =
-			await this.opportunityService.findOpportunityById(opportunityId);
-
-		if (!opportunityExists) {
-			this._logger.error(`Opportunity with ${opportunityId} id not exists`);
-			throw new NotFoundException('Opportunity not exists');
-		}
+		await this.validateOpportunityExists(opportunityId);
 
 		const userExists = await this.userService.findUserById(userId);
 
@@ -42,7 +36,7 @@ export class ApplicationService {
 			);
 
 		if (existingApplication) {
-			if (existingApplication.userIds.includes(userId)) {
+			if (existingApplication?.userIds?.includes(userId)) {
 				this._logger.error('User has already applied for this opportunity');
 				throw new ConflictException(
 					'User has already applied for this opportunity',
@@ -63,4 +57,18 @@ export class ApplicationService {
 
 		return createApplication;
 	}
+
+	private async validateOpportunityExists(opportunityId: string) {
+		const opportunity =
+			await this.opportunityService.findOpportunityById(opportunityId);
+
+		if (!opportunity) {
+			this._logger.error(
+				`Opportunity with id: ${opportunityId}, does not exist`,
+			);
+			throw new NotFoundException('Opportunity does not exist');
+		}
+	}
+
+	private;
 }
