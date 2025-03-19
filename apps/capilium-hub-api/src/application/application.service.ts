@@ -23,12 +23,7 @@ export class ApplicationService {
 
 		await this.validateOpportunityExists(opportunityId);
 
-		const userExists = await this.userService.findUserById(userId);
-
-		if (!userExists) {
-			this._logger.error(`User with ${userId} id not exists`);
-			throw new NotFoundException('User not exists');
-		}
+		await this.validateUserExists(userId);
 
 		const existingApplication =
 			await this.applicationRepository.listApplicationByOpportunity(
@@ -70,5 +65,13 @@ export class ApplicationService {
 		}
 	}
 
-	private;
+	private async validateUserExists(userId: string) {
+		const user = await this.userService.findUserById(userId);
+
+		if (!user) {
+			this._logger.error(`User with id: ${userId}, does not exist`);
+		}
+
+		throw new NotFoundException('User not exists');
+	}
 }
