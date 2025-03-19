@@ -11,11 +11,7 @@
             "envFile": "${workspaceFolder}/.env",
             "cwd": "${workspaceRoot}",
             "console": "integratedTerminal",
-            ""
-            "preLaunchTask": "npm: build",
-            "outFiles": [
-                "${workspaceFolder}/dist/**/*.js"
-            ]
+            "protocol": "inspector"
         }
     ]
 }
