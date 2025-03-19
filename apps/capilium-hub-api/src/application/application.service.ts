@@ -57,9 +57,8 @@ export class ApplicationService {
 
 		if (!user) {
 			this._logger.error(`User with id: ${userId}, does not exist`);
+			throw new NotFoundException('User not exists');
 		}
-
-		throw new NotFoundException('User not exists');
 	}
 
 	private async checkExistingApplication(
