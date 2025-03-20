@@ -30,7 +30,7 @@ export class ApplicationController {
 		description: 'User has already applied for this opportunity',
 	})
 	public async apply(
-		@Param() opportunityId: string,
+		@Param('opportunityId') opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
 	): Promise<ApplicationResponseDto> {
 		return await this.applicationService.createApplication({
