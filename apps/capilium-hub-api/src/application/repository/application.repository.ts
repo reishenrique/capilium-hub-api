@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Application } from '../entity/application.entity';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { ApplicationDocument } from '../schemas/applications.schema';
 
 @Injectable()
@@ -17,33 +17,19 @@ export class ApplicationRepository {
 	): Promise<Application> {
 		const createApplication = (
 			await this.applicationModel.create({
-				opportunityId: new Types.ObjectId(opportunityId),
-				userId: new Types.ObjectId(userId),
+				opportunityId,
+				userIds: userId,
 			})
 		).save();
 
 		return createApplication;
 	}
 
-	async hasAppliedToOpportunity(
-		opportunityId: string,
-		userId: string,
-	): Promise<Application> {
-		const hasApplied = await this.applicationModel
-			.findOne({
-				opportunityId,
-				userId,
-			})
-			.exec();
-
-		return hasApplied;
-	}
-
 	async addUserToApplication(opportunityId: string, userId: string) {
 		return await this.applicationModel.findOneAndUpdate(
 			{ opportunityId },
 			{ $addToSet: { userIds: userId } },
-			{ new: true, upsert: true },
+			{ new: true },
 		);
 	}
 
@@ -53,7 +39,9 @@ export class ApplicationRepository {
 	}
 
 	async listApplicationByOpportunity(id: string): Promise<Application> {
-		const application = await this.applicationModel.findOne({ _id: id }).exec();
+		const application = await this.applicationModel
+			.findOne({ opportunityId: id })
+			.exec();
 		return application;
 	}
 
