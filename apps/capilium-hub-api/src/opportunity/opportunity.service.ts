@@ -84,4 +84,22 @@ export class OpportunityService {
 
 		await this.opportunityRepository.deleteOpportunity(id);
 	}
+
+	public async updateOpportunityById(
+		id: string,
+		newOpportunityData: object,
+	): Promise<Partial<OpportunityResponseDto>> {
+		const findOpportunityAndUpdate =
+			await this.opportunityRepository.findOpportunityByIdAndUpdate(
+				id,
+				newOpportunityData,
+			);
+
+		if (!findOpportunityAndUpdate) {
+			this._logger.error(`User with ID: ${id} not found to update`);
+			throw new NotFoundException('User not found to update');
+		}
+
+		return findOpportunityAndUpdate;
+	}
 }
