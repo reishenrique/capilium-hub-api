@@ -8,6 +8,7 @@ import {
 	Get,
 	Body,
 	Delete,
+	Put,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OpportunityService } from '../opportunity.service';
@@ -73,5 +74,21 @@ export class OpportunityController {
 	})
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
 		return await this.opportunityService.deleteOpportunityById(id);
+	}
+
+	@Put('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Update a opportunity by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'Opportunity not found to update' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async updateOpportunityById(
+		@Param('id') id: string,
+		@Body() newOpportunityData: Partial<OpportunityCreateDto>,
+	): Promise<Partial<OpportunityResponseDto>> {
+		return await this.opportunityService.updateOpportunityById(
+			id,
+			newOpportunityData,
+		);
 	}
 }
