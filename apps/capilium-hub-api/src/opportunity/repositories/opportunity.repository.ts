@@ -35,4 +35,16 @@ export class OpportunityRepository {
 	async deleteOpportunity(id: string): Promise<void> {
 		await this.opportunityModel.deleteOne({ _id: id }).exec();
 	}
+
+	async findOpportunityByIdAndUpdate(
+		id: string,
+		newOpportunityData: object,
+	): Promise<Opportunity> {
+		const findOpportunityByIdAndUpdate =
+			await this.opportunityModel.findByIdAndUpdate(id, newOpportunityData, {
+				new: true,
+			});
+
+		return findOpportunityByIdAndUpdate;
+	}
 }
