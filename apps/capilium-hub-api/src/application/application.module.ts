@@ -7,6 +7,8 @@ import { ApplicationRepository } from './repository/application.repository';
 import { ApplicationSchema } from './schemas/applications.schema';
 import { UserModule } from '../users/user.module';
 import { OpportunityModule } from '../opportunity/opportunity.module';
+import { BullModule } from '@nestjs/bull';
+import { EMAIL_QUEUE } from '@app/shared';
 
 @Module({
 	imports: [
@@ -16,6 +18,9 @@ import { OpportunityModule } from '../opportunity/opportunity.module';
 				schema: ApplicationSchema,
 			},
 		]),
+		BullModule.registerQueue({
+			name: EMAIL_QUEUE,
+		}),
 		UserModule,
 		OpportunityModule,
 	],
