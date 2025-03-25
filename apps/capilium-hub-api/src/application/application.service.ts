@@ -8,11 +8,15 @@ import { ApplicationRepository } from './repository/application.repository';
 import { OpportunityService } from '../opportunity/opportunity.service';
 import { UserService } from '../users/user.service';
 import { ApplicationCreateDto } from './dto/applicationCreateDto';
+import { InjectQueue } from '@nestjs/bull';
+import { EMAIL_QUEUE } from '@app/shared';
+import { Queue } from 'bull';
 
 @Injectable()
 export class ApplicationService {
 	protected readonly _logger = new Logger('ApplicationService');
 	constructor(
+		@InjectQueue(EMAIL_QUEUE) private readonly emailQueue: Queue,
 		private readonly applicationRepository: ApplicationRepository,
 		private readonly userService: UserService,
 		private readonly opportunityService: OpportunityService,
@@ -76,5 +80,23 @@ export class ApplicationService {
 		}
 
 		return existingApplication;
+	}
+
+	private async sendApplyConfirmationEmail(
+		userEmail: string,
+		firstName: string,
+		opportunityTitle: string,
+	): Promise<void> {
+		const emailData = {
+			to: userEmail,
+			subject: `Application Confirmation - [${opportunityTitle}]`,
+			body: `Hello ${firstName}`,
+		};
+
+		await this.emailQueue.add('send-email', {
+			to: emailData.to,
+			subject: emailData.subject,
+			body: emailData.body,
+		});
 	}
 }
