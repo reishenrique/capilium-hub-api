@@ -25,23 +25,35 @@ export class ApplicationService {
 	public async createApplication(applicationPayload: ApplicationCreateDto) {
 		const { opportunityId, userId } = applicationPayload;
 
-		await this.validateOpportunityExists(opportunityId);
+		const opportunity = await this.validateOpportunityExists(opportunityId);
 
-		await this.validateUserExists(userId);
+		const user = await this.validateUserExists(userId);
 
-		const existingApplication = await this.checkExistingApplication(
-			opportunityId,
-			userId,
-		);
+		const existingApplication =
+			await this.checkExistingApplicationAndUserApplied(opportunityId, userId);
 
 		if (existingApplication) {
-			return this.applicationRepository.addUserToApplication(
+			await this.applicationRepository.addUserToApplication(
 				opportunityId,
 				userId,
 			);
+
+			await this.sendApplyConfirmationEmail(
+				user.email,
+				user.firstName,
+				opportunity.title,
+			);
+
+			return;
 		}
 
-		return this.applicationRepository.createApplication(opportunityId, userId);
+		await this.applicationRepository.createApplication(opportunityId, userId);
+		
+		await this.sendApplyConfirmationEmail(
+			user.email,
+			user.firstName,
+			opportunity.title,
+		);
 	}
 
 	private async validateOpportunityExists(opportunityId: string) {
@@ -54,6 +66,8 @@ export class ApplicationService {
 			);
 			throw new NotFoundException('Opportunity does not exist');
 		}
+
+		return opportunity;
 	}
 
 	private async validateUserExists(userId: string) {
@@ -63,9 +77,11 @@ export class ApplicationService {
 			this._logger.error(`User with id: ${userId}, does not exist`);
 			throw new NotFoundException('User not exists');
 		}
+
+		return user;
 	}
 
-	private async checkExistingApplication(
+	private async checkExistingApplicationAndUserApplied(
 		opportunityId: string,
 		userId: string,
 	) {
