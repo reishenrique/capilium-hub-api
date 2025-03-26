@@ -11,6 +11,8 @@ import { ApplicationCreateDto } from './dto/applicationCreateDto';
 import { InjectQueue } from '@nestjs/bull';
 import { EMAIL_QUEUE } from '@app/shared';
 import { Queue } from 'bull';
+import { ApplicationResponseDto } from './dto/applicationResponseDto';
+import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 
 @Injectable()
 export class ApplicationService {
@@ -22,7 +24,9 @@ export class ApplicationService {
 		private readonly opportunityService: OpportunityService,
 	) {}
 
-	public async createApplication(applicationPayload: ApplicationCreateDto) {
+	public async createApplication(
+		applicationPayload: ApplicationCreateDto,
+	): Promise<ApplicationResponseDto> {
 		const { opportunityId, userId } = applicationPayload;
 
 		const opportunity = await this.validateOpportunityExists(opportunityId);
@@ -48,7 +52,7 @@ export class ApplicationService {
 		}
 
 		await this.applicationRepository.createApplication(opportunityId, userId);
-		
+
 		await this.sendApplyConfirmationEmail(
 			user.email,
 			user.firstName,
@@ -113,6 +117,9 @@ export class ApplicationService {
 			to: emailData.to,
 			subject: emailData.subject,
 			body: emailData.body,
+			metadata: {
+				emailType: EmailTypeEnum.APPLICATION,
+			},
 		});
 	}
 }
