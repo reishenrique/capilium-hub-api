@@ -13,6 +13,7 @@ import { CacheService } from '../infrastructure/cache/cache.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EMAIL_QUEUE } from '@app/shared';
+import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 
 @Injectable()
 export class UserService {
@@ -128,6 +129,9 @@ export class UserService {
 			to: emailData.to,
 			subject: emailData.subject,
 			body: emailData.body,
+			metadata: {
+				emailType: EmailTypeEnum.WELCOME,
+			},
 		});
 	}
 
