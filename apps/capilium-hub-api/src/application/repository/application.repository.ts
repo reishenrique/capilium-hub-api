@@ -33,11 +33,6 @@ export class ApplicationRepository {
 		);
 	}
 
-	async listApplicationByUser(id: string): Promise<Application> {
-		const application = await this.applicationModel.findOne({ _id: id }).exec();
-		return application;
-	}
-
 	async listApplicationByOpportunity(id: string): Promise<Application> {
 		const application = await this.applicationModel
 			.findOne({ opportunityId: id })
