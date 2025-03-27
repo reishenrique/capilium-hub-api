@@ -13,6 +13,7 @@ import { EMAIL_QUEUE } from '@app/shared';
 import { Queue } from 'bull';
 import { ApplicationResponseDto } from './dto/applicationResponseDto';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
+import templates from '../common/templates/email.templates.json';
 
 @Injectable()
 export class ApplicationService {
@@ -107,10 +108,12 @@ export class ApplicationService {
 		firstName: string,
 		opportunityTitle: string,
 	): Promise<void> {
+		const templatesEmail = templates.application
+
 		const emailData = {
 			to: userEmail,
-			subject: `Application Confirmation - [${opportunityTitle}]`,
-			body: `Hello ${firstName}`,
+			subject: templatesEmail.subject.replace('{{opportunityTitle}}', opportunityTitle),
+			body: templatesEmail.body.replace('{{firstName}}', firstName),
 		};
 
 		await this.emailQueue.add('send-email', {
