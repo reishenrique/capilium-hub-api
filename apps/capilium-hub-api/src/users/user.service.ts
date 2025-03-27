@@ -14,6 +14,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EMAIL_QUEUE } from '@app/shared';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
+import templates from '../common/templates/email.templates.json';
 
 @Injectable()
 export class UserService {
@@ -119,10 +120,12 @@ export class UserService {
 		userEmail: string,
 		firstName: string,
 	): Promise<void> {
+		const templateEmail = templates.welcome;
+
 		const emailData = {
 			to: userEmail,
-			subject: `Welcome ${firstName}!`,
-			body: "We're happy to have you here. ",
+			subject: templateEmail.subject.replace('{{firstName}}', firstName),
+			body: templateEmail.body,
 		};
 
 		await this.emailQueue.add('send-email', {
