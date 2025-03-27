@@ -1,0 +1,10 @@
+{
+    "welcome": {
+        "subject": "Welcome to Capilium Hub, {{firstName}}!",
+        "body": "We're happy to have you here"
+    },
+    "application": {
+        "subject": "Application Confirmation - [{{opportunityTitle}}]",
+        "body": "Hello {{firstName}}, your application was received!"
+    }
+}
