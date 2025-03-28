@@ -74,7 +74,6 @@ describe('Opportunity Service', () => {
 				salary: 100,
 				status: StatusEnum.Open,
 				clinicName: 'ClinicName',
-				applicants: [],
 			};
 
 			const spyCreateOpportunityRepo = jest
@@ -96,7 +95,6 @@ describe('Opportunity Service', () => {
 					salary: expect.any(Number),
 					status: expect.any(String),
 					clinicName: expect.any(String),
-					applicants: expect.any(Array),
 				}),
 			);
 
@@ -115,7 +113,6 @@ describe('Opportunity Service', () => {
 				salary: 100,
 				status: StatusEnum.Open,
 				clinicName: 'ClinicName',
-				applicants: [],
 				createdAt: '2025-02-22T18:15:56.550Z',
 				updatedAt: '2025-02-22T18:15:56.550Z',
 				__v: 0,
