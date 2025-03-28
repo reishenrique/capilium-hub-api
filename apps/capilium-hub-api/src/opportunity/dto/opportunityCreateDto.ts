@@ -39,9 +39,4 @@ export class OpportunityCreateDto {
 	@IsNotEmpty()
 	@IsString()
 	clinicName: string;
-
-	@ApiProperty()
-	@IsOptional()
-	@IsArray()
-	applicants?: string[];
 }
