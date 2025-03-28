@@ -28,11 +28,4 @@ export class Opportunity {
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, ref: 'Clinic' })
 	clinicName: string;
-
-	@ApiProperty()
-	@Prop({
-		type: [{ type: Types.ObjectId, ref: 'User' }],
-		default: [],
-	})
-	applicants?: string[];
 }
