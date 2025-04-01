@@ -45,7 +45,7 @@ export class ApplicationRepository {
 		return application;
 	}
 
-	async deleteApplication(applicationId: string): Promise<void> {
-		await this.applicationModel.deleteOne({ _id: applicationId }).exec();
+	async deleteApplication(id: string): Promise<void> {
+		await this.applicationModel.deleteOne({ _id: id }).exec();
 	}
 }
