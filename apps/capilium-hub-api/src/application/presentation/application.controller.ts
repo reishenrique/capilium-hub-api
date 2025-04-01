@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	HttpCode,
 	HttpStatus,
 	Logger,
@@ -37,5 +38,15 @@ export class ApplicationController {
 			opportunityId,
 			userId: applicationPayload.userId,
 		});
+	}
+
+	@Delete('/:id')
+	@HttpCode(HttpStatus.OK)
+	@ApiOperation({ summary: 'Delete application by id' })
+	@ApiResponse({ status: 200 })
+	@ApiResponse({ status: 400, description: 'Application not found by id' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	public async deleteApplicationById(@Param('id') id: string): Promise<void> {
+		return await this.applicationService.deleteApplicationById(id);
 	}
 }
