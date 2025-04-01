@@ -108,11 +108,14 @@ export class ApplicationService {
 		firstName: string,
 		opportunityTitle: string,
 	): Promise<void> {
-		const templatesEmail = templates.application
+		const templatesEmail = templates.application;
 
 		const emailData = {
 			to: userEmail,
-			subject: templatesEmail.subject.replace('{{opportunityTitle}}', opportunityTitle),
+			subject: templatesEmail.subject.replace(
+				'{{opportunityTitle}}',
+				opportunityTitle,
+			),
 			body: templatesEmail.body.replace('{{firstName}}', firstName),
 		};
 
@@ -124,5 +127,17 @@ export class ApplicationService {
 				emailType: EmailTypeEnum.APPLICATION,
 			},
 		});
+	}
+
+	public async deleteApplicationById(id: string): Promise<void> {
+		const listApplicationById =
+			this.applicationRepository.listApplicationById(id);
+
+		if (!listApplicationById) {
+			this._logger.error(`Application with ID: ${id} not found to delete`);
+			throw new NotFoundException('Application not found by id');
+		}
+
+		await this.applicationRepository.deleteApplication(id);
 	}
 }
