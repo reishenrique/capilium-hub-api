@@ -52,16 +52,21 @@ export class ApplicationService {
 			return;
 		}
 
-		await this.applicationRepository.createApplication(opportunityId, userId);
+		const application = await this.applicationRepository.createApplication(
+			opportunityId,
+			userId,
+		);
 
 		await this.sendApplyConfirmationEmail(
 			user.email,
 			user.firstName,
 			opportunity.title,
 		);
+
+		return application;
 	}
 
-	private async validateOpportunityExists(opportunityId: string) {
+	public async validateOpportunityExists(opportunityId: string) {
 		const opportunity =
 			await this.opportunityService.findOpportunityById(opportunityId);
 
@@ -75,7 +80,7 @@ export class ApplicationService {
 		return opportunity;
 	}
 
-	private async validateUserExists(userId: string) {
+	public async validateUserExists(userId: string) {
 		const user = await this.userService.findUserById(userId);
 
 		if (!user) {
@@ -86,7 +91,7 @@ export class ApplicationService {
 		return user;
 	}
 
-	private async checkExistingApplicationAndUserApplied(
+	public async checkExistingApplicationAndUserApplied(
 		opportunityId: string,
 		userId: string,
 	) {
