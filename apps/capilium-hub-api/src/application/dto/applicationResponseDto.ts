@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Types } from 'mongoose';
 
 export class ApplicationResponseDto {
 	@ApiProperty({
@@ -13,7 +12,7 @@ export class ApplicationResponseDto {
 		example: '67ba145c48ea4e5cdf5b5a0e',
 		description: 'Opportunity ID',
 	})
-	opportunityId: Types.ObjectId;
+	opportunityId: string;
 
 	@ApiProperty({
 		example: '67bcbbdb1477995f877ff4d1',
