@@ -6,7 +6,7 @@ import { Types } from 'mongoose';
 export class Application {
 	@ApiProperty()
 	@Prop({ type: Types.ObjectId, required: true })
-	opportunityId: Types.ObjectId;
+	opportunityId: string;
 
 	@ApiProperty()
 	@Prop({ type: [Types.ObjectId], required: true })
