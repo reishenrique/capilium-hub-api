@@ -159,5 +159,38 @@ describe('Application Service', () => {
 				applicationService.createApplication(applicationPayload),
 			).rejects.toThrow('Opportunity does not exist');
 		});
+
+		it('Should throw a error when user not exists', async () => {
+			const applicationPayload = {
+				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
+				userId: '67e45f92c7e1b53f5978c3e5',
+			};
+
+			const mockOpportunity = {
+				_id: '67ba145c48ea4e5cdf5b5a0e',
+				title: 'Teste',
+				description: 'Teste',
+				location: 'Teste',
+				salary: 100,
+				status: StatusEnum.Open,
+				clinicName: 'ClinicName',
+				createdAt: new Date('2025-02-22T18:15:56.550Z'),
+				updatedAt: new Date('2025-02-22T18:15:56.550Z'),
+			};
+
+			jest
+				.spyOn(applicationService, 'validateOpportunityExists')
+				.mockResolvedValue(mockOpportunity);
+
+			jest
+				.spyOn(applicationService, 'validateUserExists')
+				.mockImplementation(() => {
+					throw new NotFoundException('User does not exist');
+				});
+
+			await expect(
+				applicationService.createApplication(applicationPayload),
+			).rejects.toThrow('User does not exist');
+		});
 	});
 });
