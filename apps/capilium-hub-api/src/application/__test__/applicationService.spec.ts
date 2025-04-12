@@ -7,6 +7,7 @@ import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { EMAIL_QUEUE } from '@app/shared';
 import { StatusEnum } from '../../common/enums/status.enum';
+import { NotFoundException } from '@nestjs/common/exceptions';
 
 describe('Application Service', () => {
 	let applicationService: ApplicationService;
@@ -121,5 +122,42 @@ describe('Application Service', () => {
 		});
 	});
 
-	describe('Failure Cases', () => {});
+	describe('Failure Cases', () => {
+		it('Should throw a error when opportunity not exists', async () => {
+			const applicationPayload = {
+				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
+				userId: '67e45f92c7e1b53f5978c3e5',
+			};
+
+			const mockUser = {
+				_id: '67bcbbdb1477995f877ff4d1',
+				firstName: 'Auth',
+				lastName: 'Test',
+				cpf: '47926193820',
+				email: 'test@test.com',
+				password: 'hash-password',
+				profession: 'Dermatologist',
+				specialization: ['Hair Transplant'],
+				availabilityStatus: 'Available',
+				professionalExperience: '3 years',
+				portfolio: 'www.teste.com.br',
+				createdAt: '2025-02-24T18:35:07.711Z',
+				updatedAt: '2025-02-24T18:35:07.711Z',
+			};
+
+			jest
+				.spyOn(applicationService, 'validateOpportunityExists')
+				.mockImplementation(() => {
+					throw new NotFoundException('Opportunity does not exist');
+				});
+
+			jest
+				.spyOn(applicationService, 'validateUserExists')
+				.mockResolvedValue(mockUser);
+
+			await expect(
+				applicationService.createApplication(applicationPayload),
+			).rejects.toThrow('Opportunity does not exist');
+		});
+	});
 });
