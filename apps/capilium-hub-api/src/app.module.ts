@@ -9,6 +9,7 @@ import { SharedModule } from '@app/shared';
 import { OpportunityModule } from './opportunity/opportunity.module';
 import { AuthModule } from './auth/auth.module';
 import { ApplicationModule } from './application/application.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
 	imports: [
@@ -34,6 +35,7 @@ import { ApplicationModule } from './application/application.module';
 		SharedModule,
 		AuthModule,
 		ApplicationModule,
+		UploadModule,
 	],
 	controllers: [],
 	providers: [SharedModule],
