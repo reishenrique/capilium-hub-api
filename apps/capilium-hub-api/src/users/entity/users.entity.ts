@@ -45,4 +45,8 @@ export class User {
 	@ApiProperty({ required: false })
 	@Prop()
 	portfolio?: string;
+
+	@ApiProperty({ required: false })
+	@Prop()
+	resume?: string;
 }
