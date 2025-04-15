@@ -10,14 +10,14 @@ export class UploadService {
 		private readonly userRepository: UserRepository,
 	) {}
 
-	async attachResume(
+	async attachResumeIntoUser(
 		userId: string,
 		resumeFileName: string,
 	): Promise<{ message: string; filename: string }> {
 		const user = await this.userRepository.findUserById(userId);
 		if (!user) throw new NotFoundException('User not found');
 
-		await this.uploadRepository.updateResume(userId, resumeFileName);
+		await this.uploadRepository.updateResumeIntoUser(userId, resumeFileName);
 
 		return {
 			message: 'Resume uploaded successfully',
