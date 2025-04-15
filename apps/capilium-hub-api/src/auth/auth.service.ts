@@ -13,7 +13,7 @@ import { LoginResponseDto } from './dto/loginResponseDto';
 import {
 	generateAccessToken,
 	refreshAccessToken,
-} from '../common/helpers/jwtHelper';
+} from '../common/helpers/jwt.helper';
 import { UserRepository } from '../users/repository/user.repository';
 
 @Injectable()
