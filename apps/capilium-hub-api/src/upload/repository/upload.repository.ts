@@ -11,7 +11,10 @@ export class UploadRepository {
 		private readonly userModel: Model<UserDocument>,
 	) {}
 
-	async updateResume(id: string, resumeFileName: string): Promise<void> {
+	async updateResumeIntoUser(
+		id: string,
+		resumeFileName: string,
+	): Promise<void> {
 		await this.userModel
 			.findByIdAndUpdate(id, { resume: resumeFileName })
 			.exec();
