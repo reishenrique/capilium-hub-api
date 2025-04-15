@@ -8,7 +8,7 @@ import { UserCreateDto } from './dto/userCreateDto';
 import { UserResponseDto } from './dto/userResponseDto';
 import bcrypt from 'bcrypt';
 import { UserRepository } from './repository/user.repository';
-import { removeNonNumeric } from '../common/helpers/cleanersHelper';
+import { removeNonNumeric } from '../common/helpers/cleaners.helper';
 import { CacheService } from '../infrastructure/cache/cache.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
