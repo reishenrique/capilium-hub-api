@@ -1,5 +1,7 @@
 import {
 	Controller,
+	HttpCode,
+	HttpStatus,
 	Logger,
 	Param,
 	Post,
@@ -8,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UploadService } from '../upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { multerStorage, pdfFileFilter } from '../helpers/upload.helper';
 
 @ApiTags('upload')
@@ -18,6 +20,11 @@ export class UploadController {
 	constructor(private readonly uploadService: UploadService) {}
 
 	@Post(':id/upload-resume')
+	@HttpCode(HttpStatus.CREATED)
+	@ApiOperation({ summary: 'Upload a pdf file and attach a user' })
+	@ApiResponse({ status: 201 })
+	@ApiResponse({ status: 404, description: 'User not found' })
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	@UseInterceptors(
 		FileInterceptor('file', {
 			storage: multerStorage,
