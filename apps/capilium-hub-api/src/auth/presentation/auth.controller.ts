@@ -9,6 +9,7 @@ import {
 	NotFoundException,
 	Post,
 	UnauthorizedException,
+	UseInterceptors,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../auth.service';
@@ -16,6 +17,7 @@ import { LoginDto } from '../dto/loginDto';
 import { LoginResponseDto } from '../dto/loginResponseDto';
 import { RefreshAuthCredentialsDto } from '../dto/refreshAuthCredentialsDto';
 import { RefreshAuthResponseDto } from '../dto/refreshAuthResponseDto';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -27,8 +29,12 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Logging a user' })
 	@ApiResponse({ status: 201, description: 'Login successful!' })
-	@ApiResponse({ status: 401, description: 'Unauthorized or Invalid password' })
+	@ApiResponse({
+		status: 401,
+		description: 'Unauthorized or Invalid password',
+	})
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async login(@Body() loginData: LoginDto): Promise<LoginResponseDto> {
 		try {
 			const loginAndGenerateAccessToken =
@@ -59,6 +65,7 @@ export class AuthController {
 	})
 	@ApiResponse({ status: 404, description: 'User not found' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async refreshAccessToken(
 		@Body() refreshAuthCredentials: RefreshAuthCredentialsDto,
 	): Promise<RefreshAuthResponseDto> {
