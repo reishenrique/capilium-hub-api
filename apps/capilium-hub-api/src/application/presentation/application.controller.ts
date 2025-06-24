@@ -7,11 +7,13 @@ import {
 	Logger,
 	Param,
 	Post,
+	UseInterceptors,
 } from '@nestjs/common';
 import { ApplicationService } from '../application.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApplicationCreateDto } from '../dto/applicationCreateDto';
 import { ApplicationResponseDto } from '../dto/applicationResponseDto';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 
 @ApiTags('application')
 @Controller('application')
@@ -30,6 +32,7 @@ export class ApplicationController {
 		status: 409,
 		description: 'User has already applied for this opportunity',
 	})
+	@UseInterceptors(LoggingInterceptor)
 	public async apply(
 		@Param('opportunityId') opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
@@ -46,6 +49,7 @@ export class ApplicationController {
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 400, description: 'Application not found by id' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async deleteApplicationById(@Param('id') id: string): Promise<void> {
 		return await this.applicationService.deleteApplicationById(id);
 	}
