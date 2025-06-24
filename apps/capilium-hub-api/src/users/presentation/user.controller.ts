@@ -9,11 +9,13 @@ import {
 	Param,
 	Post,
 	Put,
+	UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../user.service';
 import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/userResponseDto';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 
 @ApiTags('user')
 @Controller('user')
@@ -49,6 +51,7 @@ export class UserController {
 	@ApiResponse({ status: 200, type: UserResponseDto })
 	@ApiResponse({ status: 404, description: 'User not found by id' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async findUserById(
 		@Param('id') id: string,
 	): Promise<Partial<UserResponseDto>> {
@@ -61,6 +64,7 @@ export class UserController {
 	@ApiResponse({ status: 200, type: UserResponseDto })
 	@ApiResponse({ status: 404, description: 'User not found by CPF' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async findUserByCpf(
 		@Param('cpf') cpf: string,
 	): Promise<Partial<UserResponseDto>> {
@@ -73,6 +77,7 @@ export class UserController {
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 400, description: 'User not found to delete' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
+	@UseInterceptors(LoggingInterceptor)
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
 		return await this.userService.deleteUserById(id);
 	}
@@ -83,6 +88,7 @@ export class UserController {
 	@ApiResponse({ status: 200 })
 	@ApiResponse({ status: 400, description: 'User not found to update' })
 	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@UseInterceptors(LoggingInterceptor)
 	public async updateUserById(
 		@Param('id') id: string,
 		@Body() newUserData: Partial<UserCreateDto>,
