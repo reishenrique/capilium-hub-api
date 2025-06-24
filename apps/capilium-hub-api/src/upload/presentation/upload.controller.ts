@@ -12,6 +12,7 @@ import { UploadService } from '../upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { multerStorage, pdfFileFilter } from '../helpers/upload.helper';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 
 @ApiTags('upload')
 @Controller('upload')
@@ -30,6 +31,7 @@ export class UploadController {
 			storage: multerStorage,
 			fileFilter: pdfFileFilter,
 		}),
+		LoggingInterceptor,
 	)
 	public async uploadResume(
 		@Param('id') userId: string,
