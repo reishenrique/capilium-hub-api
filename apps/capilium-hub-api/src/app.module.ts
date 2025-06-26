@@ -10,6 +10,8 @@ import { OpportunityModule } from './opportunity/opportunity.module';
 import { AuthModule } from './auth/auth.module';
 import { ApplicationModule } from './application/application.module';
 import { UploadModule } from './upload/upload.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
 	imports: [
@@ -28,6 +30,8 @@ import { UploadModule } from './upload/upload.module';
 				},
 			},
 		]),
+		EventEmitterModule.forRoot(),
+		LoggerModule,
 		UserModule,
 		CacheModule,
 		ClinicModule,
