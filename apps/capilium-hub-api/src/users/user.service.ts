@@ -15,12 +15,14 @@ import { Queue } from 'bull';
 import { EMAIL_QUEUE } from '@app/shared';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
+import EventEmitter2 from 'eventemitter2';
 
 @Injectable()
 export class UserService {
 	protected readonly _logger = new Logger('UserService');
 	constructor(
 		@InjectQueue(EMAIL_QUEUE) private readonly emailQueue: Queue,
+		private eventEmitter: EventEmitter2,
 		private readonly userRepository: UserRepository,
 		private readonly cacheService?: CacheService,
 	) {}
@@ -54,6 +56,18 @@ export class UserService {
 		const newUser = await this.userRepository.createUser(user);
 
 		await this.sendWelcomeEmailToUser(newUser.email, newUser.firstName);
+
+		this.eventEmitter.emit('log.internal', {
+			level: 'info',
+			message: 'Creating a new user',
+			context: 'UserService',
+			data: {
+				name: userPayload.firstName,
+				lastName: userPayload.lastName,
+				email: userPayload.email,
+				cpf: userPayload.cpf,
+			},
+		});
 
 		return newUser;
 	}
