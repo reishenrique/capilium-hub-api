@@ -16,6 +16,8 @@ import { EMAIL_QUEUE } from '@app/shared';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
 import EventEmitter2 from 'eventemitter2';
+import { LogEventEnum } from '../logger/enum/log-event.enum';
+import { LogLevelEnum } from '../logger/enum/log-level.enum';
 
 @Injectable()
 export class UserService {
@@ -39,13 +41,33 @@ export class UserService {
 
 		if (userExistsByCpf) {
 			this._logger.error(`User with CPF: ${cpf} already registered`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'CPF already registered',
+				contexto: 'UserService',
+				data: {
+					cpf: userPayload.cpf,
+				},
+			});
+
 			throw new ConflictException('CPF already registered in the system');
 		}
 
 		const userExistsByEmail = await this.userRepository.findUserByEmail(email);
 
 		if (userExistsByEmail) {
-			this._logger.error(`User with Email: ${email} not found`);
+			this._logger.error(`User with email: ${email} not found`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Email already registered',
+				contexto: 'UserService',
+				data: {
+					email: userPayload.email,
+				},
+			});
+
 			throw new ConflictException('Email already registered in the system');
 		}
 
@@ -57,8 +79,8 @@ export class UserService {
 
 		await this.sendWelcomeEmailToUser(newUser.email, newUser.firstName);
 
-		this.eventEmitter.emit('log.internal', {
-			level: 'info',
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Info,
 			message: 'Creating a new user',
 			context: 'UserService',
 			data: {
