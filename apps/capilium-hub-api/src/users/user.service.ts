@@ -80,7 +80,7 @@ export class UserService {
 		await this.sendWelcomeEmailToUser(newUser.email, newUser.firstName);
 
 		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Info,
+			level: LogLevelEnum.Success,
 			message: 'Creating a new user',
 			context: 'UserService',
 			data: {
@@ -107,8 +107,26 @@ export class UserService {
 				throw new NotFoundException('User not found by id');
 			}
 
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Error finding user by id',
+				context: 'UserService',
+				data: {
+					id: id,
+				},
+			});
+
 			await this.cacheService.cacheValue(cacheKey, getUserById);
 		}
+
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Success,
+			message: 'Finding user by id',
+			context: 'UserService',
+			data: {
+				id: id,
+			},
+		});
 
 		return getUserById;
 	}
