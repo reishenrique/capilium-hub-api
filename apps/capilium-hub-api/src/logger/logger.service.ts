@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { LoggerDocument } from './schemas/logger.schema';
 import { Log } from './entity/logger.entity';
 import { OnEvent } from '@nestjs/event-emitter';
+import { LogEventEnum } from './enum/log-event.enum';
+import { LogLevelEnum } from './enum/log-level.enum';
 
 @Injectable()
 export class LoggerService {
@@ -12,9 +14,9 @@ export class LoggerService {
 		@InjectModel(Log.name) private loggerModel: Model<LoggerDocument>,
 	) {}
 
-	@OnEvent('log.internal')
+	@OnEvent(LogEventEnum.InternalLog)
 	async handleInternalLogger(payload: {
-		level: string;
+		level: LogLevelEnum;
 		message: string;
 		context?: string;
 		data?: Record<string, string>;
