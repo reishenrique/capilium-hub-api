@@ -240,6 +240,16 @@ export class UserService {
 			body: templateEmail.body,
 		};
 
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Info,
+			message: 'Sending welcome email to new user',
+			context: 'UserService',
+			data: {
+				email: userEmail,
+				name: firstName,
+			},
+		});
+
 		await this.emailQueue.add('send-email', {
 			to: emailData.to,
 			subject: emailData.subject,
