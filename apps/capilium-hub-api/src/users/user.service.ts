@@ -109,7 +109,7 @@ export class UserService {
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
-				message: 'Error finding user by id',
+				message: 'Finding user by id',
 				context: 'UserService',
 				data: {
 					id: id,
@@ -136,8 +136,27 @@ export class UserService {
 
 		if (!user) {
 			this._logger.error(`User with CPF: ${cpf} not found`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Finding user by cpf',
+				context: 'UserService',
+				data: {
+					cpf: cpf,
+				},
+			});
+
 			throw new NotFoundException('User not found by CPF');
 		}
+
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Success,
+			message: 'Finding a user by cpf',
+			context: 'UserService',
+			data: {
+				cpf: cpf,
+			},
+		});
 
 		return user;
 	}
@@ -147,8 +166,27 @@ export class UserService {
 
 		if (!user) {
 			this._logger.error(`User with ID: ${id} not found to delete`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Deleting user by id',
+				context: 'UserService',
+				data: {
+					id: id,
+				},
+			});
+
 			throw new NotFoundException('User not found to delete');
 		}
+
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Success,
+			message: 'Deleting user by cpf',
+			context: 'UserService',
+			data: {
+				id: id,
+			},
+		});
 
 		await this.userRepository.deleteUserById(id);
 	}
@@ -164,8 +202,28 @@ export class UserService {
 
 		if (!findUserAndUpdate) {
 			this._logger.error(`User with ID: ${id} not found to update`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Updating user by id',
+				context: 'UserService',
+				data: {
+					id: id,
+				},
+			});
+
 			throw new NotFoundException('User not found to update');
 		}
+
+		this.eventEmitter.emit(LogEventEnum.InternalLog, {
+			level: LogLevelEnum.Success,
+			message: 'Updating user by id',
+			context: 'UserService',
+			data: {
+				id: id,
+				body: newUserData,
+			},
+		});
 
 		return findUserAndUpdate;
 	}
