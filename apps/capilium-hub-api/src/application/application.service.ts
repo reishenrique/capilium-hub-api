@@ -5,8 +5,6 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { ApplicationRepository } from './repository/application.repository';
-import { OpportunityService } from '../opportunity/opportunity.service';
-import { UserService } from '../users/user.service';
 import { ApplicationCreateDto } from './dto/applicationCreateDto';
 import { InjectQueue } from '@nestjs/bull';
 import { EMAIL_QUEUE } from '@app/shared';
@@ -14,6 +12,8 @@ import { Queue } from 'bull';
 import { ApplicationResponseDto } from './dto/applicationResponseDto';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
+import { UserRepository } from '../users/repository/user.repository';
+import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
 
 @Injectable()
 export class ApplicationService {
@@ -21,8 +21,8 @@ export class ApplicationService {
 	constructor(
 		@InjectQueue(EMAIL_QUEUE) private readonly emailQueue: Queue,
 		private readonly applicationRepository: ApplicationRepository,
-		private readonly userService: UserService,
-		private readonly opportunityService: OpportunityService,
+		private readonly userRepository: UserRepository,
+		private readonly opportunityRepository: OpportunityRepository,
 	) {}
 
 	public async createApplication(
@@ -68,7 +68,7 @@ export class ApplicationService {
 
 	public async validateOpportunityExists(opportunityId: string) {
 		const opportunity =
-			await this.opportunityService.findOpportunityById(opportunityId);
+			await this.opportunityRepository.findOpportunityById(opportunityId);
 
 		if (!opportunity) {
 			this._logger.error(
@@ -81,7 +81,7 @@ export class ApplicationService {
 	}
 
 	public async validateUserExists(userId: string) {
-		const user = await this.userService.findUserById(userId);
+		const user = await this.userRepository.findUserById(userId);
 
 		if (!user) {
 			this._logger.error(`User with id: ${userId}, does not exist`);
