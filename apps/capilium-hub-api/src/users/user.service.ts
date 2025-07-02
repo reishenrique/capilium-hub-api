@@ -45,7 +45,7 @@ export class UserService {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
 				message: 'CPF already registered',
-				contexto: 'UserService',
+				context: 'UserService',
 				data: {
 					cpf: userPayload.cpf,
 				},
@@ -62,7 +62,7 @@ export class UserService {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
 				message: 'Email already registered',
-				contexto: 'UserService',
+				context: 'UserService',
 				data: {
 					email: userPayload.email,
 				},
