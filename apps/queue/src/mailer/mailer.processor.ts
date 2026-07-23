@@ -10,20 +10,29 @@ export class EmailProcessor {
 	private _logger = new Logger(EmailProcessor.name);
 
 	@Process('send-email')
-	async handleEmailJob(job: Job<IEmailJobData>) {
+	async handle(job: Job<IEmailJobData>) {
 		const { to, subject, body, metadata } = job.data;
 
 		try {
-			await send(to, subject, body);
+			send(to, subject, body);
+
 			this._logger.log(
 				`Email sent successfully to ${to} | Data: ${JSON.stringify(job.data, null, 2)}`,
 			);
 		} catch (error) {
-			this._logger.error(
-				`Failed to send email (Type: ${metadata?.emailType}) to ${to} | Error: ${error.message}
-				`,
-				error.stack,
-			);
+			if (error instanceof Error) {
+				this._logger.error(
+					`Failed to send email (Type: ${metadata?.emailType}) to ${to} | Error: ${error.message}
+			`,
+					error.stack,
+				);
+			} else {
+				this._logger.error(
+					`Failed to send email (Type: ${metadata?.emailType} to ${to} | Unknown error)`,
+					String(error),
+				);
+			}
+
 			throw error;
 		}
 	}
