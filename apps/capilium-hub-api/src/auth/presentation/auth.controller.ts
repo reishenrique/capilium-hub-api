@@ -18,7 +18,7 @@ import { LoginResponseDto } from '../dto/loginResponseDto';
 import { RefreshAuthCredentialsDto } from '../dto/refreshAuthCredentialsDto';
 import { RefreshAuthResponseDto } from '../dto/refreshAuthResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
-import { ApiAuthLogin, ApiRefreshToken } from '../swagger/auth.swagger';
+import { ApiAuthLogin, ApiAuthRefreshToken } from '../swagger/auth.swagger';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -48,7 +48,7 @@ export class AuthController {
 
 	@Post('/refreshAccessToken')
 	@HttpCode(HttpStatus.OK)
-	@ApiRefreshToken()
+	@ApiAuthRefreshToken()
 	@UseInterceptors(LoggingInterceptor)
 	public async refreshAccessToken(
 		@Body() refreshAuthCredentials: RefreshAuthCredentialsDto,
