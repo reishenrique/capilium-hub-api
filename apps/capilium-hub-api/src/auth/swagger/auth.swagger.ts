@@ -13,7 +13,7 @@ export function ApiAuthLogin() {
 	);
 }
 
-export function ApiRefreshToken() {
+export function ApiAuthRefreshToken() {
 	return applyDecorators(
 		ApiOperation({ summary: 'Refresh user access token' }),
 		ApiResponse({
