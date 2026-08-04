@@ -10,10 +10,14 @@ import {
 	UseInterceptors,
 } from '@nestjs/common';
 import { ApplicationService } from '../application.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ApplicationCreateDto } from '../dto/applicationCreateDto';
 import { ApplicationResponseDto } from '../dto/applicationResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import {
+	ApiApplyApplication,
+	ApiDeleteApplication,
+} from '../swagger/application.swagger';
 
 @ApiTags('application')
 @Controller('application')
@@ -23,15 +27,7 @@ export class ApplicationController {
 
 	@Post(':opportunityId/apply')
 	@HttpCode(HttpStatus.CREATED)
-	@ApiOperation({
-		summary: 'Creates registry of user application for opportunity',
-	})
-	@ApiResponse({ status: 201 })
-	@ApiResponse({ status: 404, description: 'User not found' })
-	@ApiResponse({
-		status: 409,
-		description: 'User has already applied for this opportunity',
-	})
+	@ApiApplyApplication()
 	@UseInterceptors(LoggingInterceptor)
 	public async apply(
 		@Param('opportunityId') opportunityId: string,
@@ -45,10 +41,7 @@ export class ApplicationController {
 
 	@Delete('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Delete application by id' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'Application not found by id' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiDeleteApplication()
 	@UseInterceptors(LoggingInterceptor)
 	public async deleteApplicationById(@Param('id') id: string): Promise<void> {
 		return await this.applicationService.deleteApplicationById(id);

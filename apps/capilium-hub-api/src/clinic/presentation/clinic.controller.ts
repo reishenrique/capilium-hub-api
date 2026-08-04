@@ -19,6 +19,14 @@ import { ClinicResponseDto } from '../dto/clinicResponseDto';
 import { Request } from 'express';
 import { IPaginationResult } from '../interface/IPaginationResult';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import {
+	ApiCreateClinic,
+	ApiDeleteClinicById,
+	ApiFindAllActivatedClinics,
+	ApiFindClinicById,
+	ApiPaginatedClinics,
+	ApiUpdateClinicById,
+} from '../swagger/clinic.swagger';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -28,16 +36,7 @@ export class ClinicController {
 
 	@Post('/')
 	@HttpCode(HttpStatus.CREATED)
-	@ApiOperation({ summary: 'Create a new clinic' })
-	@ApiResponse({ status: 201, type: ClinicResponseDto })
-	@ApiResponse({
-		status: 409,
-		description: 'CNPJ already registered in the system',
-	})
-	@ApiResponse({
-		status: 400,
-		description: 'Error when trying to created a new clinic',
-	})
+	@ApiCreateClinic()
 	@UseInterceptors(LoggingInterceptor)
 	public async create(
 		@Body() clinic: CliniCreateDto,
@@ -47,9 +46,7 @@ export class ClinicController {
 
 	@Get('findAllActivatedClinics')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Listing active clinics' })
-	@ApiResponse({ status: 200, type: [ClinicResponseDto] })
-	@ApiResponse({ status: 404, description: 'No clinics found' })
+	@ApiFindAllActivatedClinics()
 	@UseInterceptors(LoggingInterceptor)
 	public async findAll(): Promise<ClinicResponseDto[]> {
 		return await this.clinicService.findAllActivatedClinics();
@@ -57,9 +54,7 @@ export class ClinicController {
 
 	@Get('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Getting clinic by id' })
-	@ApiResponse({ status: 200, type: ClinicResponseDto })
-	@ApiResponse({ status: 404, description: 'Clinic not found' })
+	@ApiFindClinicById()
 	@UseInterceptors(LoggingInterceptor)
 	public async findById(@Param('id') id: string): Promise<ClinicResponseDto> {
 		return await this.clinicService.findClinicById(id);
@@ -67,10 +62,7 @@ export class ClinicController {
 
 	@Put('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Upgrade a clinic by id' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'Clinic not found to update' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiUpdateClinicById()
 	@UseInterceptors(LoggingInterceptor)
 	public async upgradeClinicById(
 		@Param('id') id: string,
@@ -81,10 +73,7 @@ export class ClinicController {
 
 	@Delete('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Delete clinic by id' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'Clinic not found to delete' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
+	@ApiDeleteClinicById()
 	@UseInterceptors(LoggingInterceptor)
 	public async deleteClinicById(id: string): Promise<void> {
 		return await this.clinicService.findClinicByIdAndDelete(id);
@@ -92,14 +81,7 @@ export class ClinicController {
 
 	@Get('paginated')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Getting clinics with pagination' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 404, description: 'Clinics not found' })
-	@ApiResponse({
-		status: 400,
-		description: 'Page and limit must be positive integer',
-	})
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiPaginatedClinics()
 	@UseInterceptors(LoggingInterceptor)
 	public async getPaginatedClinics(
 		@Req() req: Request,
