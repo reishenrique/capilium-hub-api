@@ -14,6 +14,9 @@ import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
 import { UserRepository } from '../users/repository/user.repository';
 import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
+import { Opportunity } from '../opportunity/entity/opportunity.entity';
+import { User } from '../users/entity/users.entity';
+import { Application } from './entity/application.entity';
 
 @Injectable()
 export class ApplicationService {
@@ -25,7 +28,7 @@ export class ApplicationService {
 		private readonly opportunityRepository: OpportunityRepository,
 	) {}
 
-	public async createApplication(
+	public async apply(
 		applicationPayload: ApplicationCreateDto,
 	): Promise<ApplicationResponseDto> {
 		const { opportunityId, userId } = applicationPayload;
@@ -35,7 +38,10 @@ export class ApplicationService {
 		const user = await this.validateUserExists(userId);
 
 		const existingApplication =
-			await this.checkExistingApplicationAndUserApplied(opportunityId, userId);
+			await this.findApplicationOrThrowIfUserAlreadyApplied(
+				opportunityId,
+				userId,
+			);
 
 		if (existingApplication) {
 			await this.applicationRepository.addUserToApplication(
@@ -66,7 +72,9 @@ export class ApplicationService {
 		return application;
 	}
 
-	public async validateOpportunityExists(opportunityId: string) {
+	public async validateOpportunityExists(
+		opportunityId: string,
+	): Promise<Opportunity> {
 		const opportunity =
 			await this.opportunityRepository.findOpportunityById(opportunityId);
 
@@ -80,7 +88,9 @@ export class ApplicationService {
 		return opportunity;
 	}
 
-	public async validateUserExists(userId: string) {
+	public async validateUserExists(
+		userId: string,
+	): Promise<Omit<User, 'password'>> {
 		const user = await this.userRepository.findUserById(userId);
 
 		if (!user) {
@@ -91,10 +101,10 @@ export class ApplicationService {
 		return user;
 	}
 
-	public async checkExistingApplicationAndUserApplied(
+	public async findApplicationOrThrowIfUserAlreadyApplied(
 		opportunityId: string,
 		userId: string,
-	) {
+	): Promise<Application> {
 		const existingApplication =
 			await this.applicationRepository.listApplicationByOpportunity(
 				opportunityId,
