@@ -37,31 +37,28 @@ export class ApplicationService {
 
 		const user = await this.validateUserExists(userId);
 
-		const existingApplication =
-			await this.findApplicationOrThrowIfUserAlreadyApplied(
+		const application =
+			await this.applicationRepository.listApplicationByOpportunity(
 				opportunityId,
-				userId,
 			);
 
-		if (existingApplication) {
+		this.validateUserHasNotApplied(application, userId);
+
+		let applicationResponse: ApplicationResponseDto;
+
+		if (application) {
 			await this.applicationRepository.addUserToApplication(
 				opportunityId,
 				userId,
 			);
 
-			await this.sendApplyConfirmationEmail(
-				user.email,
-				user.firstName,
-				opportunity.title,
+			applicationResponse = application;
+		} else {
+			applicationResponse = await this.applicationRepository.createApplication(
+				opportunityId,
+				userId,
 			);
-
-			return;
 		}
-
-		const application = await this.applicationRepository.createApplication(
-			opportunityId,
-			userId,
-		);
 
 		await this.sendApplyConfirmationEmail(
 			user.email,
@@ -69,7 +66,7 @@ export class ApplicationService {
 			opportunity.title,
 		);
 
-		return application;
+		return applicationResponse;
 	}
 
 	public async validateOpportunityExists(
@@ -86,6 +83,15 @@ export class ApplicationService {
 		}
 
 		return opportunity;
+	}
+
+	private validateUserHasNotApplied(
+		application: Application,
+		userId: string,
+	): void {
+		if (application?.userIds?.includes(userId)) {
+			throw new ConflictException('User already applied for this opportunity');
+		}
 	}
 
 	public async validateUserExists(
