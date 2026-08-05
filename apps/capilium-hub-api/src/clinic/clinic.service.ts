@@ -97,7 +97,7 @@ export class ClinicService {
 		const findClinicById = await this.clinicRepository.findClinicById(id);
 
 		if (!findClinicById) {
-			this._logger.error(`Clinic ID: ${id} not found`);
+			this._logger.error(`Clinic id "${id}" not found`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
