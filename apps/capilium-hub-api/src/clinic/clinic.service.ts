@@ -64,21 +64,15 @@ export class ClinicService {
 			await this.clinicRepository.findAllActivatedClinics();
 
 		if (!findAllClinics.length) {
-			this._logger.error('Clinics not found');
+			this._logger.log('No activated clinics found');
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Error listing clinics',
-				context: 'AuthService',
-			});
-
-			throw new NotFoundException('No clinics found');
+			return []
 		}
 
 		this.eventEmitter.emit(LogEventEnum.InternalLog, {
 			level: LogLevelEnum.Success,
 			message: 'Clinics',
-			context: 'AuthService',
+			context: 'ClinicService',
 		});
 
 		return findAllClinics;
