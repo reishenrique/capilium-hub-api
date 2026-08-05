@@ -66,7 +66,7 @@ export class ClinicService {
 		if (!findAllClinics.length) {
 			this._logger.log('No activated clinics found');
 
-			return []
+			return [];
 		}
 
 		this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -80,7 +80,7 @@ export class ClinicService {
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
 		if (!id) {
-			this._logger.error(`Clinic ID: ${id} is invalid`);
+			this._logger.error('The clinic id must be provided');
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
@@ -91,7 +91,7 @@ export class ClinicService {
 				},
 			});
 
-			throw new BadRequestException('Invalid ID');
+			throw new BadRequestException('Clinic id must be provided');
 		}
 
 		const findClinicById = await this.clinicRepository.findClinicById(id);
@@ -110,15 +110,6 @@ export class ClinicService {
 
 			throw new NotFoundException('Clinic not found');
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic find by id',
-			context: 'ClinicService',
-			data: {
-				id: id,
-			},
-		});
 
 		return findClinicById;
 	}
