@@ -61,15 +61,6 @@ export class AuthService {
 
 		const token = generateAccessToken(user);
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'User logged',
-			context: 'AuthService',
-			data: {
-				email: login.email,
-			},
-		});
-
 		return {
 			message: 'Login successful!',
 			token,
@@ -99,18 +90,7 @@ export class AuthService {
 			refreshAuthCredentials.email,
 		);
 
-		if (!user) {
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'User not found',
-				context: 'AuthService',
-				data: {
-					email: refreshAuthCredentials.email,
-				},
-			});
-
-			throw new NotFoundException('User not found');
-		}
+		if (!user) throw new NotFoundException('User not found');
 
 		const token = refreshAccessToken(
 			refreshAuthCredentials.refreshToken,
