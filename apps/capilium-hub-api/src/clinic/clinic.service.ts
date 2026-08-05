@@ -33,8 +33,8 @@ export class ClinicService {
 			);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic already exists',
+				level: LogLevelEnum.Warning,
+				message: 'Attempt to create clinic with duplicated CNPJ',
 				context: 'ClinicService',
 				data: {
 					cnpj: clinicPayload.cnpj,
