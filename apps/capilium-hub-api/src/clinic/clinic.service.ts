@@ -46,16 +46,6 @@ export class ClinicService {
 
 		const newClinic = await this.clinicRepository.createClinic(clinicPayload);
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'New clinic created',
-			context: 'ClinicService',
-			data: {
-				clinicName: clinicPayload.clinicName,
-				cnpj: clinicPayload.cnpj,
-			},
-		});
-
 		return newClinic;
 	}
 
@@ -68,12 +58,6 @@ export class ClinicService {
 
 			return [];
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinics',
-			context: 'ClinicService',
-		});
 
 		return findAllClinics;
 	}
