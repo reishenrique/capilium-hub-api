@@ -2,10 +2,14 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { OpportunityResponseDto } from './dto/opportunityResponseDto';
 import { OpportunityRepository } from './repositories/opportunity.repository';
 import { OpportunityCreateDto } from './dto/opportunityCreateDto';
+import EventEmitter2 from 'eventemitter2';
+import { LogEventEnum } from '../logger/enum/log-event.enum';
+import { LogLevelEnum } from '../logger/enum/log-level.enum';
 
 @Injectable()
 export class OpportunityService {
 	protected readonly _logger = new Logger('OpportunityService');
+	eventEmitter: EventEmitter2;
 	constructor(private readonly opportunityRepository: OpportunityRepository) {}
 
 	async findOpportunityById(
@@ -16,6 +20,16 @@ export class OpportunityService {
 
 		if (!opportunity) {
 			this._logger.error(`Opportunity ID: ${id} not found`);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Opportunity not found by id',
+				context: 'OpportunityService',
+				data: {
+					id: id,
+				},
+			});
+
 			throw new NotFoundException('Opportunity not found');
 		}
 
