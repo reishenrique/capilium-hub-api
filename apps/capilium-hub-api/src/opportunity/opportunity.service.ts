@@ -40,8 +40,11 @@ export class OpportunityService {
 		const findOpportunities =
 			await this.opportunityRepository.findAllOpenedOpportunities();
 
-		if (!findOpportunities)
-			throw new NotFoundException('No open opportunities');
+		if (!findOpportunities) {
+			this._logger.warn('There are no open opportunities on record');
+
+			return [];
+		}
 
 		return findOpportunities;
 	}
