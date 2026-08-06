@@ -114,7 +114,7 @@ export class ClinicService {
 		return findClinicById;
 	}
 
-	public async upgradeClinicById(
+	public async updateClinicById(
 		id: string,
 		newClinicData: object,
 	): Promise<ClinicResponseDto> {
@@ -136,16 +136,6 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found to update');
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic updated',
-			context: 'ClinicService',
-			data: {
-				id: id,
-				body: newClinicData,
-			},
-		});
-
 		return findClinicByIdAndUpdate;
 	}
 
@@ -166,15 +156,6 @@ export class ClinicService {
 
 			throw new NotFoundException('Clinic not found to delete');
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic deleted',
-			context: 'ClinicService',
-			data: {
-				id: id,
-			},
-		});
 
 		await this.clinicRepository.deleteClinicById(id);
 	}
@@ -217,12 +198,6 @@ export class ClinicService {
 
 			throw new NotFoundException('Clinics not found');
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinics paginated',
-			context: 'ClinicService',
-		});
 
 		return paginatedResult;
 	}
