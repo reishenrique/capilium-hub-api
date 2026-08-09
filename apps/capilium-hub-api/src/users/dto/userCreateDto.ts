@@ -1,5 +1,6 @@
 import {
 	IsArray,
+	IsBoolean,
 	IsEnum,
 	IsNotEmpty,
 	IsOptional,
@@ -103,4 +104,14 @@ export class UserCreateDto {
 	@IsOptional()
 	@IsString({ message: 'The portfolio must be a string' })
 	portfolio?: string;
+
+	@ApiProperty({
+		example: true || false,
+		description: ''
+	})
+	@IsOptional()
+	@IsBoolean()
+	isAdmin?: boolean;
+
+	@
 }
