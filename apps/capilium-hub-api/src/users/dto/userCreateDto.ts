@@ -107,11 +107,19 @@ export class UserCreateDto {
 
 	@ApiProperty({
 		example: true || false,
-		description: ''
+		description:
+			'Flag that identifies whether the user will be created as a clinic admin',
 	})
 	@IsOptional()
 	@IsBoolean()
 	isAdmin?: boolean;
 
-	@
+	@ApiProperty({
+		example: '',
+		description:
+			'Identifies the clinic for which the administrador user will be creatted',
+	})
+	@IsOptional()
+	@IsString()
+	clinicId: string;
 }
