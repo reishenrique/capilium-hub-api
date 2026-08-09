@@ -42,7 +42,7 @@ export class UserController {
 	public async create(
 		@Body() user: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
-		return await this.userService.newUser(user);
+		return await this.userService.create(user);
 	}
 
 	@Get('by-id/:id')
