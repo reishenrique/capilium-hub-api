@@ -122,4 +122,12 @@ export class UserCreateDto {
 	@IsOptional()
 	@IsString()
 	clinicId?: string;
+
+	@ApiProperty({
+		example: '',
+		description: 'CNPJ provided by the administrator responsible for a clinic',
+	})
+	@IsOptional()
+	@IsString()
+	clinicCnpj?: string;
 }
