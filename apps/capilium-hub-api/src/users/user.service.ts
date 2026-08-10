@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	ConflictException,
 	Injectable,
 	Logger,
@@ -18,6 +19,7 @@ import templates from '../common/templates/email.templates.json';
 import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
+import { ClinicRepository } from '../clinic/repository/clinic.repository';
 
 @Injectable()
 export class UserService {
@@ -26,13 +28,14 @@ export class UserService {
 		@InjectQueue(EMAIL_QUEUE) private readonly emailQueue: Queue,
 		private eventEmitter: EventEmitter2,
 		private readonly userRepository: UserRepository,
-		private readonly cacheService?: CacheService,
+		private readonly cacheService: CacheService,
+		private readonly clinicRepository: ClinicRepository,
 	) {}
 
-	public async newUser(
+	public async create(
 		userPayload: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
-		const { cpf, email }: { cpf: string; email: string } = userPayload;
+		const { cpf, email, isAdmin, clinicCnpj } = userPayload;
 
 		const formattedCpf = removeNonNumeric(cpf);
 
@@ -71,9 +74,25 @@ export class UserService {
 			throw new ConflictException('Email already registered in the system');
 		}
 
+		let clinicId: string | undefined;
+
+		if (isAdmin) {
+			if (!clinicCnpj) {
+				throw new BadRequestException(
+					'Clinic CNPJ is required for admin users',
+				);
+			}
+
+			const clinic = await this.clinicRepository.findClinicByCnpj(clinicCnpj);
+
+			if (!clinic) throw new NotFoundException('Clinic not found by cnpj');
+
+			clinicId = clinic._id;
+		}
+
 		const hashPassword = await this.saltAndHashPassword(userPayload.password);
 
-		const user = { ...userPayload, password: hashPassword };
+		const user = { ...userPayload, password: hashPassword, clinicId };
 
 		const newUser = await this.userRepository.createUser(user);
 
