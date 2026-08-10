@@ -121,5 +121,5 @@ export class UserCreateDto {
 	})
 	@IsOptional()
 	@IsString()
-	clinicId: string;
+	clinicId?: string;
 }

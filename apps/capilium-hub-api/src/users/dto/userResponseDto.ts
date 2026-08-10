@@ -73,7 +73,7 @@ export class UserResponseDto {
 	})
 	@IsOptional()
 	@IsString()
-	clinicId: string;
+	clinicId?: string;
 
 	@ApiProperty({
 		example: '2024-12-16T18:50:18.436Z',
