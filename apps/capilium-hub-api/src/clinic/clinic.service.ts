@@ -33,8 +33,8 @@ export class ClinicService {
 			);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic already exists',
+				level: LogLevelEnum.Warning,
+				message: 'Attempt to create clinic with duplicated CNPJ',
 				context: 'ClinicService',
 				data: {
 					cnpj: clinicPayload.cnpj,
@@ -46,16 +46,6 @@ export class ClinicService {
 
 		const newClinic = await this.clinicRepository.createClinic(clinicPayload);
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'New clinic created',
-			context: 'ClinicService',
-			data: {
-				clinicName: clinicPayload.clinicName,
-				cnpj: clinicPayload.cnpj,
-			},
-		});
-
 		return newClinic;
 	}
 
@@ -64,29 +54,17 @@ export class ClinicService {
 			await this.clinicRepository.findAllActivatedClinics();
 
 		if (!findAllClinics.length) {
-			this._logger.error('Clinics not found');
+			this._logger.log('No activated clinics found');
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Error listing clinics',
-				context: 'AuthService',
-			});
-
-			throw new NotFoundException('No clinics found');
+			return [];
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinics',
-			context: 'AuthService',
-		});
 
 		return findAllClinics;
 	}
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
 		if (!id) {
-			this._logger.error(`Clinic ID: ${id} is invalid`);
+			this._logger.error('The clinic id must be provided');
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
@@ -97,13 +75,13 @@ export class ClinicService {
 				},
 			});
 
-			throw new BadRequestException('Invalid ID');
+			throw new BadRequestException('Clinic id must be provided');
 		}
 
 		const findClinicById = await this.clinicRepository.findClinicById(id);
 
 		if (!findClinicById) {
-			this._logger.error(`Clinic ID: ${id} not found`);
+			this._logger.error(`Clinic id "${id}" not found`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Error,
@@ -117,19 +95,10 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found');
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic find by id',
-			context: 'ClinicService',
-			data: {
-				id: id,
-			},
-		});
-
 		return findClinicById;
 	}
 
-	public async upgradeClinicById(
+	public async updateClinicById(
 		id: string,
 		newClinicData: object,
 	): Promise<ClinicResponseDto> {
@@ -151,16 +120,6 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found to update');
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic updated',
-			context: 'ClinicService',
-			data: {
-				id: id,
-				body: newClinicData,
-			},
-		});
-
 		return findClinicByIdAndUpdate;
 	}
 
@@ -181,15 +140,6 @@ export class ClinicService {
 
 			throw new NotFoundException('Clinic not found to delete');
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinic deleted',
-			context: 'ClinicService',
-			data: {
-				id: id,
-			},
-		});
 
 		await this.clinicRepository.deleteClinicById(id);
 	}
@@ -232,12 +182,6 @@ export class ClinicService {
 
 			throw new NotFoundException('Clinics not found');
 		}
-
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Clinics paginated',
-			context: 'ClinicService',
-		});
 
 		return paginatedResult;
 	}

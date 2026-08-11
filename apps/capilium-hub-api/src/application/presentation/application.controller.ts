@@ -33,7 +33,7 @@ export class ApplicationController {
 		@Param('opportunityId') opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
 	): Promise<ApplicationResponseDto> {
-		return await this.applicationService.createApplication({
+		return await this.applicationService.apply({
 			opportunityId,
 			userId: applicationPayload.userId,
 		});

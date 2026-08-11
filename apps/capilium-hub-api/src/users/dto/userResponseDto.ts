@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UserResponseDto {
 	@ApiProperty({
@@ -57,11 +58,22 @@ export class UserResponseDto {
 	professionalExperience: string;
 
 	@ApiProperty({
-		example: 'www.teste.com.br',
+		example: true || false,
 		description:
-			'User professional portfolio URL or document (Upload coming soon)',
+			'Flag that identifies whether the user will be created as a clinic admin',
 	})
-	portfolio: string;
+	@IsOptional()
+	@IsBoolean()
+	isAdmin?: boolean;
+
+	@ApiProperty({
+		example: '',
+		description:
+			'Identifies the clinic for which the administrador user will be creatted',
+	})
+	@IsOptional()
+	@IsString()
+	clinicId?: string;
 
 	@ApiProperty({
 		example: '2024-12-16T18:50:18.436Z',

@@ -12,7 +12,7 @@ import {
 	Req,
 	UseInterceptors,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
 import { CliniCreateDto } from '../dto/clinicCreateDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
@@ -68,7 +68,7 @@ export class ClinicController {
 		@Param('id') id: string,
 		@Body() newClinicData: Partial<CliniCreateDto>,
 	): Promise<ClinicResponseDto> {
-		return await this.clinicService.upgradeClinicById(id, newClinicData);
+		return await this.clinicService.updateClinicById(id, newClinicData);
 	}
 
 	@Delete('/:id')

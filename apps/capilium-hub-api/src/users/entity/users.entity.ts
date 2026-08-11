@@ -49,4 +49,12 @@ export class User {
 	@ApiProperty({ required: false })
 	@Prop()
 	resume?: string;
+
+	@ApiProperty({ required: false })
+	@Prop()
+	isAdmin?: boolean;
+
+	@ApiProperty({ required: false })
+	@Prop()
+	clinicId?: string;
 }

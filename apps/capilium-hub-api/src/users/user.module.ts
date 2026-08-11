@@ -14,6 +14,7 @@ import { CacheModule } from '../infrastructure/cache/cache.module';
 import { BullModule } from '@nestjs/bull';
 import { EMAIL_QUEUE, SharedModule } from '@app/shared';
 import { AuthorizationMiddleware } from '../infrastructure/middlewares/authorization';
+import { ClinicModule } from '../clinic/clinic.module';
 
 @Module({
 	imports: [
@@ -28,6 +29,7 @@ import { AuthorizationMiddleware } from '../infrastructure/middlewares/authoriza
 			name: EMAIL_QUEUE,
 		}),
 		SharedModule,
+		ClinicModule,
 	],
 	controllers: [UserController],
 	providers: [UserService, UserRepository],

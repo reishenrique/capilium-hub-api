@@ -2,9 +2,14 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { SocialNetworksEnum } from '../../common/enums/social-networks.enum';
 import { SpecializationEnum } from '../../common/enums/specialization.enum';
+import { Optional } from '@nestjs/common';
 
 @Schema({ timestamps: true })
 export class Clinic {
+	@ApiProperty()
+	@Optional()
+	_id?: string;
+
 	@ApiProperty()
 	@Prop()
 	clinicName: string;
