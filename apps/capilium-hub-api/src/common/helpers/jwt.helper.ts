@@ -4,6 +4,8 @@ export const generateAccessToken = (user) => {
 	const payload = {
 		id: user._id,
 		email: user.email,
+		isAdmin: user.isAdmin,
+		...(user.isAdmin && { clinicId: user.clinicId }),
 	};
 
 	const secret = process.env.SECRET as string;
