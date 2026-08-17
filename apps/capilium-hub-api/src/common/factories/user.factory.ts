@@ -21,7 +21,9 @@ export const createUserMock = (
 	...overrides,
 });
 
-export const createUserEntityMock = (overrides?: Partial<User>): User => ({
+export const createUserEntityMock = (
+	overrides?: Partial<User> & { _id?: string },
+): User => ({
 	firstName: 'John',
 	lastName: 'Doe',
 	cpf: '12345678901',
