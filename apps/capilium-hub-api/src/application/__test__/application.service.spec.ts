@@ -96,8 +96,6 @@ describe('ApplicationService', () => {
 		jest.clearAllMocks();
 	});
 
-	// ── apply ────────────────────────────────────────────────────────────────────
-
 	describe('apply', () => {
 		describe('Success Cases', () => {
 			beforeEach(() => {
@@ -105,7 +103,6 @@ describe('ApplicationService', () => {
 					mockOpportunity,
 				);
 				userRepository.findUserById.mockResolvedValue(mockUser);
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				emailQueue.add.mockResolvedValue({} as any);
 			});
 
@@ -134,7 +131,6 @@ describe('ApplicationService', () => {
 					...mockApplication,
 					userIds: ['outro-user-id'],
 				});
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				applicationRepository.addUserToApplication.mockResolvedValue({} as any);
 
 				await applicationService.apply(applicationPayload);
@@ -247,7 +243,6 @@ describe('ApplicationService', () => {
 	describe('deleteApplicationById', () => {
 		it('should delete application successfully', async () => {
 			applicationRepository.listApplicationById.mockReturnValue(
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				mockApplication as any,
 			);
 			applicationRepository.deleteApplication.mockResolvedValue(undefined);
