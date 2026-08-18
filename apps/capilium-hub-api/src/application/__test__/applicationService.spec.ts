@@ -1,17 +1,54 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OpportunityService } from '../../opportunity/opportunity.service';
-import { UserService } from '../../users/user.service';
 import { ApplicationService } from '../application.service';
 import { ApplicationRepository } from '../repository/application.repository';
-import { createMock } from '@golevelup/ts-jest';
 import { getQueueToken } from '@nestjs/bull';
 import { EMAIL_QUEUE } from '@app/shared';
 import { StatusEnum } from '../../common/enums/status.enum';
-import { NotFoundException } from '@nestjs/common/exceptions';
+import {
+	ConflictException,
+	NotFoundException,
+} from '@nestjs/common/exceptions';
+import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
+import { Queue } from 'bull';
+import { createUserEntityMock } from '../../common/factories/user.factory';
+import { OpportunityRepository } from '../../opportunity/repositories/opportunity.repository';
+import { UserRepository } from '../../users/repository/user.repository';
+import { User } from '../../users/entity/users.entity';
 
-describe('Application Service', () => {
+describe('ApplicationService', () => {
 	let applicationService: ApplicationService;
-	let applicationRepository: ApplicationRepository;
+	let applicationRepository: jest.Mocked<ApplicationRepository>;
+	let userRepository: jest.Mocked<UserRepository>;
+	let opportunityRepository: jest.Mocked<OpportunityRepository>;
+	let emailQueue: jest.Mocked<Queue>;
+
+	const mockOpportunity = {
+		_id: '67ba145c48ea4e5cdf5b5a0e',
+		title: 'Teste',
+		description: 'Teste',
+		location: 'Teste',
+		salary: 100,
+		status: StatusEnum.Open,
+		clinicName: 'ClinicName',
+		createdAt: new Date('2025-02-22T18:15:56.550Z'),
+		updatedAt: new Date('2025-02-22T18:15:56.550Z'),
+	};
+
+	const mockUser = createUserEntityMock() as User & { _id: string };
+
+	const mockApplication = {
+		_id: '67dc76395488f214f38a74db',
+		opportunityId: '67ba145c48ea4e5cdf5b5a0e',
+		userIds: [],
+		createdAt: '2025-03-20T20:10:39.526Z',
+		updatedAt: '2025-03-26T20:14:00.532Z',
+		__v: 0,
+	};
+
+	const applicationPayload = {
+		opportunityId: '67ba145c48ea4e5cdf5b5a0e',
+		userId: '67e45f92c7e1b53f5978c3e5',
+	};
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -19,15 +56,25 @@ describe('Application Service', () => {
 				ApplicationService,
 				{
 					provide: ApplicationRepository,
-					useValue: createMock<ApplicationRepository>(),
+					useValue: {
+						listApplicationByOpportunity: jest.fn(),
+						listApplicationById: jest.fn(),
+						createApplication: jest.fn(),
+						addUserToApplication: jest.fn(),
+						deleteApplication: jest.fn(),
+					},
 				},
 				{
-					provide: UserService,
-					useValue: createMock<UserService>(),
+					provide: UserRepository,
+					useValue: {
+						findUserById: jest.fn(),
+					},
 				},
 				{
-					provide: OpportunityService,
-					useValue: createMock<OpportunityService>,
+					provide: OpportunityRepository,
+					useValue: {
+						findOpportunityById: jest.fn(),
+					},
 				},
 				{
 					provide: getQueueToken(EMAIL_QUEUE),
@@ -39,158 +86,189 @@ describe('Application Service', () => {
 		}).compile();
 
 		applicationService = module.get<ApplicationService>(ApplicationService);
-		applicationRepository = module.get<ApplicationRepository>(
-			ApplicationRepository,
-		);
+		applicationRepository = module.get(ApplicationRepository);
+		userRepository = module.get(UserRepository);
+		opportunityRepository = module.get(OpportunityRepository);
+		emailQueue = module.get(getQueueToken(EMAIL_QUEUE));
 	});
 
-	afterAll(() => {
+	afterEach(() => {
 		jest.clearAllMocks();
 	});
 
-	describe('Success Cases', () => {
-		it('Should create a new application', async () => {
-			const mockOpportunity = {
-				_id: '67ba145c48ea4e5cdf5b5a0e',
-				title: 'Teste',
-				description: 'Teste',
-				location: 'Teste',
-				salary: 100,
-				status: StatusEnum.Open,
-				clinicName: 'ClinicName',
-				createdAt: new Date('2025-02-22T18:15:56.550Z'),
-				updatedAt: new Date('2025-02-22T18:15:56.550Z'),
-			};
+	// ── apply ────────────────────────────────────────────────────────────────────
 
-			const mockUser = {
-				_id: '67bcbbdb1477995f877ff4d1',
-				firstName: 'Auth',
-				lastName: 'Test',
-				cpf: '47926193820',
-				email: 'test@test.com',
-				password: 'hash-password',
-				profession: 'Dermatologist',
-				specialization: ['Hair Transplant'],
-				availabilityStatus: 'Available',
-				professionalExperience: '3 years',
-				portfolio: 'www.teste.com.br',
-				createdAt: '2025-02-24T18:35:07.711Z',
-				updatedAt: '2025-02-24T18:35:07.711Z',
-			};
+	describe('apply', () => {
+		describe('Success Cases', () => {
+			beforeEach(() => {
+				opportunityRepository.findOpportunityById.mockResolvedValue(
+					mockOpportunity,
+				);
+				userRepository.findUserById.mockResolvedValue(mockUser);
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				emailQueue.add.mockResolvedValue({} as any);
+			});
 
-			const mockApplication = {
-				_id: '67dc76395488f214f38a74db',
-				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
-				userIds: ['67e45f92c7e1b53f5978c3e5'],
-				createdAt: '2025-03-20T20:10:39.526Z',
-				updatedAt: '2025-03-26T20:14:00.532Z',
-				__v: 0,
-			};
+			it('should create a new application when no application exists for the opportunity', async () => {
+				applicationRepository.listApplicationByOpportunity.mockResolvedValue(
+					null,
+				);
+				applicationRepository.createApplication.mockResolvedValue(
+					mockApplication,
+				);
 
-			const spyValidateOpportunityExists = jest
-				.spyOn(applicationService, 'validateOpportunityExists')
-				.mockResolvedValue(mockOpportunity);
+				const result = await applicationService.apply(applicationPayload);
 
-			const spyValidateUserExists = jest
-				.spyOn(applicationService, 'validateUserExists')
-				.mockResolvedValue(mockUser);
+				expect(result.opportunityId).toBe(applicationPayload.opportunityId);
+				expect(applicationRepository.createApplication).toHaveBeenCalledWith(
+					applicationPayload.opportunityId,
+					applicationPayload.userId,
+				);
+				expect(
+					applicationRepository.addUserToApplication,
+				).not.toHaveBeenCalled();
+			});
 
-			const spyCheckExistingAplication = jest
-				.spyOn(applicationService, 'checkExistingApplicationAndUserApplied')
-				.mockResolvedValue(null);
+			it('should add user to an existing application', async () => {
+				applicationRepository.listApplicationByOpportunity.mockResolvedValue({
+					...mockApplication,
+					userIds: ['outro-user-id'],
+				});
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				applicationRepository.addUserToApplication.mockResolvedValue({} as any);
 
-			const spyCreateApplicationRepository = jest
-				.spyOn(applicationRepository, 'createApplication')
-				.mockResolvedValue(mockApplication);
+				await applicationService.apply(applicationPayload);
 
-			const applicationPayload = {
-				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
-				userId: '67e45f92c7e1b53f5978c3e5',
-			};
+				expect(applicationRepository.addUserToApplication).toHaveBeenCalledWith(
+					applicationPayload.opportunityId,
+					applicationPayload.userId,
+				);
+				expect(applicationRepository.createApplication).not.toHaveBeenCalled();
+			});
 
-			const newApplication =
-				await applicationService.createApplication(applicationPayload);
+			it('should send confirmation email after application', async () => {
+				applicationRepository.listApplicationByOpportunity.mockResolvedValue(
+					null,
+				);
+				applicationRepository.createApplication.mockResolvedValue(
+					mockApplication,
+				);
 
-			expect(newApplication.opportunityId).toBe(
-				applicationPayload.opportunityId,
-			);
+				await applicationService.apply(applicationPayload);
 
-			expect(spyValidateOpportunityExists).toHaveBeenCalledTimes(1);
-			expect(spyValidateUserExists).toHaveBeenCalledTimes(1);
-			expect(spyCheckExistingAplication).toHaveBeenCalledTimes(1);
-			expect(spyCreateApplicationRepository).toHaveBeenCalledTimes(1);
+				expect(emailQueue.add).toHaveBeenCalledWith(
+					'send-email',
+					expect.objectContaining({
+						to: mockUser.email,
+						metadata: { emailType: EmailTypeEnum.APPLICATION },
+					}),
+				);
+			});
+		});
+
+		describe('Failure Cases', () => {
+			it('should throw NotFoundException when opportunity does not exist', async () => {
+				opportunityRepository.findOpportunityById.mockResolvedValue(null);
+				userRepository.findUserById.mockResolvedValue(mockUser);
+
+				await expect(
+					applicationService.apply(applicationPayload),
+				).rejects.toThrow(NotFoundException);
+			});
+
+			it('should throw NotFoundException when user does not exist', async () => {
+				opportunityRepository.findOpportunityById.mockResolvedValue(
+					mockOpportunity,
+				);
+				userRepository.findUserById.mockResolvedValue(null);
+
+				await expect(
+					applicationService.apply(applicationPayload),
+				).rejects.toThrow(NotFoundException);
+			});
+
+			it('should throw ConflictException when user has already applied for the opportunity', async () => {
+				opportunityRepository.findOpportunityById.mockResolvedValue(
+					mockOpportunity,
+				);
+				userRepository.findUserById.mockResolvedValue(mockUser);
+				applicationRepository.listApplicationByOpportunity.mockResolvedValue({
+					...mockApplication,
+					userIds: [applicationPayload.userId],
+				});
+
+				await expect(
+					applicationService.apply(applicationPayload),
+				).rejects.toThrow(ConflictException);
+			});
 		});
 	});
 
-	describe('Failure Cases', () => {
-		it('Should throw a error when opportunity not exists', async () => {
-			const applicationPayload = {
-				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
-				userId: '67e45f92c7e1b53f5978c3e5',
-			};
+	describe('validateOpportunityExists', () => {
+		it('should return the opportunity when found', async () => {
+			opportunityRepository.findOpportunityById.mockResolvedValue(
+				mockOpportunity,
+			);
 
-			const mockUser = {
-				_id: '67bcbbdb1477995f877ff4d1',
-				firstName: 'Auth',
-				lastName: 'Test',
-				cpf: '47926193820',
-				email: 'test@test.com',
-				password: 'hash-password',
-				profession: 'Dermatologist',
-				specialization: ['Hair Transplant'],
-				availabilityStatus: 'Available',
-				professionalExperience: '3 years',
-				portfolio: 'www.teste.com.br',
-				createdAt: '2025-02-24T18:35:07.711Z',
-				updatedAt: '2025-02-24T18:35:07.711Z',
-			};
+			const result = await applicationService.validateOpportunityExists(
+				mockOpportunity._id,
+			);
 
-			jest
-				.spyOn(applicationService, 'validateOpportunityExists')
-				.mockImplementation(() => {
-					throw new NotFoundException('Opportunity does not exist');
-				});
-
-			jest
-				.spyOn(applicationService, 'validateUserExists')
-				.mockResolvedValue(mockUser);
-
-			await expect(
-				applicationService.createApplication(applicationPayload),
-			).rejects.toThrow('Opportunity does not exist');
+			expect(result).toEqual(mockOpportunity);
 		});
 
-		it('Should throw a error when user not exists', async () => {
-			const applicationPayload = {
-				opportunityId: '67ba145c48ea4e5cdf5b5a0e',
-				userId: '67e45f92c7e1b53f5978c3e5',
-			};
-
-			const mockOpportunity = {
-				_id: '67ba145c48ea4e5cdf5b5a0e',
-				title: 'Teste',
-				description: 'Teste',
-				location: 'Teste',
-				salary: 100,
-				status: StatusEnum.Open,
-				clinicName: 'ClinicName',
-				createdAt: new Date('2025-02-22T18:15:56.550Z'),
-				updatedAt: new Date('2025-02-22T18:15:56.550Z'),
-			};
-
-			jest
-				.spyOn(applicationService, 'validateOpportunityExists')
-				.mockResolvedValue(mockOpportunity);
-
-			jest
-				.spyOn(applicationService, 'validateUserExists')
-				.mockImplementation(() => {
-					throw new NotFoundException('User does not exist');
-				});
+		it('should throw NotFoundException when opportunity is not found', async () => {
+			opportunityRepository.findOpportunityById.mockResolvedValue(null);
 
 			await expect(
-				applicationService.createApplication(applicationPayload),
-			).rejects.toThrow('User does not exist');
+				applicationService.validateOpportunityExists('id-inexistente'),
+			).rejects.toThrow(NotFoundException);
+		});
+	});
+
+	describe('validateUserExists', () => {
+		it('should return the user when found', async () => {
+			userRepository.findUserById.mockResolvedValue(mockUser);
+
+			const result = await applicationService.validateUserExists(mockUser._id);
+
+			expect(result).toEqual(mockUser);
+		});
+
+		it('should throw NotFoundException when user is not found', async () => {
+			userRepository.findUserById.mockResolvedValue(null);
+
+			await expect(
+				applicationService.validateUserExists('id-inexistente'),
+			).rejects.toThrow(NotFoundException);
+		});
+	});
+
+	describe('deleteApplicationById', () => {
+		it('should delete application successfully', async () => {
+			applicationRepository.listApplicationById.mockReturnValue(
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				mockApplication as any,
+			);
+			applicationRepository.deleteApplication.mockResolvedValue(undefined);
+
+			await expect(
+				applicationService.deleteApplicationById(mockApplication._id),
+			).resolves.not.toThrow();
+
+			expect(applicationRepository.deleteApplication).toHaveBeenCalledWith(
+				mockApplication._id,
+			);
+		});
+
+		it('should throw NotFoundException when application is not found', async () => {
+			applicationRepository.listApplicationById.mockReturnValue(null);
+
+			await expect(
+				applicationService.deleteApplicationById('id-inexistente'),
+			).rejects.toThrow(NotFoundException);
+
+			expect(applicationRepository.deleteApplication).not.toHaveBeenCalled();
 		});
 	});
 });
