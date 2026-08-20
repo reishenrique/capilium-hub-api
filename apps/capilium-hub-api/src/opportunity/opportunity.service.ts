@@ -1,16 +1,27 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	Logger,
+	NotFoundException,
+} from '@nestjs/common';
 import { OpportunityResponseDto } from './dto/opportunityResponseDto';
 import { OpportunityRepository } from './repositories/opportunity.repository';
 import { OpportunityCreateDto } from './dto/opportunityCreateDto';
 import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
+import { UserRepository } from '../users/repository/user.repository';
+import { ClinicRepository } from '../clinic/repository/clinic.repository';
 
 @Injectable()
 export class OpportunityService {
 	protected readonly _logger = new Logger('OpportunityService');
 	eventEmitter: EventEmitter2;
-	constructor(private readonly opportunityRepository: OpportunityRepository) {}
+	constructor(
+		private readonly opportunityRepository: OpportunityRepository,
+		private readonly userRepository: UserRepository,
+		private readonly clinicRepository: ClinicRepository,
+	) {}
 
 	async findOpportunityById(
 		id: string,
@@ -51,8 +62,24 @@ export class OpportunityService {
 
 	async create(
 		opportunity: OpportunityCreateDto,
+		userId: string,
 	): Promise<Partial<OpportunityResponseDto>> {
-		const newOpportunity = await this.opportunityRepository.create(opportunity);
+		const user = await this.userRepository.findUserById(userId);
+
+		if (!user.isAdmin)
+			throw new BadRequestException(
+				'Only clinic administrators can create opportunities',
+			);
+
+		const clinic = await this.clinicRepository.findClinicByCnpj(user.clinicId);
+
+		const opportunityPayload = {
+			...opportunity,
+			clinicName: clinic.clinicName,
+		};
+
+		const newOpportunity =
+			await this.opportunityRepository.create(opportunityPayload);
 
 		return newOpportunity;
 	}

@@ -27,9 +27,4 @@ export class OpportunityCreateDto {
 	@IsNotEmpty()
 	@IsEnum(StatusEnum)
 	status: StatusEnum;
-
-	@ApiProperty()
-	@IsNotEmpty()
-	@IsString()
-	clinicName: string;
 }

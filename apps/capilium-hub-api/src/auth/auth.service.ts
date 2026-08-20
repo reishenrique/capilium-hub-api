@@ -22,8 +22,10 @@ import { LogLevelEnum } from '../logger/enum/log-level.enum';
 @Injectable()
 export class AuthService {
 	protected readonly _logger = new Logger('AuthService');
-	private eventEmitter: EventEmitter2;
-	constructor(private readonly userRepository: UserRepository) {}
+	constructor(
+		private readonly userRepository: UserRepository,
+		private readonly eventEmitter: EventEmitter2,
+	) {}
 
 	async login(login: LoginDto): Promise<LoginResponseDto> {
 		const user = await this.userRepository.findUserByEmail(login.email);

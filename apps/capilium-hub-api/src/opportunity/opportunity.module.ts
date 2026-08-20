@@ -5,6 +5,8 @@ import { OpportunityRepository } from './repositories/opportunity.repository';
 import { OpportunityController } from './presentation/opportunity.controller';
 import { OpportunitySchema } from './schemas/opportunity.schema';
 import { OpportunityService } from './opportunity.service';
+import { UserModule } from '../users/user.module';
+import { ClinicModule } from '../clinic/clinic.module';
 
 @Module({
 	imports: [
@@ -14,6 +16,8 @@ import { OpportunityService } from './opportunity.service';
 				schema: OpportunitySchema,
 			},
 		]),
+		UserModule,
+		ClinicModule,
 	],
 	controllers: [OpportunityController],
 	providers: [OpportunityService, OpportunityRepository],

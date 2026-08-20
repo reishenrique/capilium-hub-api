@@ -10,6 +10,7 @@ import {
 	Delete,
 	Put,
 	UseInterceptors,
+	Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { OpportunityService } from '../opportunity.service';
@@ -24,6 +25,15 @@ import {
 	ApiUpdatedOpportunityById,
 } from '../swagger/opportunity.swagger';
 
+interface AuthenticatedRequest extends Request {
+	user: {
+		id: string;
+		email: string;
+		isAdmin: boolean;
+		clinicId?: string;
+	};
+}
+
 @ApiTags('opportunity')
 @Controller('opportunity')
 export class OpportunityController {
@@ -34,8 +44,13 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateOpportunity()
 	@UseInterceptors(LoggingInterceptor)
-	public async create(@Body() opportunity: OpportunityCreateDto) {
-		return await this.opportunityService.create(opportunity);
+	public async create(
+		@Body() opportunity: OpportunityCreateDto,
+		@Req() request: AuthenticatedRequest,
+	) {
+		const userId = request.user.id;
+
+		return await this.opportunityService.create(opportunity, userId);
 	}
 
 	@Get(':id')
