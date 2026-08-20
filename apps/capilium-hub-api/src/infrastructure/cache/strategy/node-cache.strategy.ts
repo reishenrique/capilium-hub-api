@@ -1,9 +1,9 @@
 import NodeCache from 'node-cache';
-import CacheStrategy from './abstractCacheStrategy';
+import AbstractCacheStrategy from './abstract-cache.strategy';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export default class NodeCacheStrategy extends CacheStrategy {
+export default class NodeCacheStrategy extends AbstractCacheStrategy {
 	private myCache = new NodeCache({
 		stdTTL: 86400,
 	});

@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import CacheStrategy from "./cacheStrategy/abstractCacheStrategy";
-import NodeCacheStrategy from "./cacheStrategy/nodeCacheStrategy";
-import { CacheStrategiesEnum } from "./enum/CacheStrategies";
+import { Injectable } from '@nestjs/common';
+import CacheStrategy from './strategy/abstract-cache.strategy';
+import NodeCacheStrategy from './strategy/node-cache.strategy';
+import { CacheStrategiesEnum } from './enum/CacheStrategies';
 
 @Injectable()
 export class CacheService {
@@ -40,7 +40,7 @@ export class CacheService {
 	}
 
 	public async clearAllCacheValues(strategy = CacheStrategiesEnum.nodeCache) {
-        const strategyCache = this.strategyCacheMap.get(strategy)
-        return strategyCache.clearCache()
-    }
+		const strategyCache = this.strategyCacheMap.get(strategy);
+		return strategyCache.clearCache();
+	}
 }
