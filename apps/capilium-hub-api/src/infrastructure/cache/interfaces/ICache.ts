@@ -1,6 +1,6 @@
 export interface ICache {
-	setOnCache(key: string, value: any, ttl: number): boolean;
-	getOnCache(key: string): any;
-	deleteFromCache(key: string): void;
-	clearCache(): void;
+	set<T>(key: string, value: T, ttl: number): void;
+	get<T>(key: string): T | undefined;
+	delete(key: string): void;
+	clear(): void;
 }
