@@ -4,27 +4,23 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export default class NodeCacheStrategy extends AbstractCacheStrategy {
-	private myCache = new NodeCache({
+	private nodeCache = new NodeCache({
 		stdTTL: 86400,
 	});
 
-	public setOnCache(key: string, value: any, ttl?: number): boolean {
-		if (ttl !== undefined) {
-			return this.myCache.set(key, value, ttl);
-		}
-
-		return this.myCache.set(key, value);
+	public async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+		this.nodeCache.set(key, value, ttl);
 	}
 
-	public getOnCache(key: string): any {
-		return this.myCache.get(key);
+	public async get<T>(key: string): Promise<T | undefined> {
+		return this.nodeCache.get<T>(key);
 	}
 
-	public deleteFromCache(key: string) {
-		return this.myCache.del(key);
+	public async delete(key: string): Promise<void> {
+		this.nodeCache.del(key);
 	}
 
-	public clearCache(): void {
-		return this.myCache.flushAll();
+	public async clear(): Promise<void> {
+		this.nodeCache.flushAll();
 	}
 }
