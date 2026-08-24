@@ -3,8 +3,8 @@ import { ICache } from '../interfaces/ICache';
 
 @Injectable()
 export default abstract class AbstractCacheStrategy implements ICache {
-	abstract set<T>(key: string, value: T, ttl?: number): void;
-	abstract get<T>(key: string): T | undefined;
-	abstract delete(key: string): void;
-	abstract clear(): void;
+	public abstract set<T>(key: string, value: T, ttl?: number): Promise<void>;
+	public abstract get<T>(key: string): Promise<T | undefined>;
+	public abstract delete(key: string): Promise<void>;
+	public abstract clear(): Promise<void>;
 }
