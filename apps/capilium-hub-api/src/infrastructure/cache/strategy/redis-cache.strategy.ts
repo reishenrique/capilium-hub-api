@@ -30,4 +30,8 @@ export default class RedisCacheStrategy extends AbstractCacheStrategy {
 	public async delete(key: string): Promise<void> {
 		await this.redis.del(key);
 	}
+
+	public async clear(): Promise<void> {
+		await this.redis.flushdb();
+	}
 }
