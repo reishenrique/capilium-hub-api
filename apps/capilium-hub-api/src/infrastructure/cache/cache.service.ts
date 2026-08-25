@@ -1,46 +1,49 @@
 import { Injectable } from '@nestjs/common';
-import CacheStrategy from './strategy/abstract-cache.strategy';
 import NodeCacheStrategy from './strategy/node-cache.strategy';
 import { CacheStrategiesEnum } from './enum/CacheStrategies';
+import AbstractCacheStrategy from './strategy/abstract-cache.strategy';
+import RedisCacheStrategy from './strategy/redis-cache.strategy';
 
 @Injectable()
 export class CacheService {
-	private strategyCacheMap = new Map<CacheStrategiesEnum, CacheStrategy>();
+	private strategyCacheMap = new Map<
+		CacheStrategiesEnum,
+		AbstractCacheStrategy
+	>();
 
-	constructor(private readonly _nodeCacheStrategy: NodeCacheStrategy) {
+	constructor(
+		private readonly nodeCacheStrategy: NodeCacheStrategy,
+		private readonly redisCacheStrategy: RedisCacheStrategy,
+	) {
+		this.strategyCacheMap.set(CacheStrategiesEnum.nodeCache, nodeCacheStrategy);
+
 		this.strategyCacheMap.set(
-			CacheStrategiesEnum.nodeCache,
-			_nodeCacheStrategy,
+			CacheStrategiesEnum.redisCache,
+			redisCacheStrategy,
 		);
 	}
 
-	public async cacheValue(
+	public async set(
 		key: string,
 		value: any,
 		strategy = CacheStrategiesEnum.nodeCache,
 	) {
 		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.setOnCache(key, value);
+		return strategyCache?.set(key, value);
 	}
 
-	public async getCacheValue(
-		key: string,
-		strategy = CacheStrategiesEnum.nodeCache,
-	) {
+	public async get(key: string, strategy = CacheStrategiesEnum.nodeCache) {
 		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.getOnCache(key);
+		return strategyCache?.get(key);
 	}
 
-	public async deleteCacheValue(
-		key: string,
-		strategy = CacheStrategiesEnum.nodeCache,
-	) {
+	public async delete(key: string, strategy = CacheStrategiesEnum.nodeCache) {
 		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.deleteFromCache(key);
+		return strategyCache?.delete(key);
 	}
 
-	public async clearAllCacheValues(strategy = CacheStrategiesEnum.nodeCache) {
+	public async clear(strategy = CacheStrategiesEnum.nodeCache) {
 		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache.clearCache();
+		return strategyCache.clear();
 	}
 }
