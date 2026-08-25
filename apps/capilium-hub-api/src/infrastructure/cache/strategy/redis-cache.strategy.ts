@@ -18,4 +18,12 @@ export default class RedisCacheStrategy extends AbstractCacheStrategy {
 
 		await this.redis.set(key, serializedValue);
 	}
+
+	public async get<T>(key: string): Promise<T | undefined> {
+		const value = await this.redis.get(key);
+
+		if (!value) return undefined;
+
+		return JSON.parse(value) as T;
+	}
 }
