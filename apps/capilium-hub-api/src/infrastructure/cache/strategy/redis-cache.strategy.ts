@@ -26,4 +26,8 @@ export default class RedisCacheStrategy extends AbstractCacheStrategy {
 
 		return JSON.parse(value) as T;
 	}
+
+	public async delete(key: string): Promise<void> {
+		await this.redis.del(key);
+	}
 }
