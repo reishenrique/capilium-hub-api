@@ -116,7 +116,7 @@ export class UserService {
 	public async findUserById(id: string): Promise<Partial<UserResponseDto>> {
 		const cacheKey = `user:${id}`;
 
-		let getUserById = await this.cacheService.getCacheValue(cacheKey);
+		let getUserById = await this.cacheService.get(cacheKey);
 
 		if (!getUserById) {
 			getUserById = await this.userRepository.findUserById(id);
@@ -135,7 +135,7 @@ export class UserService {
 				},
 			});
 
-			await this.cacheService.cacheValue(cacheKey, getUserById);
+			await this.cacheService.set(cacheKey, getUserById);
 		}
 
 		this.eventEmitter.emit(LogEventEnum.InternalLog, {
