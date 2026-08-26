@@ -23,26 +23,32 @@ export class CacheService {
 		);
 	}
 
-	public async set(
+	public async set<T>(
 		key: string,
-		value: any,
+		value: T,
 		strategy = CacheStrategiesEnum.nodeCache,
-	) {
+	): Promise<void> {
 		const strategyCache = this.strategyCacheMap.get(strategy);
 		return strategyCache?.set(key, value);
 	}
 
-	public async get(key: string, strategy = CacheStrategiesEnum.nodeCache) {
+	public async get<T>(
+		key: string,
+		strategy = CacheStrategiesEnum.nodeCache,
+	): Promise<T | undefined> {
 		const strategyCache = this.strategyCacheMap.get(strategy);
 		return strategyCache?.get(key);
 	}
 
-	public async delete(key: string, strategy = CacheStrategiesEnum.nodeCache) {
+	public async delete(
+		key: string,
+		strategy = CacheStrategiesEnum.nodeCache,
+	): Promise<void> {
 		const strategyCache = this.strategyCacheMap.get(strategy);
 		return strategyCache?.delete(key);
 	}
 
-	public async clear(strategy = CacheStrategiesEnum.nodeCache) {
+	public async clear(strategy: CacheStrategiesEnum): Promise<void> {
 		const strategyCache = this.strategyCacheMap.get(strategy);
 		return strategyCache.clear();
 	}
