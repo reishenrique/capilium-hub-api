@@ -24,8 +24,9 @@ export class CacheService {
 			redisCacheStrategy,
 		);
 
-		this.defaultCacheStrategy = process.env
-			.CACHE_STRATEGY as CacheStrategiesEnum;
+		this.defaultCacheStrategy =
+			(process.env.CACHE_STRATEGY as CacheStrategiesEnum) ??
+			CacheStrategiesEnum.nodeCache;
 	}
 
 	public async set<T>(
@@ -63,14 +64,14 @@ export class CacheService {
 	): AbstractCacheStrategy {
 		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
 
-		const strategyCacheIntoMapper = this.strategyCacheMap.get(selectedStrategy);
+		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
 
-		if (!strategyCacheIntoMapper) {
+		if (!strategyCache) {
 			throw new NotFoundException(
 				`Cache strategy "${selectedStrategy}" not found`,
 			);
 		}
 
-		return strategyCacheIntoMapper;
+		return strategyCache;
 	}
 }
