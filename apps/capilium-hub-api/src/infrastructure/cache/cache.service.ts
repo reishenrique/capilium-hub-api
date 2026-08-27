@@ -65,4 +65,20 @@ export class CacheService {
 		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
 		return strategyCache.clear();
 	}
+
+	private getStrategyCache(
+		strategy?: CacheStrategiesEnum,
+	): AbstractCacheStrategy {
+		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
+
+		const strategyCacheIntoMapper = this.strategyCacheMap.get(selectedStrategy);
+
+		if (!strategyCacheIntoMapper) {
+			throw new NotFoundException(
+				`Cache strategy "${selectedStrategy}" not found`,
+			);
+		}
+
+		return strategyCacheIntoMapper;
+	}
 }
