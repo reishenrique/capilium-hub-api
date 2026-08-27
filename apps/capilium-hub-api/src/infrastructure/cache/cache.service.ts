@@ -33,37 +33,29 @@ export class CacheService {
 		value: T,
 		strategy?: CacheStrategiesEnum,
 	): Promise<void> {
-		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
-
-		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
-		return strategyCache.set<T>(key, value);
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.set<T>(key, value);
 	}
 
 	public async get<T>(
 		key: string,
 		strategy?: CacheStrategiesEnum,
 	): Promise<T | undefined> {
-		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
-		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
-
-		return strategyCache.get<T>(key);
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.get<T>(key);
 	}
 
 	public async delete(
 		key: string,
 		strategy?: CacheStrategiesEnum,
 	): Promise<void> {
-		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
-
-		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
-		return strategyCache.delete(key);
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.delete(key);
 	}
 
 	public async clear(strategy?: CacheStrategiesEnum): Promise<void> {
-		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
-
-		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
-		return strategyCache.clear();
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.clear();
 	}
 
 	private getStrategyCache(
