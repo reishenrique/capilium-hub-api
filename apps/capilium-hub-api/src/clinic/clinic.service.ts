@@ -59,9 +59,7 @@ export class ClinicService {
 		const cachedClinics =
 			await this.cacheService.get<ClinicResponseDto[]>(cacheKey);
 
-		if (cachedClinics) {
-			return cachedClinics;
-		}
+		if (cachedClinics) return cachedClinics;
 
 		const clinics = await this.clinicRepository.findAllActivatedClinics();
 
@@ -70,6 +68,8 @@ export class ClinicService {
 
 			return [];
 		}
+
+		await this.cacheService.set<ClinicResponseDto[]>(cacheKey, clinics);
 
 		return clinics;
 	}
