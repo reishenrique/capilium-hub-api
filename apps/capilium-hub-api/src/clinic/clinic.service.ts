@@ -13,12 +13,16 @@ import { IPaginationResult } from './interface/IPaginationResult';
 import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
+import { CacheService } from '../infrastructure/cache/cache.service';
 
 @Injectable()
 export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
 	eventEmitter: EventEmitter2;
-	constructor(private readonly clinicRepository: ClinicRepository) {}
+	constructor(
+		private readonly clinicRepository: ClinicRepository,
+		private readonly cacheService: CacheService,
+	) {}
 
 	public async create(
 		clinicPayload: CliniCreateDto,
@@ -50,16 +54,24 @@ export class ClinicService {
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
-		const findAllClinics =
-			await this.clinicRepository.findAllActivatedClinics();
+		const cacheKey = 'clinic:activated';
 
-		if (!findAllClinics.length) {
+		const cachedClinics =
+			await this.cacheService.get<ClinicResponseDto[]>(cacheKey);
+
+		if (cachedClinics) {
+			return cachedClinics;
+		}
+
+		const clinics = await this.clinicRepository.findAllActivatedClinics();
+
+		if (!clinics.length) {
 			this._logger.log('No activated clinics found');
 
 			return [];
 		}
 
-		return findAllClinics;
+		return clinics;
 	}
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
