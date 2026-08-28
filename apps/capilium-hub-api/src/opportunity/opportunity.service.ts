@@ -12,6 +12,7 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { UserRepository } from '../users/repository/user.repository';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
+import { CacheService } from '../infrastructure/cache/cache.service';
 
 @Injectable()
 export class OpportunityService {
@@ -21,6 +22,7 @@ export class OpportunityService {
 		private readonly opportunityRepository: OpportunityRepository,
 		private readonly userRepository: UserRepository,
 		private readonly clinicRepository: ClinicRepository,
+		private readonly cacheService: CacheService,
 	) {}
 
 	async findOpportunityById(
@@ -48,16 +50,28 @@ export class OpportunityService {
 	}
 
 	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
-		const findOpportunities =
+		const cacheKey = 'opportunities:opened';
+
+		const cachedOpportunities =
+			await this.cacheService.get<OpportunityResponseDto[]>(cacheKey);
+
+		if (cachedOpportunities) return cachedOpportunities;
+
+		const opportunities =
 			await this.opportunityRepository.findAllOpenedOpportunities();
 
-		if (!findOpportunities) {
+		if (!opportunities.length) {
 			this._logger.warn('There are no open opportunities on record');
 
 			return [];
 		}
 
-		return findOpportunities;
+		await this.cacheService.set<OpportunityResponseDto[]>(
+			cacheKey,
+			opportunities,
+		);
+
+		return opportunities;
 	}
 
 	async create(
