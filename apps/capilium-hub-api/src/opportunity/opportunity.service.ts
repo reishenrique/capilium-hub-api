@@ -28,6 +28,13 @@ export class OpportunityService {
 	async findOpportunityById(
 		id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
+		const cacheKey = `opportunity:${id}`;
+
+		const cachedOpportunity =
+			await this.cacheService.get<OpportunityResponseDto>(cacheKey);
+
+		if (cachedOpportunity) return cachedOpportunity;
+
 		const opportunity =
 			await this.opportunityRepository.findOpportunityById(id);
 
@@ -45,6 +52,8 @@ export class OpportunityService {
 
 			throw new NotFoundException('Opportunity not found');
 		}
+
+		await this.cacheService.set(cacheKey, opportunity);
 
 		return opportunity;
 	}
