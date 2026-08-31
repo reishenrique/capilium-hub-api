@@ -117,7 +117,9 @@ export class OpportunityService {
 		}
 
 		const cacheKey = `opportunity:${id}`;
+
 		await this.cacheService.delete(cacheKey);
+		await this.cacheService.delete('opportunity:activated');
 
 		await this.opportunityRepository.deleteOpportunity(id);
 	}
