@@ -116,6 +116,9 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found to delete');
 		}
 
+		const cacheKey = `opportunity:${id}`;
+
+		await this.cacheService.delete(cacheKey);
 		await this.opportunityRepository.deleteOpportunity(id);
 	}
 
