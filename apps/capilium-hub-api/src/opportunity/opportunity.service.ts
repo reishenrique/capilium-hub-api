@@ -13,6 +13,7 @@ import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { UserRepository } from '../users/repository/user.repository';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { CacheService } from '../infrastructure/cache/cache.service';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class OpportunityService {
@@ -28,10 +29,10 @@ export class OpportunityService {
 	async findOpportunityById(
 		id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
-		const cacheKey = `opportunity:${id}`;
-
 		const cachedOpportunity =
-			await this.cacheService.get<OpportunityResponseDto>(cacheKey);
+			await this.cacheService.get<OpportunityResponseDto>(
+				`${CacheKeyEnum.OPPORTUNITY}:${id}`,
+			);
 
 		if (cachedOpportunity) return cachedOpportunity;
 
@@ -53,16 +54,18 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found');
 		}
 
-		await this.cacheService.set(cacheKey, opportunity);
+		await this.cacheService.set(
+			`${CacheKeyEnum.OPPORTUNITY}:${id}`,
+			opportunity,
+		);
 
 		return opportunity;
 	}
 
 	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
-		const cacheKey = 'opportunities:opened';
-
-		const cachedOpportunities =
-			await this.cacheService.get<OpportunityResponseDto[]>(cacheKey);
+		const cachedOpportunities = await this.cacheService.get<
+			OpportunityResponseDto[]
+		>(CacheKeyEnum.OPPORTUNITIES_OPENED);
 
 		if (cachedOpportunities) return cachedOpportunities;
 
@@ -76,7 +79,7 @@ export class OpportunityService {
 		}
 
 		await this.cacheService.set<OpportunityResponseDto[]>(
-			cacheKey,
+			CacheKeyEnum.OPPORTUNITIES_OPENED,
 			opportunities,
 		);
 
@@ -116,10 +119,8 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found to delete');
 		}
 
-		const cacheKey = `opportunity:${id}`;
-
-		await this.cacheService.delete(cacheKey);
-		await this.cacheService.delete('opportunity:activated');
+		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 
 		await this.opportunityRepository.deleteOpportunity(id);
 	}
@@ -139,8 +140,7 @@ export class OpportunityService {
 			throw new NotFoundException('User not found to update');
 		}
 
-		const cacheKey = `opportunity:${id}`;
-		await this.cacheService.delete(cacheKey);
+		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
 
 		return findOpportunityAndUpdate;
 	}
