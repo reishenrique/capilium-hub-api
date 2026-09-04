@@ -166,6 +166,9 @@ export class ClinicService {
 		}
 
 		await this.clinicRepository.deleteClinicById(id);
+
+		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 	}
 
 	public async getPagedAllClinics(
