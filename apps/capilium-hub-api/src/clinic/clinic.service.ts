@@ -80,22 +80,19 @@ export class ClinicService {
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
 		if (!id) {
 			this._logger.error('The clinic id must be provided');
-
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Id not provided or invalid',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
-
 			throw new BadRequestException('Clinic id must be provided');
 		}
 
-		const findClinicById = await this.clinicRepository.findClinicById(id);
+		const cacheKey = `${CacheKeyEnum.CLINIC}:${id}`;
 
-		if (!findClinicById) {
+		const cachedClinic =
+			await this.cacheService.get<ClinicResponseDto>(cacheKey);
+
+		if (cachedClinic) return cachedClinic;
+
+		const clinic = await this.clinicRepository.findClinicById(id);
+
+		if (!clinic) {
 			this._logger.error(`Clinic id "${id}" not found`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -110,7 +107,9 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found');
 		}
 
-		return findClinicById;
+		await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
+
+		return clinic;
 	}
 
 	public async updateClinicById(
