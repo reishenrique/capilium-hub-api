@@ -14,6 +14,7 @@ import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { CacheService } from '../infrastructure/cache/cache.service';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class ClinicService {
@@ -54,10 +55,9 @@ export class ClinicService {
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
-		const cacheKey = 'clinic:activated';
-
-		const cachedClinics =
-			await this.cacheService.get<ClinicResponseDto[]>(cacheKey);
+		const cachedClinics = await this.cacheService.get<ClinicResponseDto[]>(
+			CacheKeyEnum.CLINIC_ACTIVATED,
+		);
 
 		if (cachedClinics) return cachedClinics;
 
@@ -69,7 +69,10 @@ export class ClinicService {
 			return [];
 		}
 
-		await this.cacheService.set<ClinicResponseDto[]>(cacheKey, clinics);
+		await this.cacheService.set<ClinicResponseDto[]>(
+			CacheKeyEnum.CLINIC_ACTIVATED,
+			clinics,
+		);
 
 		return clinics;
 	}
