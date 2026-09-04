@@ -142,10 +142,15 @@ export class ClinicService {
 		return findAndUpdate;
 	}
 
-	public async findClinicByIdAndDelete(id: string): Promise<void> {
-		const findClinicById = await this.clinicRepository.findClinicById(id);
+	public async delete(id: string): Promise<void> {
+		if (!id) {
+			this._logger.error('The clinic id must be provided');
+			throw new BadRequestException('Clinic id must be provided');
+		}
 
-		if (!findClinicById) {
+		const find = await this.clinicRepository.findClinicById(id);
+
+		if (!find) {
 			this._logger.error(`Clinic ID: ${id} not found to delete`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
