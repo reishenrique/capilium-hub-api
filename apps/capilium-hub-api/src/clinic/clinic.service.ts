@@ -116,10 +116,12 @@ export class ClinicService {
 		id: string,
 		newClinicData: object,
 	): Promise<ClinicResponseDto> {
-		const findClinicByIdAndUpdate =
-			await this.clinicRepository.findClinicByIdAndUpdate(id, newClinicData);
+		const findAndUpdate = await this.clinicRepository.findClinicByIdAndUpdate(
+			id,
+			newClinicData,
+		);
 
-		if (!findClinicByIdAndUpdate) {
+		if (!findAndUpdate) {
 			this._logger.error(`Clinic ID: ${id} not found to update`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -134,7 +136,10 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found to update');
 		}
 
-		return findClinicByIdAndUpdate;
+		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
+
+		return findAndUpdate;
 	}
 
 	public async findClinicByIdAndDelete(id: string): Promise<void> {
