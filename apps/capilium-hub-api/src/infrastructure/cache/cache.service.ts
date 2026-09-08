@@ -1,46 +1,77 @@
-import { Injectable } from "@nestjs/common";
-import CacheStrategy from "./cacheStrategy/abstractCacheStrategy";
-import NodeCacheStrategy from "./cacheStrategy/nodeCacheStrategy";
-import { CacheStrategiesEnum } from "./enum/CacheStrategies";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import NodeCacheStrategy from './strategy/node-cache.strategy';
+import { CacheStrategiesEnum } from './enum/CacheStrategies';
+import AbstractCacheStrategy from './strategy/abstract-cache.strategy';
+import RedisCacheStrategy from './strategy/redis-cache.strategy';
 
 @Injectable()
 export class CacheService {
-	private strategyCacheMap = new Map<CacheStrategiesEnum, CacheStrategy>();
+	private strategyCacheMap = new Map<
+		CacheStrategiesEnum,
+		AbstractCacheStrategy
+	>();
 
-	constructor(private readonly _nodeCacheStrategy: NodeCacheStrategy) {
+	private readonly defaultCacheStrategy: CacheStrategiesEnum;
+
+	constructor(
+		private readonly nodeCacheStrategy: NodeCacheStrategy,
+		private readonly redisCacheStrategy: RedisCacheStrategy,
+	) {
+		this.strategyCacheMap.set(CacheStrategiesEnum.nodeCache, nodeCacheStrategy);
+
 		this.strategyCacheMap.set(
-			CacheStrategiesEnum.nodeCache,
-			_nodeCacheStrategy,
+			CacheStrategiesEnum.redisCache,
+			redisCacheStrategy,
 		);
+
+		this.defaultCacheStrategy =
+			(process.env.CACHE_STRATEGY as CacheStrategiesEnum) ??
+			CacheStrategiesEnum.nodeCache;
 	}
 
-	public async cacheValue(
+	public async set<T>(
 		key: string,
-		value: any,
-		strategy = CacheStrategiesEnum.nodeCache,
-	) {
-		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.setOnCache(key, value);
+		value: T,
+		strategy?: CacheStrategiesEnum,
+	): Promise<void> {
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.set<T>(key, value);
 	}
 
-	public async getCacheValue(
+	public async get<T>(
 		key: string,
-		strategy = CacheStrategiesEnum.nodeCache,
-	) {
-		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.getOnCache(key);
+		strategy?: CacheStrategiesEnum,
+	): Promise<T | undefined> {
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.get<T>(key);
 	}
 
-	public async deleteCacheValue(
+	public async delete(
 		key: string,
-		strategy = CacheStrategiesEnum.nodeCache,
-	) {
-		const strategyCache = this.strategyCacheMap.get(strategy);
-		return strategyCache?.deleteFromCache(key);
+		strategy?: CacheStrategiesEnum,
+	): Promise<void> {
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.delete(key);
 	}
 
-	public async clearAllCacheValues(strategy = CacheStrategiesEnum.nodeCache) {
-        const strategyCache = this.strategyCacheMap.get(strategy)
-        return strategyCache.clearCache()
-    }
+	public async clear(strategy?: CacheStrategiesEnum): Promise<void> {
+		const selectedCacheStrategy = this.getStrategyCache(strategy);
+		return selectedCacheStrategy.clear();
+	}
+
+	private getStrategyCache(
+		strategy?: CacheStrategiesEnum,
+	): AbstractCacheStrategy {
+		const selectedStrategy = strategy ?? this.defaultCacheStrategy;
+
+		const strategyCache = this.strategyCacheMap.get(selectedStrategy);
+
+		if (!strategyCache) {
+			throw new NotFoundException(
+				`Cache strategy "${selectedStrategy}" not found`,
+			);
+		}
+
+		return strategyCache;
+	}
 }

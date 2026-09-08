@@ -15,18 +15,20 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 @Controller('cache')
 export class CacheController {
 	protected readonly _logger = new Logger(CacheController.name);
-	constructor(private readonly _cacheService: CacheService) {}
+	constructor(private readonly cacheService: CacheService) {}
 
 	@Post('/clear')
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Clearing the application cache' })
 	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 500, description: 'Internal Server Error'})
+	@ApiResponse({ status: 500, description: 'Internal Server Error' })
 	public async clearCache(@Query('strategy') strategy: CacheStrategiesEnum) {
 		try {
-			return await this._cacheService.clearAllCacheValues(strategy);
+			return await this.cacheService.clear(strategy);
 		} catch (error) {
-			this._logger.error('Error when trying to log in user');
+			this._logger.error(
+				`Error attempting to clear the strategy cache: ${strategy}`,
+			);
 			throw new InternalServerErrorException(error);
 		}
 	}

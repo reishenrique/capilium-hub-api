@@ -53,8 +53,8 @@ describe('UserService', () => {
 				{
 					provide: CacheService,
 					useValue: {
-						getCacheValue: jest.fn(),
-						cacheValue: jest.fn(),
+						get: jest.fn(),
+						set: jest.fn(),
 					},
 				},
 				{
@@ -89,7 +89,6 @@ describe('UserService', () => {
 			userRepository.findUserByCpf.mockResolvedValue(null);
 			userRepository.findUserByEmail.mockResolvedValue(null);
 			userRepository.createUser.mockResolvedValue(createUserEntityMock());
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			emailQueue.add.mockResolvedValue({} as any);
 		});
 
@@ -142,7 +141,6 @@ describe('UserService', () => {
 
 		it('deve associar clinicId ao usuário quando isAdmin=true e clínica é encontrada', async () => {
 			const mockClinic = { _id: 'clinic-id-1', cnpj: '12345678000100' };
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			clinicRepository.findClinicByCnpj.mockResolvedValue(mockClinic as any);
 
 			await service.create(
@@ -191,7 +189,7 @@ describe('UserService', () => {
 	describe('findUserById', () => {
 		it('deve retornar usuário do cache quando disponível', async () => {
 			const mockUser = createUserResponseMock();
-			cacheService.getCacheValue.mockResolvedValue(mockUser);
+			cacheService.get.mockResolvedValue(mockUser);
 
 			const result = await service.findUserById('user-id-1');
 
@@ -201,7 +199,7 @@ describe('UserService', () => {
 
 		it('deve buscar usuário no banco quando não está em cache', async () => {
 			const mockUser = createUserEntityMock();
-			cacheService.getCacheValue.mockResolvedValue(null);
+			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
 
 			const result = await service.findUserById('user-id-1');
@@ -212,19 +210,16 @@ describe('UserService', () => {
 
 		it('deve salvar usuário no cache após buscar no banco', async () => {
 			const mockUser = createUserEntityMock();
-			cacheService.getCacheValue.mockResolvedValue(null);
+			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
 
 			await service.findUserById('user-id-1');
 
-			expect(cacheService.cacheValue).toHaveBeenCalledWith(
-				'user:user-id-1',
-				mockUser,
-			);
+			expect(cacheService.set).toHaveBeenCalledWith('user:user-id-1', mockUser);
 		});
 
 		it('deve lançar NotFoundException quando usuário não é encontrado', async () => {
-			cacheService.getCacheValue.mockResolvedValue(null);
+			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(null);
 
 			await expect(service.findUserById('user-id-1')).rejects.toThrow(

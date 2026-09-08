@@ -12,6 +12,8 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { UserRepository } from '../users/repository/user.repository';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
+import { CacheService } from '../infrastructure/cache/cache.service';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class OpportunityService {
@@ -21,11 +23,19 @@ export class OpportunityService {
 		private readonly opportunityRepository: OpportunityRepository,
 		private readonly userRepository: UserRepository,
 		private readonly clinicRepository: ClinicRepository,
+		private readonly cacheService: CacheService,
 	) {}
 
 	async findOpportunityById(
 		id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
+		const cachedOpportunity =
+			await this.cacheService.get<OpportunityResponseDto>(
+				`${CacheKeyEnum.OPPORTUNITY}:${id}`,
+			);
+
+		if (cachedOpportunity) return cachedOpportunity;
+
 		const opportunity =
 			await this.opportunityRepository.findOpportunityById(id);
 
@@ -44,20 +54,36 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found');
 		}
 
+		await this.cacheService.set(
+			`${CacheKeyEnum.OPPORTUNITY}:${id}`,
+			opportunity,
+		);
+
 		return opportunity;
 	}
 
 	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
-		const findOpportunities =
+		const cachedOpportunities = await this.cacheService.get<
+			OpportunityResponseDto[]
+		>(CacheKeyEnum.OPPORTUNITIES_OPENED);
+
+		if (cachedOpportunities) return cachedOpportunities;
+
+		const opportunities =
 			await this.opportunityRepository.findAllOpenedOpportunities();
 
-		if (!findOpportunities) {
+		if (!opportunities.length) {
 			this._logger.warn('There are no open opportunities on record');
 
 			return [];
 		}
 
-		return findOpportunities;
+		await this.cacheService.set<OpportunityResponseDto[]>(
+			CacheKeyEnum.OPPORTUNITIES_OPENED,
+			opportunities,
+		);
+
+		return opportunities;
 	}
 
 	async create(
@@ -93,6 +119,9 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found to delete');
 		}
 
+		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
+
 		await this.opportunityRepository.deleteOpportunity(id);
 	}
 
@@ -110,6 +139,8 @@ export class OpportunityService {
 			this._logger.error(`User with ID: ${id} not found to update`);
 			throw new NotFoundException('User not found to update');
 		}
+
+		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
 
 		return findOpportunityAndUpdate;
 	}

@@ -13,12 +13,17 @@ import { IPaginationResult } from './interface/IPaginationResult';
 import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
+import { CacheService } from '../infrastructure/cache/cache.service';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
 	eventEmitter: EventEmitter2;
-	constructor(private readonly clinicRepository: ClinicRepository) {}
+	constructor(
+		private readonly clinicRepository: ClinicRepository,
+		private readonly cacheService: CacheService,
+	) {}
 
 	public async create(
 		clinicPayload: CliniCreateDto,
@@ -50,37 +55,44 @@ export class ClinicService {
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
-		const findAllClinics =
-			await this.clinicRepository.findAllActivatedClinics();
+		const cachedClinics = await this.cacheService.get<ClinicResponseDto[]>(
+			CacheKeyEnum.CLINIC_ACTIVATED,
+		);
 
-		if (!findAllClinics.length) {
+		if (cachedClinics) return cachedClinics;
+
+		const clinics = await this.clinicRepository.findAllActivatedClinics();
+
+		if (!clinics.length) {
 			this._logger.log('No activated clinics found');
 
 			return [];
 		}
 
-		return findAllClinics;
+		await this.cacheService.set<ClinicResponseDto[]>(
+			CacheKeyEnum.CLINIC_ACTIVATED,
+			clinics,
+		);
+
+		return clinics;
 	}
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
 		if (!id) {
 			this._logger.error('The clinic id must be provided');
-
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Id not provided or invalid',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
-
 			throw new BadRequestException('Clinic id must be provided');
 		}
 
-		const findClinicById = await this.clinicRepository.findClinicById(id);
+		const cacheKey = `${CacheKeyEnum.CLINIC}:${id}`;
 
-		if (!findClinicById) {
+		const cachedClinic =
+			await this.cacheService.get<ClinicResponseDto>(cacheKey);
+
+		if (cachedClinic) return cachedClinic;
+
+		const clinic = await this.clinicRepository.findClinicById(id);
+
+		if (!clinic) {
 			this._logger.error(`Clinic id "${id}" not found`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -95,17 +107,21 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found');
 		}
 
-		return findClinicById;
+		await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
+
+		return clinic;
 	}
 
 	public async updateClinicById(
 		id: string,
 		newClinicData: object,
 	): Promise<ClinicResponseDto> {
-		const findClinicByIdAndUpdate =
-			await this.clinicRepository.findClinicByIdAndUpdate(id, newClinicData);
+		const findAndUpdate = await this.clinicRepository.findClinicByIdAndUpdate(
+			id,
+			newClinicData,
+		);
 
-		if (!findClinicByIdAndUpdate) {
+		if (!findAndUpdate) {
 			this._logger.error(`Clinic ID: ${id} not found to update`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -120,13 +136,21 @@ export class ClinicService {
 			throw new NotFoundException('Clinic not found to update');
 		}
 
-		return findClinicByIdAndUpdate;
+		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
+
+		return findAndUpdate;
 	}
 
-	public async findClinicByIdAndDelete(id: string): Promise<void> {
-		const findClinicById = await this.clinicRepository.findClinicById(id);
+	public async delete(id: string): Promise<void> {
+		if (!id) {
+			this._logger.error('The clinic id must be provided');
+			throw new BadRequestException('Clinic id must be provided');
+		}
 
-		if (!findClinicById) {
+		const find = await this.clinicRepository.findClinicById(id);
+
+		if (!find) {
 			this._logger.error(`Clinic ID: ${id} not found to delete`);
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -142,6 +166,9 @@ export class ClinicService {
 		}
 
 		await this.clinicRepository.deleteClinicById(id);
+
+		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 	}
 
 	public async getPagedAllClinics(
