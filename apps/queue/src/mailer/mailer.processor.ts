@@ -42,7 +42,6 @@ export class EmailProcessor {
 
 				return;
 			}
-			
 
 			send(to, subject, body);
 
@@ -50,9 +49,16 @@ export class EmailProcessor {
 				`Email sent successfully to ${to} | Data: ${JSON.stringify(job.data, null, 2)}`,
 			);
 
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Info,
+				message: 'Sending welcome email to new user',
+				context: 'UserService',
+				data: {
+					email: to,
+				},
+			});
+
 			await this.cacheService.set(metadata.idempotencyKey, true);
-
-
 		} catch (error) {
 			if (error instanceof Error) {
 				this._logger.error(
