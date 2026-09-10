@@ -10,8 +10,8 @@ import { LogEventEnum } from 'apps/capilium-hub-api/src/logger/enum/log-event.en
 import { LogLevelEnum } from 'apps/capilium-hub-api/src/logger/enum/log-level.enum';
 
 @Processor(EMAIL_QUEUE)
-export class EmailProcessor {
-	private _logger = new Logger(EmailProcessor.name);
+export class EmailWorker {
+	private _logger = new Logger(EmailWorker.name);
 	constructor(
 		private readonly cacheService: CacheService,
 		private eventEmitter: EventEmitter2,
