@@ -52,7 +52,7 @@ export class EmailProcessor {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
 				level: LogLevelEnum.Info,
 				message: 'Sending welcome email to new user',
-				context: 'UserService',
+				context: 'MailerProcessor',
 				data: {
 					email: to,
 				},
@@ -61,17 +61,19 @@ export class EmailProcessor {
 			await this.cacheService.set(metadata.idempotencyKey, true);
 		} catch (error) {
 			if (error instanceof Error) {
-				this._logger.error(
-					`Failed to send email (Type: ${metadata?.emailType}) to ${to} | Error: ${error.message}
-			`,
-					error.stack,
-				);
-			} else {
-				this._logger.error(
-					`Failed to send email (Type: ${metadata?.emailType} to ${to} | Unknown error)`,
-					String(error),
-				);
+				this._logger.error(`Error: ${error.message}`, error.stack);
+
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: `Failed to send email (type: ${metadata?.emailType}) to ${to}`,
+					context: 'MailerProcessor',
+				});
 			}
+
+			this._logger.error(
+				`Failed to send email (Type: ${metadata?.emailType} to ${to} | Unknown error)`,
+				String(error),
+			);
 
 			throw error;
 		}
