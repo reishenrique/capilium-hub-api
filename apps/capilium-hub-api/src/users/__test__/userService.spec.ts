@@ -195,7 +195,7 @@ describe('UserService', () => {
 	});
 
 	describe('findUserById', () => {
-		it('deve retornar usuário do cache quando disponível', async () => {
+		it('should return the user from the cache when available', async () => {
 			const mockUser = createUserResponseMock();
 			cacheService.get.mockResolvedValue(mockUser);
 
@@ -205,7 +205,7 @@ describe('UserService', () => {
 			expect(userRepository.findUserById).not.toHaveBeenCalled();
 		});
 
-		it('deve buscar usuário no banco quando não está em cache', async () => {
+		it('should fetch the user from the database when not available in the cache', async () => {
 			const mockUser = createUserEntityMock();
 			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
@@ -216,7 +216,7 @@ describe('UserService', () => {
 			expect(userRepository.findUserById).toHaveBeenCalledWith('user-id-1');
 		});
 
-		it('deve salvar usuário no cache após buscar no banco', async () => {
+		it('should save the user to the cache after fetching from the database', async () => {
 			const mockUser = createUserEntityMock();
 			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
@@ -226,7 +226,7 @@ describe('UserService', () => {
 			expect(cacheService.set).toHaveBeenCalledWith('user:user-id-1', mockUser);
 		});
 
-		it('deve lançar NotFoundException quando usuário não é encontrado', async () => {
+		it('should throw NotFoundException when the user is not found', async () => {
 			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(null);
 
@@ -237,7 +237,7 @@ describe('UserService', () => {
 	});
 
 	describe('findUserByCpf', () => {
-		it('deve retornar usuário quando CPF é encontrado', async () => {
+		it('should return the user when CPF is found', async () => {
 			const mockUser = createUserEntityMock();
 			userRepository.findUserByCpf.mockResolvedValue(mockUser);
 
@@ -246,7 +246,7 @@ describe('UserService', () => {
 			expect(result).toEqual(mockUser);
 		});
 
-		it('deve lançar NotFoundException quando CPF não é encontrado', async () => {
+		it('should throw NotFoundException when CPF is not found', async () => {
 			userRepository.findUserByCpf.mockResolvedValue(null);
 
 			await expect(service.findUserByCpf('12345678901')).rejects.toThrow(
@@ -254,7 +254,7 @@ describe('UserService', () => {
 			);
 		});
 
-		it('deve emitir evento de log de sucesso quando usuário é encontrado', async () => {
+		it('should emit a successful log event when the user is found', async () => {
 			userRepository.findUserByCpf.mockResolvedValue(createUserEntityMock());
 
 			await service.findUserByCpf('12345678901');
