@@ -298,7 +298,7 @@ describe('UserService', () => {
 	});
 
 	describe('updateUserById', () => {
-		it('deve atualizar usuário com sucesso', async () => {
+		it('should successfully update the user', async () => {
 			const updatedUser = createUserEntityMock({ firstName: 'Jane' });
 			userRepository.findUserByIdAndUpdate.mockResolvedValue(updatedUser);
 
@@ -313,7 +313,7 @@ describe('UserService', () => {
 			);
 		});
 
-		it('deve lançar NotFoundException quando usuário não é encontrado para atualizar', async () => {
+		it('should throw NotFoundException when the user is not found for update', async () => {
 			userRepository.findUserByIdAndUpdate.mockResolvedValue(null);
 
 			await expect(
@@ -321,7 +321,7 @@ describe('UserService', () => {
 			).rejects.toThrow(NotFoundException);
 		});
 
-		it('deve emitir evento de log de sucesso após atualizar usuário', async () => {
+		it('should emit a successful log event after updating the user', async () => {
 			userRepository.findUserByIdAndUpdate.mockResolvedValue(
 				createUserEntityMock(),
 			);
