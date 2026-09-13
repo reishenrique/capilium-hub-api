@@ -153,13 +153,21 @@ describe('UserService', () => {
 		});
 
 		it('deve enviar email de boas-vindas após criar usuário', async () => {
-			await service.create(createUserEntityMock());
+			const mockUser = createUserEntityMock();
+
+			userRepository.findUserByEmail
+				.mockResolvedValueOnce(null)
+				.mockResolvedValueOnce(mockUser as any);
+
+			await service.create(createUserMock());
 
 			expect(emailQueue.add).toHaveBeenCalledWith(
 				'send-email',
 				expect.objectContaining({
 					to: 'johndoe@test.com',
-					metadata: { emailType: EmailTypeEnum.WELCOME },
+					metadata: expect.objectContaining({
+						emailType: EmailTypeEnum.WELCOME,
+					}),
 				}),
 			);
 		});
