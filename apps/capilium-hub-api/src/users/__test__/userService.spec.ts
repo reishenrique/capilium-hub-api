@@ -92,7 +92,7 @@ describe('UserService', () => {
 			emailQueue.add.mockResolvedValue({} as any);
 		});
 
-		it('deve criar um usuário com sucesso', async () => {
+		it('should successfully create a user', async () => {
 			const mockUser = createUserEntityMock();
 			userRepository.createUser.mockResolvedValue(mockUser);
 
@@ -103,7 +103,7 @@ describe('UserService', () => {
 			expect(userRepository.createUser).toHaveBeenCalledTimes(1);
 		});
 
-		it('deve lançar ConflictException quando CPF já está cadastrado', async () => {
+		it('should throw ConflictException when CPF is already registered', async () => {
 			userRepository.findUserByCpf.mockResolvedValue(createUserEntityMock());
 
 			await expect(service.create(createUserEntityMock())).rejects.toThrow(
@@ -112,7 +112,7 @@ describe('UserService', () => {
 			expect(userRepository.createUser).not.toHaveBeenCalled();
 		});
 
-		it('deve lançar ConflictException quando email já está cadastrado', async () => {
+		it('should throw ConflictException when email is already registered', async () => {
 			userRepository.findUserByEmail.mockResolvedValue(createUserEntityMock());
 
 			await expect(service.create(createUserEntityMock())).rejects.toThrow(
@@ -121,7 +121,7 @@ describe('UserService', () => {
 			expect(userRepository.createUser).not.toHaveBeenCalled();
 		});
 
-		it('deve lançar BadRequestException quando isAdmin=true e clinicCnpj não é fornecido', async () => {
+		it('should throw BadRequestException when isAdmin=true and clinicCnpj is not provided', async () => {
 			await expect(
 				service.create(
 					createUserEntityMock({ isAdmin: true, clinicId: undefined }),
@@ -129,7 +129,7 @@ describe('UserService', () => {
 			).rejects.toThrow(BadRequestException);
 		});
 
-		it('deve lançar NotFoundException quando clinicCnpj não encontra uma clínica', async () => {
+		it('should throw NotFoundException when clinicCnpj does not match any clinic', async () => {
 			clinicRepository.findClinicByCnpj.mockResolvedValue(null);
 
 			await expect(
@@ -139,7 +139,7 @@ describe('UserService', () => {
 			).rejects.toThrow(NotFoundException);
 		});
 
-		it('deve associar clinicId ao usuário quando isAdmin=true e clínica é encontrada', async () => {
+		it('should associate clinicId with the user when isAdmin=true and the clinic is found', async () => {
 			const mockClinic = { _id: 'clinic-id-1', cnpj: '12345678000100' };
 			clinicRepository.findClinicByCnpj.mockResolvedValue(mockClinic as any);
 
@@ -152,7 +152,7 @@ describe('UserService', () => {
 			);
 		});
 
-		it('deve enviar email de boas-vindas após criar usuário', async () => {
+		it('should send a welcome email after creating the user', async () => {
 			const mockUser = createUserEntityMock();
 
 			userRepository.findUserByEmail
@@ -172,7 +172,7 @@ describe('UserService', () => {
 			);
 		});
 
-		it('deve emitir evento de log de sucesso após criar usuário', async () => {
+		it('should emit a successful log event after creating the user', async () => {
 			await service.create(createUserEntityMock());
 
 			expect(eventEmitter.emit).toHaveBeenCalledWith(
@@ -184,7 +184,7 @@ describe('UserService', () => {
 			);
 		});
 
-		it('deve hashear a senha antes de criar o usuário', async () => {
+		it('should hash the password before creating the user', async () => {
 			const payload = createUserEntityMock({ password: '123@Test' });
 			await service.create(payload);
 
