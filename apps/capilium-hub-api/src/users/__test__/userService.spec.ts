@@ -267,7 +267,7 @@ describe('UserService', () => {
 	});
 
 	describe('deleteUserById', () => {
-		it('deve deletar usuário com sucesso', async () => {
+		it('should successfully delete the user', async () => {
 			userRepository.findUserById.mockResolvedValue(createUserEntityMock());
 			userRepository.deleteUserById.mockResolvedValue(undefined);
 
@@ -275,7 +275,7 @@ describe('UserService', () => {
 			expect(userRepository.deleteUserById).toHaveBeenCalledWith('user-id-1');
 		});
 
-		it('deve lançar NotFoundException quando usuário não é encontrado para deletar', async () => {
+		it('should throw NotFoundException when the user is not found for deletion', async () => {
 			userRepository.findUserById.mockResolvedValue(null);
 
 			await expect(service.deleteUserById('user-id-1')).rejects.toThrow(
@@ -284,7 +284,7 @@ describe('UserService', () => {
 			expect(userRepository.deleteUserById).not.toHaveBeenCalled();
 		});
 
-		it('deve emitir evento de log de sucesso após deletar usuário', async () => {
+		it('should emit a successful log event after deleting the user', async () => {
 			userRepository.findUserById.mockResolvedValue(createUserEntityMock());
 			userRepository.deleteUserById.mockResolvedValue(undefined);
 
