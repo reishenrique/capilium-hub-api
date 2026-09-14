@@ -45,6 +45,14 @@ export class EmailWorker {
 
 			send(to, subject, body);
 
+			const TWENTY_FOUR_HOURS_TTL = 86400;
+
+			await this.cacheService.set(
+				metadata.idempotencyKey,
+				true,
+				TWENTY_FOUR_HOURS_TTL,
+			);
+
 			this._logger.log(
 				`Email sent successfully to ${to} | Data: ${JSON.stringify(job.data, null, 2)}`,
 			);
@@ -57,8 +65,6 @@ export class EmailWorker {
 					email: to,
 				},
 			});
-
-			await this.cacheService.set(metadata.idempotencyKey, true);
 		} catch (error) {
 			if (error instanceof Error) {
 				this._logger.error(`Error: ${error.message}`, error.stack);
