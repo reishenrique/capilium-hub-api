@@ -32,10 +32,11 @@ export class CacheService {
 	public async set<T>(
 		key: string,
 		value: T,
+		ttl?: number,
 		strategy?: CacheStrategiesEnum,
 	): Promise<void> {
 		const selectedCacheStrategy = this.getStrategyCache(strategy);
-		return selectedCacheStrategy.set<T>(key, value);
+		return selectedCacheStrategy.set<T>(key, value, ttl);
 	}
 
 	public async get<T>(
