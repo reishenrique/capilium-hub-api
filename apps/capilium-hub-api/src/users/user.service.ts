@@ -253,6 +253,10 @@ export class UserService {
 	): Promise<void> {
 		const templateEmail = templates.welcome;
 
+		const user = await this.userRepository.findUserByEmail(userEmail);
+
+		if (!user) return;
+
 		const emailData = {
 			to: userEmail,
 			subject: templateEmail.subject.replace('{{firstName}}', firstName),
@@ -275,6 +279,7 @@ export class UserService {
 			body: emailData.body,
 			metadata: {
 				emailType: EmailTypeEnum.WELCOME,
+				idempotencyKey: `email:welcome:${user._id}`,
 			},
 		});
 	}

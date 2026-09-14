@@ -6,5 +6,6 @@ export interface IEmailJobData {
 	body: string;
 	metadata?: {
 		emailType?: EmailTypeEnum;
+		idempotencyKey?: string;
 	};
 }

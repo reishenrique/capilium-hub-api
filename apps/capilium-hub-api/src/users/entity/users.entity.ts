@@ -6,6 +6,10 @@ import { SpecializationEnum } from '../../common/enums/specialization.enum';
 
 @Schema({ timestamps: true })
 export class User {
+	@ApiProperty({ required: false })
+	@Prop()
+	_id?: string;
+
 	@ApiProperty()
 	@Prop()
 	firstName: string;
