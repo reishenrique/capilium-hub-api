@@ -10,17 +10,17 @@ const transporter = nodemailer.createTransport({
 	},
 } as unknown as SMTPTransport.Options);
 
-export const send = (to: string, subject: string, body: string) => {
-	try {
-		transporter.sendMail({
-			from: process.env.MAIL_FROM,
-			to,
-			subject,
-			text: body,
-		});
-	} catch (error) {
-		throw new Error('Unable to send email');
-	}
+export const send = async (
+	to: string,
+	subject: string,
+	body: string,
+): Promise<void> => {
+	await transporter.sendMail({
+		from: process.env.MAIL_FROM,
+		to,
+		subject,
+		text: body,
+	});
 };
 
 export const validateMailbox = async (email: string): Promise<boolean> => {
