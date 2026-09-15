@@ -131,6 +131,10 @@ export class ApplicationService {
 	): Promise<void> {
 		const templatesEmail = templates.application;
 
+		const user = await this.userRepository.findUserByEmail(userEmail);
+
+		if (!user) return;
+
 		const emailData = {
 			to: userEmail,
 			subject: templatesEmail.subject.replace(
@@ -146,6 +150,7 @@ export class ApplicationService {
 			body: emailData.body,
 			metadata: {
 				emailType: EmailTypeEnum.APPLICATION,
+				idempotencyKey: `email:application:${user._id}:${opportunityTitle}`,
 			},
 		});
 	}
