@@ -17,6 +17,7 @@ import { OpportunityRepository } from '../opportunity/repositories/opportunity.r
 import { Opportunity } from '../opportunity/entity/opportunity.entity';
 import { User } from '../users/entity/users.entity';
 import { Application } from './entity/application.entity';
+import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 
 @Injectable()
 export class ApplicationService {
@@ -64,6 +65,7 @@ export class ApplicationService {
 			user.email,
 			user.firstName,
 			opportunity.title,
+			opportunityId,
 		);
 
 		return applicationResponse;
@@ -128,6 +130,7 @@ export class ApplicationService {
 		userEmail: string,
 		firstName: string,
 		opportunityTitle: string,
+		opportunityId: string,
 	): Promise<void> {
 		const templatesEmail = templates.application;
 
@@ -144,13 +147,19 @@ export class ApplicationService {
 			body: templatesEmail.body.replace('{{firstName}}', firstName),
 		};
 
+		const idempotencyKey = generateIdempotencyKey(
+			user._id,
+			EmailTypeEnum.APPLICATION,
+			opportunityId,
+		);
+
 		await this.emailQueue.add('send-email', {
 			to: emailData.to,
 			subject: emailData.subject,
 			body: emailData.body,
 			metadata: {
 				emailType: EmailTypeEnum.APPLICATION,
-				idempotencyKey: `email:application:${user._id}:${opportunityTitle}`,
+				idempotencyKey,
 			},
 		});
 	}
