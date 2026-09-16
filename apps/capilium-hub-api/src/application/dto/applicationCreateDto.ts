@@ -7,6 +7,7 @@ export class ApplicationCreateDto {
 		description: 'Opportunity ID',
 		type: String,
 	})
+	
 	@IsNotEmpty()
 	@IsString({ message: 'This field is a object id' })
 	opportunityId: string;
