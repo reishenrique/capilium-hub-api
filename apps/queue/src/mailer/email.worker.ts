@@ -43,7 +43,7 @@ export class EmailWorker {
 				return;
 			}
 
-			send(to, subject, body);
+			await send(to, subject, body);
 
 			const TWENTY_FOUR_HOURS_TTL = 86400;
 
@@ -66,20 +66,27 @@ export class EmailWorker {
 				},
 			});
 		} catch (error) {
-			if (error instanceof Error) {
-				this._logger.error(`Error: ${error.message}`, error.stack);
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
 
-				this.eventEmitter.emit(LogEventEnum.InternalLog, {
-					level: LogLevelEnum.Error,
-					message: `Failed to send email (type: ${metadata?.emailType}) to ${to}`,
-					context: 'MailerProcessor',
-				});
-			}
+			const errorStack = error instanceof Error ? error.stack : undefined;
 
 			this._logger.error(
-				`Failed to send email (Type: ${metadata?.emailType} to ${to} | Unknown error)`,
-				String(error),
+				`Failed to send email (type: ${metadata?.emailType}) to ${to} - ${errorMessage}`,
+				errorStack,
 			);
+
+			this.eventEmitter.emit(LogEventEnum.InternalLog, {
+				level: LogLevelEnum.Error,
+				message: 'Failed to send email',
+				context: 'EmailWorker',
+				data: {
+					email: to,
+					emailType: metadata?.emailType,
+					idempotencyKey: metadata?.idempotencyKey,
+					error: errorMessage,
+				},
+			});
 
 			throw error;
 		}
