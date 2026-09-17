@@ -34,7 +34,8 @@ export class ApplicationService {
 	): Promise<ApplicationResponseDto> {
 		const { opportunityId, userId } = applicationPayload;
 
-		const opportunity = await this.validateOpportunityExists(opportunityId);
+		const opportunity =
+			await this.opportunityRepository.findOpportunityById(opportunityId);
 
 		const user = await this.validateUserExists(userId);
 
@@ -69,22 +70,6 @@ export class ApplicationService {
 		);
 
 		return applicationResponse;
-	}
-
-	public async validateOpportunityExists(
-		opportunityId: string,
-	): Promise<Opportunity> {
-		const opportunity =
-			await this.opportunityRepository.findOpportunityById(opportunityId);
-
-		if (!opportunity) {
-			this._logger.error(
-				`Opportunity with id: ${opportunityId}, does not exist`,
-			);
-			throw new NotFoundException('Opportunity does not exist');
-		}
-
-		return opportunity;
 	}
 
 	private validateUserHasNotApplied(
