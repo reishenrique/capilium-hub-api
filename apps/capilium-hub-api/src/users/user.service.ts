@@ -20,6 +20,7 @@ import EventEmitter2 from 'eventemitter2';
 import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
+import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 
 @Injectable()
 export class UserService {
@@ -273,13 +274,18 @@ export class UserService {
 			},
 		});
 
+		const idempotencyKey = generateIdempotencyKey(
+			user._id,
+			EmailTypeEnum.WELCOME,
+		);
+
 		await this.emailQueue.add('send-email', {
 			to: emailData.to,
 			subject: emailData.subject,
 			body: emailData.body,
 			metadata: {
 				emailType: EmailTypeEnum.WELCOME,
-				idempotencyKey: `email:welcome:${user._id}`,
+				idempotencyKey,
 			},
 		});
 	}
