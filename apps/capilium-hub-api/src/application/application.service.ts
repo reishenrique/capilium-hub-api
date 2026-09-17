@@ -109,23 +109,6 @@ export class ApplicationService {
 		return user;
 	}
 
-	public async findApplicationOrThrowIfUserAlreadyApplied(
-		opportunityId: string,
-		userId: string,
-	): Promise<Application> {
-		const existingApplication =
-			await this.applicationRepository.listApplicationByOpportunity(
-				opportunityId,
-			);
-
-		if (existingApplication?.userIds?.includes(userId)) {
-			this._logger.error('User has already applied for this opportunity');
-			throw new ConflictException('User already applied for this opportunity');
-		}
-
-		return existingApplication;
-	}
-
 	private async sendApplyConfirmationEmail(
 		userEmail: string,
 		firstName: string,
