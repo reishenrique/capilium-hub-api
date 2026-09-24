@@ -80,6 +80,7 @@ export class UserResponseDto {
 		description: 'Date when the user record was created',
 		type: String,
 	})
+	@IsOptional()
 	createdAt: string;
 
 	@ApiProperty({
@@ -87,11 +88,13 @@ export class UserResponseDto {
 		description: 'Date when the user record was last updated',
 		type: String,
 	})
+	@IsOptional()
 	updatedAt: string;
 
 	@ApiProperty({
 		example: 0,
 		description: 'Version of the document in MongoDB',
 	})
+	@IsOptional()
 	__v: number;
 }
