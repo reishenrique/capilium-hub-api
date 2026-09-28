@@ -21,6 +21,7 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
+import { toUserResponseDto } from './mappers/users.mappers';
 
 @Injectable()
 export class UserService {
@@ -114,15 +115,15 @@ export class UserService {
 		return newUser;
 	}
 
-	public async findUserById(id: string): Promise<Partial<UserResponseDto>> {
+	public async findUserById(id: string): Promise<UserResponseDto> {
 		const cacheKey = `user:${id}`;
 
-		let getUserById = await this.cacheService.get(cacheKey);
+		const cachedUser = await this.cacheService.get<UserResponseDto>(cacheKey);
 
-		if (!getUserById) {
-			getUserById = await this.userRepository.findUserById(id);
+		if (!cachedUser) {
+			const user = await this.userRepository.findUserById(id);
 
-			if (!getUserById) {
+			if (!user) {
 				this._logger.error(`User with ID: ${id} not found`);
 				throw new NotFoundException('User not found by id');
 			}
@@ -136,19 +137,12 @@ export class UserService {
 				},
 			});
 
-			await this.cacheService.set(cacheKey, getUserById);
+			await this.cacheService.set(cacheKey, user);
+
+			return toUserResponseDto(user);
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Finding user by id',
-			context: 'UserService',
-			data: {
-				id: id,
-			},
-		});
-
-		return getUserById;
+		return cachedUser;
 	}
 
 	public async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
