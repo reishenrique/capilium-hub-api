@@ -22,6 +22,7 @@ import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { toUserResponseDto } from './mappers/users.mappers';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class UserService {
@@ -116,7 +117,7 @@ export class UserService {
 	}
 
 	public async findUserById(id: string): Promise<UserResponseDto> {
-		const cacheKey = `user:${id}`;
+		const cacheKey = `${CacheKeyEnum.USER}:${id}`;
 
 		const cachedUser = await this.cacheService.get<UserResponseDto>(cacheKey);
 
