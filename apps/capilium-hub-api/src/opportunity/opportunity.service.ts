@@ -69,23 +69,25 @@ export class OpportunityService {
 			OpportunityResponseDto[]
 		>(CacheKeyEnum.OPPORTUNITIES_OPENED);
 
-		if (cachedOpportunities) return cachedOpportunities;
+		if (!cachedOpportunities) {
+			const opportunities =
+				await this.opportunityRepository.findAllOpenedOpportunities();
 
-		const opportunities =
-			await this.opportunityRepository.findAllOpenedOpportunities();
+			if (!opportunities.length) {
+				this._logger.warn('There are no open opportunities on record');
 
-		if (!opportunities.length) {
-			this._logger.warn('There are no open opportunities on record');
+				return [];
+			}
 
-			return [];
+			await this.cacheService.set<OpportunityResponseDto[]>(
+				CacheKeyEnum.OPPORTUNITIES_OPENED,
+				opportunities,
+			);
+
+			return opportunities;
 		}
 
-		await this.cacheService.set<OpportunityResponseDto[]>(
-			CacheKeyEnum.OPPORTUNITIES_OPENED,
-			opportunities,
-		);
-
-		return opportunities;
+		return cachedOpportunities;
 	}
 
 	async create(
