@@ -34,32 +34,34 @@ export class OpportunityService {
 				`${CacheKeyEnum.OPPORTUNITY}:${id}`,
 			);
 
-		if (cachedOpportunity) return cachedOpportunity;
+		if (!cachedOpportunity) {
+			const opportunity =
+				await this.opportunityRepository.findOpportunityById(id);
 
-		const opportunity =
-			await this.opportunityRepository.findOpportunityById(id);
+			if (!opportunity) {
+				this._logger.error(`Opportunity ID: ${id} not found`);
 
-		if (!opportunity) {
-			this._logger.error(`Opportunity ID: ${id} not found`);
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: 'Opportunity not found by id',
+					context: 'OpportunityService',
+					data: {
+						id: id,
+					},
+				});
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Opportunity not found by id',
-				context: 'OpportunityService',
-				data: {
-					id: id,
-				},
-			});
+				throw new NotFoundException('Opportunity not found');
+			}
 
-			throw new NotFoundException('Opportunity not found');
+			await this.cacheService.set(
+				`${CacheKeyEnum.OPPORTUNITY}:${id}`,
+				opportunity,
+			);
+
+			return opportunity;
 		}
 
-		await this.cacheService.set(
-			`${CacheKeyEnum.OPPORTUNITY}:${id}`,
-			opportunity,
-		);
-
-		return opportunity;
+		return cachedOpportunity;
 	}
 
 	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
