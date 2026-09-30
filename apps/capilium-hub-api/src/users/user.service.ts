@@ -147,33 +147,41 @@ export class UserService {
 	}
 
 	public async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
-		const user = await this.userRepository.findUserByCpf(cpf);
+		const cacheKey = `${CacheKeyEnum.USER}:${cpf}`;
 
-		if (!user) {
-			this._logger.error(`User with CPF: ${cpf} not found`);
+		const cachedUser = await this.cacheService.get<UserResponseDto>(cacheKey);
+
+		if (!cachedUser) {
+			const user = await this.userRepository.findUserByCpf(cpf);
+
+			if (!user) {
+				this._logger.error(`User with CPF: ${cpf} not found`);
+
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: 'Finding user by cpf',
+					context: 'UserService',
+					data: {
+						cpf: cpf,
+					},
+				});
+
+				throw new NotFoundException('User not found by CPF');
+			}
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Finding user by cpf',
+				level: LogLevelEnum.Success,
+				message: 'Finding a user by cpf',
 				context: 'UserService',
 				data: {
 					cpf: cpf,
 				},
 			});
 
-			throw new NotFoundException('User not found by CPF');
+			return user;
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Finding a user by cpf',
-			context: 'UserService',
-			data: {
-				cpf: cpf,
-			},
-		});
-
-		return user;
+		return cachedUser;
 	}
 
 	public async deleteUserById(id: string): Promise<void> {
