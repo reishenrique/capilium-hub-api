@@ -248,6 +248,8 @@ export class UserService {
 			},
 		});
 
+		await this.cacheService.delete(`${CacheKeyEnum.USER}:${id}`);
+
 		return findUserAndUpdate;
 	}
 
