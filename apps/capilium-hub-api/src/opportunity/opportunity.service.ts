@@ -141,7 +141,9 @@ export class OpportunityService {
 			throw new NotFoundException('User not found to update');
 		}
 
-		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
+		const cacheKey = `${CacheKeyEnum.OPPORTUNITY}:${id}`;
+
+		await this.cacheService.delete(cacheKey);
 
 		return findOpportunityAndUpdate;
 	}
