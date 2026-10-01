@@ -21,6 +21,7 @@ import {
 	ApiDeleteUserSwaggerDocumentation,
 	ApiGetUserByCpfSwaggerDocumentation,
 	ApiGetUserByIdSwaggerDocumetation,
+	ApiUpdateUserSwaggerDocumentation,
 } from '../swagger/user.swagger';
 
 @ApiTags('user')
@@ -68,10 +69,7 @@ export class UserController {
 
 	@Put('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Upgrade a user by id' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'User not found to update' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiUpdateUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
 	public async updateUserById(
 		@Param('id') id: string,

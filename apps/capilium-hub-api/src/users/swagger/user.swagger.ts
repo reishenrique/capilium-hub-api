@@ -47,3 +47,12 @@ export function ApiDeleteUserSwaggerDocumentation() {
 		ApiResponse({ status: 500, description: 'Internal Server Error ' }),
 	);
 }
+
+export function ApiUpdateUserSwaggerDocumentation() {
+	return applyDecorators(
+		ApiOperation({ summary: 'Upgrade a user by id' }),
+		ApiResponse({ status: 200 }),
+		ApiResponse({ status: 400, description: 'User not found to update' }),
+		ApiResponse({ status: 500, description: 'Internal Server Error' }),
+	);
+}
