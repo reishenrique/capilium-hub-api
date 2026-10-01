@@ -38,3 +38,12 @@ export function ApiGetUserByCpfSwaggerDocumentation() {
 		ApiResponse({ status: 500, description: 'Internal Server Error' }),
 	);
 }
+
+export function ApiDeleteUserSwaggerDocumentation() {
+	return applyDecorators(
+		ApiOperation({ summary: 'Delete user by id' }),
+		ApiResponse({ status: 200 }),
+		ApiResponse({ status: 400, description: 'User not found to delete' }),
+		ApiResponse({ status: 500, description: 'Internal Server Error ' }),
+	);
+}

@@ -18,6 +18,7 @@ import { UserResponseDto } from '../dto/userResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import {
 	ApiCreateUserSwaggerDocumentation,
+	ApiDeleteUserSwaggerDocumentation,
 	ApiGetUserByCpfSwaggerDocumentation,
 	ApiGetUserByIdSwaggerDocumetation,
 } from '../swagger/user.swagger';
@@ -59,10 +60,7 @@ export class UserController {
 
 	@Delete('/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Delete user by id' })
-	@ApiResponse({ status: 200 })
-	@ApiResponse({ status: 400, description: 'User not found to delete' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error ' })
+	@ApiDeleteUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
 		return await this.userService.deleteUserById(id);
