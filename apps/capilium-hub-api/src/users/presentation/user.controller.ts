@@ -16,6 +16,7 @@ import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/userResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { ApiCreateUserSwaggerDocumentation } from '../swagger/user.swagger';
 
 @ApiTags('user')
 @Controller('user')
@@ -25,20 +26,7 @@ export class UserController {
 
 	@Post('/')
 	@HttpCode(HttpStatus.CREATED)
-	@ApiOperation({ summary: 'Create a new user' })
-	@ApiResponse({ status: 201, type: UserResponseDto })
-	@ApiResponse({
-		status: 409,
-		description: 'CPF already registered in the system',
-	})
-	@ApiResponse({
-		status: 409,
-		description: 'Email already registered in the system',
-	})
-	@ApiResponse({
-		status: 400,
-		description: 'Error when trying to created a new user',
-	})
+	@ApiCreateUserSwaggerDocumentation()
 	public async create(
 		@Body() user: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
