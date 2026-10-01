@@ -55,26 +55,29 @@ export class ClinicService {
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
-		const cachedClinics = await this.cacheService.get<ClinicResponseDto[]>(
-			CacheKeyEnum.CLINIC_ACTIVATED,
-		);
+		const cacheKey = CacheKeyEnum.CLINIC_ACTIVATED;
 
-		if (cachedClinics) return cachedClinics;
+		const cachedClinics =
+			await this.cacheService.get<ClinicResponseDto[]>(cacheKey);
 
-		const clinics = await this.clinicRepository.findAllActivatedClinics();
+		if (!cachedClinics) {
+			const clinics = await this.clinicRepository.findAllActivatedClinics();
 
-		if (!clinics.length) {
-			this._logger.log('No activated clinics found');
+			if (!clinics.length) {
+				this._logger.log('No activated clinics found');
 
-			return [];
+				return [];
+			}
+
+			await this.cacheService.set<ClinicResponseDto[]>(
+				CacheKeyEnum.CLINIC_ACTIVATED,
+				clinics,
+			);
+
+			return clinics;
 		}
 
-		await this.cacheService.set<ClinicResponseDto[]>(
-			CacheKeyEnum.CLINIC_ACTIVATED,
-			clinics,
-		);
-
-		return clinics;
+		return cachedClinics;
 	}
 
 	public async findClinicById(id: string): Promise<ClinicResponseDto> {
@@ -88,28 +91,30 @@ export class ClinicService {
 		const cachedClinic =
 			await this.cacheService.get<ClinicResponseDto>(cacheKey);
 
-		if (cachedClinic) return cachedClinic;
+		if (!cachedClinic) {
+			const clinic = await this.clinicRepository.findClinicById(id);
 
-		const clinic = await this.clinicRepository.findClinicById(id);
+			if (!clinic) {
+				this._logger.error(`Clinic id "${id}" not found`);
 
-		if (!clinic) {
-			this._logger.error(`Clinic id "${id}" not found`);
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: 'Clinic not fround by id',
+					context: 'ClinicService',
+					data: {
+						id: id,
+					},
+				});
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic not fround by id',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
+				throw new NotFoundException('Clinic not found');
+			}
 
-			throw new NotFoundException('Clinic not found');
+			await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
+
+			return clinic;
 		}
 
-		await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
-
-		return clinic;
+		return cachedClinic;
 	}
 
 	public async updateClinicById(

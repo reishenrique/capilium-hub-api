@@ -14,10 +14,10 @@ import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
 import { UserRepository } from '../users/repository/user.repository';
 import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
-import { Opportunity } from '../opportunity/entity/opportunity.entity';
-import { User } from '../users/entity/users.entity';
 import { Application } from './entity/application.entity';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
+import { toUserResponseDto } from '../users/mappers/users.mappers';
+import { UserResponseDto } from '../users/dto/userResponseDto';
 
 @Injectable()
 export class ApplicationService {
@@ -34,7 +34,8 @@ export class ApplicationService {
 	): Promise<ApplicationResponseDto> {
 		const { opportunityId, userId } = applicationPayload;
 
-		const opportunity = await this.validateOpportunityExists(opportunityId);
+		const opportunity =
+			await this.opportunityRepository.findOpportunityById(opportunityId);
 
 		const user = await this.validateUserExists(userId);
 
@@ -71,22 +72,6 @@ export class ApplicationService {
 		return applicationResponse;
 	}
 
-	public async validateOpportunityExists(
-		opportunityId: string,
-	): Promise<Opportunity> {
-		const opportunity =
-			await this.opportunityRepository.findOpportunityById(opportunityId);
-
-		if (!opportunity) {
-			this._logger.error(
-				`Opportunity with id: ${opportunityId}, does not exist`,
-			);
-			throw new NotFoundException('Opportunity does not exist');
-		}
-
-		return opportunity;
-	}
-
 	private validateUserHasNotApplied(
 		application: Application,
 		userId: string,
@@ -96,9 +81,7 @@ export class ApplicationService {
 		}
 	}
 
-	public async validateUserExists(
-		userId: string,
-	): Promise<Omit<User, 'password'>> {
+	public async validateUserExists(userId: string): Promise<UserResponseDto> {
 		const user = await this.userRepository.findUserById(userId);
 
 		if (!user) {
@@ -106,7 +89,7 @@ export class ApplicationService {
 			throw new NotFoundException('User not exists');
 		}
 
-		return user;
+		return toUserResponseDto(user);
 	}
 
 	private async sendApplyConfirmationEmail(

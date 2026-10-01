@@ -4,4 +4,5 @@ export enum CacheKeyEnum {
 	OPPORTUNITY = 'opportunity',
 	OPPORTUNITIES_OPENED = 'opportunities:opened',
 	OPPORTUNITY_ACTIVATED = 'opportunity:activated',
+	USER = 'user'
 }

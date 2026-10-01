@@ -21,6 +21,8 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
+import { toUserResponseDto } from './mappers/users.mappers';
+import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 
 @Injectable()
 export class UserService {
@@ -114,15 +116,15 @@ export class UserService {
 		return newUser;
 	}
 
-	public async findUserById(id: string): Promise<Partial<UserResponseDto>> {
-		const cacheKey = `user:${id}`;
+	public async findUserById(id: string): Promise<UserResponseDto> {
+		const cacheKey = `${CacheKeyEnum.USER}:${id}`;
 
-		let getUserById = await this.cacheService.get(cacheKey);
+		const cachedUser = await this.cacheService.get<UserResponseDto>(cacheKey);
 
-		if (!getUserById) {
-			getUserById = await this.userRepository.findUserById(id);
+		if (!cachedUser) {
+			const user = await this.userRepository.findUserById(id);
 
-			if (!getUserById) {
+			if (!user) {
 				this._logger.error(`User with ID: ${id} not found`);
 				throw new NotFoundException('User not found by id');
 			}
@@ -136,49 +138,50 @@ export class UserService {
 				},
 			});
 
-			await this.cacheService.set(cacheKey, getUserById);
+			await this.cacheService.set(cacheKey, user);
+
+			return toUserResponseDto(user);
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Finding user by id',
-			context: 'UserService',
-			data: {
-				id: id,
-			},
-		});
-
-		return getUserById;
+		return cachedUser;
 	}
 
 	public async findUserByCpf(cpf: string): Promise<Partial<UserResponseDto>> {
-		const user = await this.userRepository.findUserByCpf(cpf);
+		const cacheKey = `${CacheKeyEnum.USER}:${cpf}`;
 
-		if (!user) {
-			this._logger.error(`User with CPF: ${cpf} not found`);
+		const cachedUser = await this.cacheService.get<UserResponseDto>(cacheKey);
+
+		if (!cachedUser) {
+			const user = await this.userRepository.findUserByCpf(cpf);
+
+			if (!user) {
+				this._logger.error(`User with CPF: ${cpf} not found`);
+
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: 'Finding user by cpf',
+					context: 'UserService',
+					data: {
+						cpf: cpf,
+					},
+				});
+
+				throw new NotFoundException('User not found by CPF');
+			}
 
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Finding user by cpf',
+				level: LogLevelEnum.Success,
+				message: 'Finding a user by cpf',
 				context: 'UserService',
 				data: {
 					cpf: cpf,
 				},
 			});
 
-			throw new NotFoundException('User not found by CPF');
+			return user;
 		}
 
-		this.eventEmitter.emit(LogEventEnum.InternalLog, {
-			level: LogLevelEnum.Success,
-			message: 'Finding a user by cpf',
-			context: 'UserService',
-			data: {
-				cpf: cpf,
-			},
-		});
-
-		return user;
+		return cachedUser;
 	}
 
 	public async deleteUserById(id: string): Promise<void> {
@@ -244,6 +247,8 @@ export class UserService {
 				body: newUserData,
 			},
 		});
+
+		await this.cacheService.delete(`${CacheKeyEnum.USER}:${id}`);
 
 		return findUserAndUpdate;
 	}

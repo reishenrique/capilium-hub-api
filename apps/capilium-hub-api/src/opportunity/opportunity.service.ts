@@ -29,37 +29,36 @@ export class OpportunityService {
 	async findOpportunityById(
 		id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
+		const cacheKey = `${CacheKeyEnum.OPPORTUNITY}:${id}`;
+
 		const cachedOpportunity =
-			await this.cacheService.get<OpportunityResponseDto>(
-				`${CacheKeyEnum.OPPORTUNITY}:${id}`,
-			);
+			await this.cacheService.get<OpportunityResponseDto>(cacheKey);
 
-		if (cachedOpportunity) return cachedOpportunity;
+		if (!cachedOpportunity) {
+			const opportunity =
+				await this.opportunityRepository.findOpportunityById(id);
 
-		const opportunity =
-			await this.opportunityRepository.findOpportunityById(id);
+			if (!opportunity) {
+				this._logger.error(`Opportunity ID: ${id} not found`);
 
-		if (!opportunity) {
-			this._logger.error(`Opportunity ID: ${id} not found`);
+				this.eventEmitter.emit(LogEventEnum.InternalLog, {
+					level: LogLevelEnum.Error,
+					message: 'Opportunity not found by id',
+					context: 'OpportunityService',
+					data: {
+						id: id,
+					},
+				});
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Opportunity not found by id',
-				context: 'OpportunityService',
-				data: {
-					id: id,
-				},
-			});
+				throw new NotFoundException('Opportunity not found');
+			}
 
-			throw new NotFoundException('Opportunity not found');
+			await this.cacheService.set(cacheKey, opportunity);
+
+			return opportunity;
 		}
 
-		await this.cacheService.set(
-			`${CacheKeyEnum.OPPORTUNITY}:${id}`,
-			opportunity,
-		);
-
-		return opportunity;
+		return cachedOpportunity;
 	}
 
 	async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
@@ -67,23 +66,25 @@ export class OpportunityService {
 			OpportunityResponseDto[]
 		>(CacheKeyEnum.OPPORTUNITIES_OPENED);
 
-		if (cachedOpportunities) return cachedOpportunities;
+		if (!cachedOpportunities) {
+			const opportunities =
+				await this.opportunityRepository.findAllOpenedOpportunities();
 
-		const opportunities =
-			await this.opportunityRepository.findAllOpenedOpportunities();
+			if (!opportunities.length) {
+				this._logger.warn('There are no open opportunities on record');
 
-		if (!opportunities.length) {
-			this._logger.warn('There are no open opportunities on record');
+				return [];
+			}
 
-			return [];
+			await this.cacheService.set<OpportunityResponseDto[]>(
+				CacheKeyEnum.OPPORTUNITIES_OPENED,
+				opportunities,
+			);
+
+			return opportunities;
 		}
 
-		await this.cacheService.set<OpportunityResponseDto[]>(
-			CacheKeyEnum.OPPORTUNITIES_OPENED,
-			opportunities,
-		);
-
-		return opportunities;
+		return cachedOpportunities;
 	}
 
 	async create(
@@ -140,7 +141,9 @@ export class OpportunityService {
 			throw new NotFoundException('User not found to update');
 		}
 
-		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
+		const cacheKey = `${CacheKeyEnum.OPPORTUNITY}:${id}`;
+
+		await this.cacheService.delete(cacheKey);
 
 		return findOpportunityAndUpdate;
 	}
