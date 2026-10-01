@@ -18,6 +18,7 @@ import { UserResponseDto } from '../dto/userResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import {
 	ApiCreateUserSwaggerDocumentation,
+	ApiGetUserByCpfSwaggerDocumentation,
 	ApiGetUserByIdSwaggerDocumetation,
 } from '../swagger/user.swagger';
 
@@ -48,10 +49,7 @@ export class UserController {
 
 	@Get('by-cpf/:cpf')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Getting user by id' })
-	@ApiResponse({ status: 200, type: UserResponseDto })
-	@ApiResponse({ status: 404, description: 'User not found by CPF' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiGetUserByCpfSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
 	public async findUserByCpf(
 		@Param('cpf') cpf: string,

@@ -29,3 +29,12 @@ export function ApiGetUserByIdSwaggerDocumetation() {
 		ApiResponse({ status: 500, description: 'Internal Server Error' }),
 	);
 }
+
+export function ApiGetUserByCpfSwaggerDocumentation() {
+	return applyDecorators(
+		ApiOperation({ summary: 'Getting user by id' }),
+		ApiResponse({ status: 200, type: UserResponseDto }),
+		ApiResponse({ status: 404, description: 'User not found by CPF' }),
+		ApiResponse({ status: 500, description: 'Internal Server Error' }),
+	);
+}
