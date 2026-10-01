@@ -20,3 +20,12 @@ export function ApiCreateUserSwaggerDocumentation() {
 		}),
 	);
 }
+
+export function ApiGetUserByIdSwaggerDocumetation() {
+	return applyDecorators(
+		ApiOperation({ summary: 'Getting user by id' }),
+		ApiResponse({ status: 200, type: UserResponseDto }),
+		ApiResponse({ status: 404, description: 'User not found by id' }),
+		ApiResponse({ status: 500, description: 'Internal Server Error' }),
+	);
+}

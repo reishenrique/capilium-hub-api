@@ -16,7 +16,10 @@ import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/userResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
-import { ApiCreateUserSwaggerDocumentation } from '../swagger/user.swagger';
+import {
+	ApiCreateUserSwaggerDocumentation,
+	ApiGetUserByIdSwaggerDocumetation,
+} from '../swagger/user.swagger';
 
 @ApiTags('user')
 @Controller('user')
@@ -35,10 +38,7 @@ export class UserController {
 
 	@Get('by-id/:id')
 	@HttpCode(HttpStatus.OK)
-	@ApiOperation({ summary: 'Getting user by id' })
-	@ApiResponse({ status: 200, type: UserResponseDto })
-	@ApiResponse({ status: 404, description: 'User not found by id' })
-	@ApiResponse({ status: 500, description: 'Internal Server Error' })
+	@ApiGetUserByIdSwaggerDocumetation()
 	@UseInterceptors(LoggingInterceptor)
 	public async findUserById(
 		@Param('id') id: string,
