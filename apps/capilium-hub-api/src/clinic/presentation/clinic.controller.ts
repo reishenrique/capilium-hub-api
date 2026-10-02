@@ -76,7 +76,7 @@ export class ClinicController {
 	@ApiDeleteClinicById()
 	@UseInterceptors(LoggingInterceptor)
 	public async deleteClinicById(id: string): Promise<void> {
-		return await this.clinicService.findClinicByIdAndDelete(id);
+		return await this.clinicService.delete(id);
 	}
 
 	@Get('paginated')
