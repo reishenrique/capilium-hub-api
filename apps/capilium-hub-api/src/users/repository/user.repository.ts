@@ -11,23 +11,29 @@ export class UserRepository {
 		private readonly userModel: Model<UserDocument>,
 	) {}
 
-	async createUser(user: User): Promise<User> {
+	async createUser(user: User): Promise<UserDocument | null> {
 		const newUser = (await this.userModel.create(user)).save();
 		return newUser;
 	}
 
-	async findUserById(id: string): Promise<Omit<User, 'password'> | null> {
+	async findUserById(
+		id: string,
+	): Promise<Omit<UserDocument, 'password'> | null> {
 		const user = await this.userModel.findById(id).exec();
 
 		return user;
 	}
 
-	async findUserByCpf(cpf: string): Promise<Omit<User, 'password'>> {
+	async findUserByCpf(
+		cpf: string,
+	): Promise<Omit<UserDocument, 'password'> | null> {
 		const user = await this.userModel.findOne({ cpf }).exec();
 		return user;
 	}
 
-	async findUserByEmail(email: string): Promise<User> {
+	async findUserByEmail(
+		email: string,
+	): Promise<Omit<UserDocument, 'password'> | null> {
 		const user = await this.userModel.findOne({ email }).exec();
 		return user;
 	}
@@ -36,7 +42,10 @@ export class UserRepository {
 		await this.userModel.deleteOne({ _id: id }).exec();
 	}
 
-	async findUserByIdAndUpdate(id: string, newUserData: object): Promise<User> {
+	async findUserByIdAndUpdate(
+		id: string,
+		newUserData: object,
+	): Promise<Omit<UserDocument, 'password'> | null> {
 		const findUserAndUpdate = await this.userModel.findByIdAndUpdate(
 			id,
 			newUserData,
