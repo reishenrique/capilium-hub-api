@@ -9,6 +9,7 @@ import {
 	Param,
 	Post,
 	Put,
+	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../user.service';
@@ -23,6 +24,7 @@ import {
 	ApiGetUserByIdSwaggerDocumetation,
 	ApiUpdateUserSwaggerDocumentation,
 } from '../swagger/user.swagger';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 
 @ApiTags('user')
 @Controller('user')
@@ -43,6 +45,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiGetUserByIdSwaggerDocumetation()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findUserById(
 		@Param('id') id: string,
 	): Promise<Partial<UserResponseDto>> {
