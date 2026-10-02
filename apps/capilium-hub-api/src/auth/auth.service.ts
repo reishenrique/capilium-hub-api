@@ -43,10 +43,7 @@ export class AuthService {
 			throw new UnauthorizedException('Unauthorized');
 		}
 
-		const isValidPassword = await bcrypt.compareSync(
-			login.password,
-			user.password,
-		);
+		const isValidPassword = await bcrypt.compare(login.password, user.password);
 
 		if (!isValidPassword) {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
