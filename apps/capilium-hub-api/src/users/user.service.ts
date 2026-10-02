@@ -178,7 +178,7 @@ export class UserService {
 				},
 			});
 
-			return user;
+			return { ...user.toObject, _id: user._id.toString() };
 		}
 
 		return cachedUser;
@@ -250,7 +250,10 @@ export class UserService {
 
 		await this.cacheService.delete(`${CacheKeyEnum.USER}:${id}`);
 
-		return findUserAndUpdate;
+		return {
+			...findUserAndUpdate.toObject(),
+			_id: findUserAndUpdate._id.toString(),
+		};
 	}
 
 	private async sendWelcomeEmailToUser(
