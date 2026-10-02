@@ -18,6 +18,7 @@ export class UserRepository {
 
 	async findUserById(id: string): Promise<Omit<User, 'password'> | null> {
 		const user = await this.userModel.findById(id).exec();
+
 		return user;
 	}
 
