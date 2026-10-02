@@ -280,7 +280,7 @@ export class UserService {
 		});
 
 		const idempotencyKey = generateIdempotencyKey(
-			user._id,
+			user._id.toString(),
 			EmailTypeEnum.WELCOME,
 		);
 
