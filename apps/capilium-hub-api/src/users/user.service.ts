@@ -113,7 +113,7 @@ export class UserService {
 			},
 		});
 
-		return newUser;
+		return { ...newUser.toObject(), _id: newUser._id.toString() };
 	}
 
 	public async findUserById(id: string): Promise<UserResponseDto> {
