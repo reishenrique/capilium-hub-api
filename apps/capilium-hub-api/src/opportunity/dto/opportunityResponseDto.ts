@@ -57,10 +57,4 @@ export class OpportunityResponseDto {
 		type: String,
 	})
 	updatedAt?: Date;
-
-	@ApiProperty({
-		example: 0,
-		description: 'Version of the document in MongoDB',
-	})
-	__v?: 0;
 }
