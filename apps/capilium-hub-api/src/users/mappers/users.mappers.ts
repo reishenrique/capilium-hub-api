@@ -1,11 +1,11 @@
 import { UserResponseDto } from '../dto/userResponseDto';
-import { User } from '../entity/users.entity';
+import { UserDocument } from '../schemas/users.schema';
 
 export function toUserResponseDto(
-	user: Omit<User, 'password'>,
+	user: Omit<UserDocument, 'password'>,
 ): UserResponseDto {
 	return {
-		_id: user._id,
+		_id: user._id.toString(),
 		firstName: user.firstName,
 		lastName: user.lastName,
 		cpf: user.cpf,
@@ -21,4 +21,3 @@ export function toUserResponseDto(
 		__v: null,
 	};
 }
-
