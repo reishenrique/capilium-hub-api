@@ -56,4 +56,11 @@ export class UserRepository {
 
 		return findUserAndUpdate;
 	}
+
+	async findUserByEmailWithPassword(
+		email: string,
+	): Promise<UserDocument | null> {
+		const user = await this.userModel.findOne({ email }).exec();
+		return user;
+	}
 }
