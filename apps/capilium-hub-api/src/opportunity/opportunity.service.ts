@@ -153,6 +153,9 @@ export class OpportunityService {
 
 		await this.cacheService.delete(cacheKey);
 
-		return findOpportunityAndUpdate;
+		return {
+			...findOpportunityAndUpdate,
+			_id: findOpportunityAndUpdate._id.toString(),
+		};
 	}
 }
