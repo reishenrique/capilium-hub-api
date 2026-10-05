@@ -116,7 +116,7 @@ export class OpportunityService {
 		const newOpportunity =
 			await this.opportunityRepository.create(opportunityPayload);
 
-		return newOpportunity;
+		return { ...newOpportunity, _id: newOpportunity._id.toString() };
 	}
 
 	async deleteOpportunityById(id: string): Promise<void> {
