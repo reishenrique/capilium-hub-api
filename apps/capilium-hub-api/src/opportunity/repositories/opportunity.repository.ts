@@ -12,19 +12,19 @@ export class OpportunityRepository {
 		private readonly opportunityModel: Model<OpportunityDocument>,
 	) {}
 
-	async findOpportunityById(id: string): Promise<Opportunity> {
+	async findOpportunityById(id: string): Promise<OpportunityDocument | null> {
 		const opportunity = await this.opportunityModel.findById(id).exec();
 		return opportunity;
 	}
 
-	async create(opportunity: Opportunity): Promise<Opportunity> {
+	async create(opportunity: Opportunity): Promise<OpportunityDocument> {
 		const newOpportunity = (
 			await this.opportunityModel.create(opportunity)
 		).save();
 		return newOpportunity;
 	}
 
-	async findAllOpenedOpportunities(): Promise<Opportunity[]> {
+	async findAllOpenedOpportunities(): Promise<OpportunityDocument[] | []> {
 		const openOpportunityes = await this.opportunityModel.find({
 			status: StatusEnum.Open,
 		});
@@ -39,7 +39,7 @@ export class OpportunityRepository {
 	async findOpportunityByIdAndUpdate(
 		id: string,
 		newOpportunityData: object,
-	): Promise<Opportunity> {
+	): Promise<OpportunityDocument> {
 		const findOpportunityByIdAndUpdate =
 			await this.opportunityModel.findByIdAndUpdate(id, newOpportunityData, {
 				new: true,
