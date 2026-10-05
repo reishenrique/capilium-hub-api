@@ -28,7 +28,7 @@ export class ApplicationRepository {
 	async addUserToApplication(
 		opportunityId: string,
 		userId: string,
-	): Promise<void> {
+	): Promise<ApplicationDocument> {
 		return await this.applicationModel.findOneAndUpdate(
 			{ opportunityId },
 			{ $addToSet: { userIds: userId } },
