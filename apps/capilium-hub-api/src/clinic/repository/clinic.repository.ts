@@ -12,22 +12,22 @@ export class ClinicRepository {
 		private readonly clinicModel: Model<ClinicDocument>,
 	) {}
 
-	async createClinic(clinic: Clinic): Promise<Clinic> {
+	async createClinic(clinic: Clinic): Promise<ClinicDocument> {
 		const newClinic = (await this.clinicModel.create(clinic)).save();
 		return newClinic;
 	}
 
-	async findClinicById(id: string): Promise<Clinic> {
+	async findClinicById(id: string): Promise<ClinicDocument | null> {
 		const clinic = await this.clinicModel.findById(id).exec();
 		return clinic;
 	}
 
-	async findClinicByCnpj(cnpj: string): Promise<Clinic> {
+	async findClinicByCnpj(cnpj: string): Promise<ClinicDocument | null> {
 		const clinic = await this.clinicModel.findOne({ cnpj }).exec();
 		return clinic;
 	}
 
-	async findAllActivatedClinics(): Promise<Clinic[]> {
+	async findAllActivatedClinics(): Promise<Clinic[] | []> {
 		const clinics = await this.clinicModel.find({ active: true });
 		return clinics;
 	}
@@ -35,7 +35,7 @@ export class ClinicRepository {
 	async findClinicByIdAndUpdate(
 		id: string,
 		newClinicData: object,
-	): Promise<Clinic> {
+	): Promise<ClinicDocument | null> {
 		const findClinicAndUpdate = await this.clinicModel.findByIdAndUpdate(
 			id,
 			newClinicData,
@@ -52,7 +52,7 @@ export class ClinicRepository {
 	async getPaginatedClinics(
 		page: number,
 		limit: number,
-	): Promise<IPaginationResult<Clinic>> {
+	): Promise<IPaginationResult<ClinicDocument>> {
 		const skip = (page - 1) * limit;
 
 		const [results, totalDocuments] = await Promise.all([
