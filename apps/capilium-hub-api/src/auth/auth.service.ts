@@ -28,7 +28,9 @@ export class AuthService {
 	) {}
 
 	async login(login: LoginDto): Promise<LoginResponseDto> {
-		const user = await this.userRepository.findUserByEmail(login.email);
+		const user = await this.userRepository.findUserByEmailWithPassword(
+			login.email,
+		);
 
 		if (!user) {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
