@@ -14,6 +14,7 @@ import { UserRepository } from '../users/repository/user.repository';
 import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { CacheService } from '../infrastructure/cache/cache.service';
 import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
+import { OpportunityDocument } from './schemas/opportunity.schema';
 
 @Injectable()
 export class OpportunityService {
@@ -55,7 +56,7 @@ export class OpportunityService {
 
 			await this.cacheService.set(cacheKey, opportunity);
 
-			return opportunity;
+			return { ...opportunity, _id: opportunity._id.toString() };
 		}
 
 		return cachedOpportunity;
@@ -76,12 +77,19 @@ export class OpportunityService {
 				return [];
 			}
 
-			await this.cacheService.set<OpportunityResponseDto[]>(
-				CacheKeyEnum.OPPORTUNITIES_OPENED,
-				opportunities,
+			const parsedOpportunities: OpportunityResponseDto[] = opportunities.map(
+				(opportunity: OpportunityDocument) => ({
+					...opportunity.toObject(),
+					_id: opportunity._id.toString(),
+				}),
 			);
 
-			return opportunities;
+			await this.cacheService.set<OpportunityResponseDto[]>(
+				CacheKeyEnum.OPPORTUNITIES_OPENED,
+				parsedOpportunities,
+			);
+
+			return parsedOpportunities;
 		}
 
 		return cachedOpportunities;
