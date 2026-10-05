@@ -54,12 +54,20 @@ export class ApplicationService {
 				userId,
 			);
 
-			applicationResponse = application;
+			applicationResponse = {
+				...application.toObject(),
+				_id: application._id.toString(),
+			};
 		} else {
-			applicationResponse = await this.applicationRepository.createApplication(
+			const newApplication = await this.applicationRepository.createApplication(
 				opportunityId,
 				userId,
 			);
+
+			applicationResponse = {
+				...newApplication.toObject(),
+				_id: newApplication._id.toString(),
+			};
 		}
 
 		await this.sendApplyConfirmationEmail(
@@ -114,7 +122,7 @@ export class ApplicationService {
 		};
 
 		const idempotencyKey = generateIdempotencyKey(
-			user._id,
+			user._id.toString(),
 			EmailTypeEnum.APPLICATION,
 			opportunityId,
 		);
