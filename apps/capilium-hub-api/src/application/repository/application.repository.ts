@@ -14,7 +14,7 @@ export class ApplicationRepository {
 	async createApplication(
 		opportunityId: string,
 		userId: string,
-	): Promise<Application> {
+	): Promise<ApplicationDocument> {
 		const createApplication = (
 			await this.applicationModel.create({
 				opportunityId,
@@ -25,7 +25,10 @@ export class ApplicationRepository {
 		return createApplication;
 	}
 
-	async addUserToApplication(opportunityId: string, userId: string) {
+	async addUserToApplication(
+		opportunityId: string,
+		userId: string,
+	): Promise<void> {
 		return await this.applicationModel.findOneAndUpdate(
 			{ opportunityId },
 			{ $addToSet: { userIds: userId } },
@@ -33,14 +36,16 @@ export class ApplicationRepository {
 		);
 	}
 
-	async listApplicationByOpportunity(id: string): Promise<Application> {
+	async listApplicationByOpportunity(
+		id: string,
+	): Promise<ApplicationDocument | null> {
 		const application = await this.applicationModel
 			.findOne({ opportunityId: id })
 			.exec();
 		return application;
 	}
 
-	async listApplicationById(id: string) {
+	async listApplicationById(id: string): Promise<ApplicationDocument | null> {
 		const application = await this.applicationModel.findOne({ _id: id }).exec();
 		return application;
 	}
