@@ -116,7 +116,7 @@ export class ClinicService {
 
 			await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
 
-			return clinic;
+			return toClinicResponseDto(clinic);
 		}
 
 		return cachedClinic;
