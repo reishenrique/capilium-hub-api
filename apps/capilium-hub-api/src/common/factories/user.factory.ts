@@ -50,8 +50,5 @@ export const createUserResponseMock = (
 	availabilityStatus: AvailabilityStatusEnum.Available,
 	professionalExperience: '3 years',
 	isAdmin: false,
-	createdAt: '2024-12-16T18:50:18.436Z',
-	updatedAt: '2024-12-16T18:50:18.436Z',
-	__v: 0,
 	...overrides,
 });
