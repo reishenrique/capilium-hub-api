@@ -18,6 +18,7 @@ import { Application } from './entity/application.entity';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { toUserResponseDto } from '../users/mappers/users.mappers';
 import { UserResponseDto } from '../users/dto/userResponseDto';
+import { toApplicationResponseDto } from './mappers/application.mappers';
 
 @Injectable()
 export class ApplicationService {
@@ -54,20 +55,14 @@ export class ApplicationService {
 				userId,
 			);
 
-			applicationResponse = {
-				...application.toObject(),
-				_id: application._id.toString(),
-			};
+			applicationResponse = toApplicationResponseDto(application);
 		} else {
 			const newApplication = await this.applicationRepository.createApplication(
 				opportunityId,
 				userId,
 			);
 
-			applicationResponse = {
-				...newApplication.toObject(),
-				_id: newApplication._id.toString(),
-			};
+			applicationResponse = toApplicationResponseDto(newApplication);
 		}
 
 		await this.sendApplyConfirmationEmail(
