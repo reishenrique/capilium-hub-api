@@ -15,6 +15,7 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { CacheService } from '../infrastructure/cache/cache.service';
 import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
+import { toClinicResponseDto } from './mappers/clinic.mappers';
 
 @Injectable()
 export class ClinicService {
@@ -51,7 +52,7 @@ export class ClinicService {
 
 		const newClinic = await this.clinicRepository.createClinic(clinicPayload);
 
-		return newClinic;
+		return toClinicResponseDto(newClinic);
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
