@@ -113,7 +113,7 @@ export class UserService {
 			},
 		});
 
-		return { ...newUser.toObject(), _id: newUser._id.toString() };
+		return toUserResponseDto(newUser);
 	}
 
 	public async findUserById(id: string): Promise<UserResponseDto> {
@@ -178,7 +178,7 @@ export class UserService {
 				},
 			});
 
-			return { ...user.toObject, _id: user._id.toString() };
+			return toUserResponseDto(user);
 		}
 
 		return cachedUser;
@@ -250,10 +250,7 @@ export class UserService {
 
 		await this.cacheService.delete(`${CacheKeyEnum.USER}:${id}`);
 
-		return {
-			...findUserAndUpdate.toObject(),
-			_id: findUserAndUpdate._id.toString(),
-		};
+		return toUserResponseDto(findUserAndUpdate);
 	}
 
 	private async sendWelcomeEmailToUser(
