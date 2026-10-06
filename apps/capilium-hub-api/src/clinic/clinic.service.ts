@@ -149,7 +149,7 @@ export class ClinicService {
 		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
 		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 
-		return findAndUpdate;
+		return toClinicResponseDto(findAndUpdate);
 	}
 
 	public async delete(id: string): Promise<void> {
