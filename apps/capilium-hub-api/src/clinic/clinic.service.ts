@@ -75,7 +75,11 @@ export class ClinicService {
 				clinics,
 			);
 
-			return clinics;
+			const mappedClinics = clinics.map((clinic) =>
+				toClinicResponseDto(clinic),
+			);
+
+			return mappedClinics;
 		}
 
 		return cachedClinics;
