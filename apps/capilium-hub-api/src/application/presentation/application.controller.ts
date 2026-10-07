@@ -7,6 +7,7 @@ import {
 	Logger,
 	Param,
 	Post,
+	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { ApplicationService } from '../application.service';
@@ -18,6 +19,7 @@ import {
 	ApiApplyApplication,
 	ApiDeleteApplication,
 } from '../swagger/application.swagger';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 
 @ApiTags('application')
 @Controller('application')
@@ -29,6 +31,7 @@ export class ApplicationController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiApplyApplication()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async apply(
 		@Param('opportunityId') opportunityId: string,
 		@Body() applicationPayload: ApplicationCreateDto,
@@ -43,6 +46,7 @@ export class ApplicationController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteApplication()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async deleteApplicationById(@Param('id') id: string): Promise<void> {
 		return await this.applicationService.deleteApplicationById(id);
 	}
