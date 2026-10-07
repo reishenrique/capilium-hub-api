@@ -15,6 +15,7 @@ import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { CacheService } from '../infrastructure/cache/cache.service';
 import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
 import { OpportunityDocument } from './schemas/opportunity.schema';
+import { toOpportunityResponseDto } from './mappers/opportunity.mappers';
 
 @Injectable()
 export class OpportunityService {
@@ -56,7 +57,7 @@ export class OpportunityService {
 
 			await this.cacheService.set(cacheKey, opportunity);
 
-			return { ...opportunity, _id: opportunity._id.toString() };
+			return toOpportunityResponseDto(opportunity);
 		}
 
 		return cachedOpportunity;
@@ -78,10 +79,8 @@ export class OpportunityService {
 			}
 
 			const parsedOpportunities: OpportunityResponseDto[] = opportunities.map(
-				(opportunity: OpportunityDocument) => ({
-					...opportunity.toObject(),
-					_id: opportunity._id.toString(),
-				}),
+				(opportunity: OpportunityDocument) =>
+					toOpportunityResponseDto(opportunity),
 			);
 
 			await this.cacheService.set<OpportunityResponseDto[]>(
@@ -116,7 +115,7 @@ export class OpportunityService {
 		const newOpportunity =
 			await this.opportunityRepository.create(opportunityPayload);
 
-		return { ...newOpportunity, _id: newOpportunity._id.toString() };
+		return toOpportunityResponseDto(newOpportunity);
 	}
 
 	async deleteOpportunityById(id: string): Promise<void> {
@@ -153,9 +152,6 @@ export class OpportunityService {
 
 		await this.cacheService.delete(cacheKey);
 
-		return {
-			...findOpportunityAndUpdate,
-			_id: findOpportunityAndUpdate._id.toString(),
-		};
+		return toOpportunityResponseDto(findOpportunityAndUpdate);
 	}
 }
