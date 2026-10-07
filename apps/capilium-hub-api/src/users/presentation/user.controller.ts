@@ -56,6 +56,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiGetUserByCpfSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findUserByCpf(
 		@Param('cpf') cpf: string,
 	): Promise<Partial<UserResponseDto>> {
@@ -66,6 +67,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
 		return await this.userService.deleteUserById(id);
 	}
@@ -74,6 +76,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdateUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async updateUserById(
 		@Param('id') id: string,
 		@Body() newUserData: Partial<UserCreateDto>,
