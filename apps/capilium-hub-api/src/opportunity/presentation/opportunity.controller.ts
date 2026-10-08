@@ -11,6 +11,7 @@ import {
 	Put,
 	UseInterceptors,
 	Req,
+	UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { OpportunityService } from '../opportunity.service';
@@ -24,6 +25,7 @@ import {
 	ApiFindOpportunityById,
 	ApiUpdatedOpportunityById,
 } from '../swagger/opportunity.swagger';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 
 interface AuthenticatedRequest extends Request {
 	user: {
@@ -44,6 +46,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateOpportunity()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async create(
 		@Body() opportunity: OpportunityCreateDto,
 		@Req() request: AuthenticatedRequest,
@@ -57,6 +60,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiFindOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findById(
 		@Param('id') id: string,
 	): Promise<Partial<OpportunityResponseDto>> {
@@ -67,6 +71,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiFindAllOpenedOpportunities()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findAllOpenedOpportunities(): Promise<OpportunityResponseDto[]> {
 		return await this.opportunityService.findAllOpenedOpportunities();
 	}
@@ -75,6 +80,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
 		return await this.opportunityService.deleteOpportunityById(id);
 	}
@@ -83,6 +89,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdatedOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async updateOpportunityById(
 		@Param('id') id: string,
 		@Body() newOpportunityData: Partial<OpportunityCreateDto>,
