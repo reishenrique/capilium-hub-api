@@ -26,15 +26,7 @@ import {
 	ApiUpdatedOpportunityById,
 } from '../swagger/opportunity.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-
-interface AuthenticatedRequest extends Request {
-	user: {
-		id: string;
-		email: string;
-		isAdmin: boolean;
-		clinicId?: string;
-	};
-}
+import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
 
 @ApiTags('opportunity')
 @Controller('opportunity')
