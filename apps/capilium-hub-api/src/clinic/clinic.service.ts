@@ -38,15 +38,6 @@ export class ClinicService {
 				`Clinic CNPJ: ${clinicPayload.cnpj} already registered`,
 			);
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Warning,
-				message: 'Attempt to create clinic with duplicated CNPJ',
-				context: 'ClinicService',
-				data: {
-					cnpj: clinicPayload.cnpj,
-				},
-			});
-
 			throw new ConflictException('CNPJ already registered in the system');
 		}
 
