@@ -136,15 +136,6 @@ export class ClinicService {
 		if (!find) {
 			this._logger.error(`Clinic ID: ${id} not found to delete`);
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic not found to delete',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
-
 			throw new NotFoundException('Clinic not found to delete');
 		}
 
