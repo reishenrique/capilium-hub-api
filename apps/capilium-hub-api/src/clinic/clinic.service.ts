@@ -20,10 +20,10 @@ import { toClinicResponseDto } from './mappers/clinic.mappers';
 @Injectable()
 export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
-	eventEmitter: EventEmitter2;
 	constructor(
 		private readonly clinicRepository: ClinicRepository,
 		private readonly cacheService: CacheService,
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	public async create(
