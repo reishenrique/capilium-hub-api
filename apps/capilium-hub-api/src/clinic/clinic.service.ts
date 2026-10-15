@@ -150,16 +150,6 @@ export class ClinicService {
 		limit: number,
 	): Promise<IPaginationResult<Clinic>> {
 		if (page < 1 || limit < 1) {
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Page and limit must be greater than 1',
-				context: 'ClinicService',
-				data: {
-					pageNumber: page,
-					limit: limit,
-				},
-			});
-
 			throw new BadRequestException('Page and limit must be positive integer');
 		}
 
