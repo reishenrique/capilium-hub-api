@@ -116,15 +116,6 @@ export class ClinicService {
 		if (!findAndUpdate) {
 			this._logger.error(`Clinic ID: ${id} not found to update`);
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic not fround by id to update',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
-
 			throw new NotFoundException('Clinic not found to update');
 		}
 
