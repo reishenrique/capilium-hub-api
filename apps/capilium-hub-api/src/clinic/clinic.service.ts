@@ -93,15 +93,6 @@ export class ClinicService {
 			if (!clinic) {
 				this._logger.error(`Clinic id "${id}" not found`);
 
-				this.eventEmitter.emit(LogEventEnum.InternalLog, {
-					level: LogLevelEnum.Error,
-					message: 'Clinic not fround by id',
-					context: 'ClinicService',
-					data: {
-						id: id,
-					},
-				});
-
 				throw new NotFoundException('Clinic not found');
 			}
 
