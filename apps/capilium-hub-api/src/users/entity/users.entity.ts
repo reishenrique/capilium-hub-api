@@ -23,7 +23,7 @@ export class User {
 	email: string;
 
 	@ApiProperty()
-	@Prop({ select: false })
+	@Prop()
 	password: string;
 
 	@ApiProperty()
