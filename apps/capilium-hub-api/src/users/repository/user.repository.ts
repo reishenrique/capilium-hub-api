@@ -60,7 +60,10 @@ export class UserRepository {
 	async findUserByEmailWithPassword(
 		email: string,
 	): Promise<UserDocument | null> {
-		const user = await this.userModel.findOne({ email }).exec();
+		const user = await this.userModel
+			.findOne({ email })
+			.select('+password')
+			.exec();
 		return user;
 	}
 }
