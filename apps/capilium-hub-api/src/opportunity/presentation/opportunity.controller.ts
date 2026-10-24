@@ -26,6 +26,7 @@ import {
 	ApiUpdatedOpportunityById,
 } from '../swagger/opportunity.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { AdminGuard } from '../../auth/guard/admin.guard';
 import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
 
 @ApiTags('opportunity')
@@ -72,7 +73,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
 		return await this.opportunityService.deleteOpportunityById(id);
 	}
@@ -81,7 +82,7 @@ export class OpportunityController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdatedOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async updateOpportunityById(
 		@Param('id') id: string,
 		@Body() newOpportunityData: Partial<OpportunityCreateDto>,
