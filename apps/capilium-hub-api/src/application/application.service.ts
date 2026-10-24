@@ -135,7 +135,7 @@ export class ApplicationService {
 
 	public async deleteApplicationById(id: string): Promise<void> {
 		const listApplicationById =
-			this.applicationRepository.listApplicationById(id);
+			await this.applicationRepository.listApplicationById(id);
 
 		if (!listApplicationById) {
 			this._logger.error(`Application with ID: ${id} not found to delete`);
