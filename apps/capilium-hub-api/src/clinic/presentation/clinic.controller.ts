@@ -29,6 +29,7 @@ import {
 	ApiUpdateClinicById,
 } from '../swagger/clinic.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { AdminGuard } from '../../auth/guard/admin.guard';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -40,7 +41,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateClinic()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async create(
 		@Body() clinic: CliniCreateDto,
 	): Promise<Partial<ClinicResponseDto>> {
@@ -69,7 +70,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdateClinicById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async upgradeClinicById(
 		@Param('id') id: string,
 		@Body() newClinicData: Partial<CliniCreateDto>,
@@ -81,7 +82,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteClinicById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async deleteClinicById(id: string): Promise<void> {
 		return await this.clinicService.delete(id);
 	}
