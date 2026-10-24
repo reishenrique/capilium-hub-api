@@ -136,6 +136,8 @@ export class OpportunityService {
 		const newOpportunity =
 			await this.opportunityRepository.create(opportunityPayload);
 
+		await this.cacheService.delete(CacheKeyEnum.OPPORTUNITIES_OPENED);
+
 		return toOpportunityResponseDto(newOpportunity);
 	}
 
@@ -148,10 +150,11 @@ export class OpportunityService {
 			throw new NotFoundException('Opportunity not found to delete');
 		}
 
+		await this.opportunityRepository.deleteOpportunity(id);
+
 		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
 		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
-
-		await this.opportunityRepository.deleteOpportunity(id);
+		await this.cacheService.delete(CacheKeyEnum.OPPORTUNITIES_OPENED);
 	}
 
 	public async updateOpportunityById(
@@ -172,6 +175,7 @@ export class OpportunityService {
 		const cacheKey = `${CacheKeyEnum.OPPORTUNITY}:${id}`;
 
 		await this.cacheService.delete(cacheKey);
+		await this.cacheService.delete(CacheKeyEnum.OPPORTUNITIES_OPENED);
 
 		return toOpportunityResponseDto(findOpportunityAndUpdate);
 	}
