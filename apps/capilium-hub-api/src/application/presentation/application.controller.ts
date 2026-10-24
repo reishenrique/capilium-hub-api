@@ -20,7 +20,6 @@ import {
 } from '../swagger/application.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
-import { ApplicationOwnerOrAdminGuard } from '../guard/application-owner-or-admin.guard';
 
 @ApiTags('application')
 @Controller('application')
@@ -47,8 +46,14 @@ export class ApplicationController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteApplication()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard, ApplicationOwnerOrAdminGuard)
-	public async deleteApplicationById(@Param('id') id: string): Promise<void> {
-		return await this.applicationService.deleteApplicationById(id);
+	@UseGuards(JwtAuthGuard)
+	public async deleteApplicationById(
+		@Param('id') id: string,
+		@Req() request: AuthenticatedRequest,
+	): Promise<void> {
+		return await this.applicationService.deleteApplicationById(
+			id,
+			request.user,
+		);
 	}
 }
