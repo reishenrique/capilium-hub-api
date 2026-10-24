@@ -113,7 +113,7 @@ export class UserService {
 			},
 		});
 
-		return newUser;
+		return toUserResponseDto(newUser);
 	}
 
 	public async findUserById(id: string): Promise<UserResponseDto> {
@@ -178,7 +178,7 @@ export class UserService {
 				},
 			});
 
-			return user;
+			return toUserResponseDto(user);
 		}
 
 		return cachedUser;
@@ -250,7 +250,7 @@ export class UserService {
 
 		await this.cacheService.delete(`${CacheKeyEnum.USER}:${id}`);
 
-		return findUserAndUpdate;
+		return toUserResponseDto(findUserAndUpdate);
 	}
 
 	private async sendWelcomeEmailToUser(
@@ -280,7 +280,7 @@ export class UserService {
 		});
 
 		const idempotencyKey = generateIdempotencyKey(
-			user._id,
+			user._id.toString(),
 			EmailTypeEnum.WELCOME,
 		);
 

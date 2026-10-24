@@ -15,14 +15,15 @@ import { LogEventEnum } from '../logger/enum/log-event.enum';
 import { LogLevelEnum } from '../logger/enum/log-level.enum';
 import { CacheService } from '../infrastructure/cache/cache.service';
 import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
+import { toClinicResponseDto } from './mappers/clinic.mappers';
 
 @Injectable()
 export class ClinicService {
 	protected readonly _logger = new Logger('ClinicService');
-	eventEmitter: EventEmitter2;
 	constructor(
 		private readonly clinicRepository: ClinicRepository,
 		private readonly cacheService: CacheService,
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	public async create(
@@ -37,21 +38,12 @@ export class ClinicService {
 				`Clinic CNPJ: ${clinicPayload.cnpj} already registered`,
 			);
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Warning,
-				message: 'Attempt to create clinic with duplicated CNPJ',
-				context: 'ClinicService',
-				data: {
-					cnpj: clinicPayload.cnpj,
-				},
-			});
-
 			throw new ConflictException('CNPJ already registered in the system');
 		}
 
 		const newClinic = await this.clinicRepository.createClinic(clinicPayload);
 
-		return newClinic;
+		return toClinicResponseDto(newClinic);
 	}
 
 	public async findAllActivatedClinics(): Promise<ClinicResponseDto[]> {
@@ -74,7 +66,11 @@ export class ClinicService {
 				clinics,
 			);
 
-			return clinics;
+			const mappedClinics = clinics.map((clinic) =>
+				toClinicResponseDto(clinic),
+			);
+
+			return mappedClinics;
 		}
 
 		return cachedClinics;
@@ -97,21 +93,12 @@ export class ClinicService {
 			if (!clinic) {
 				this._logger.error(`Clinic id "${id}" not found`);
 
-				this.eventEmitter.emit(LogEventEnum.InternalLog, {
-					level: LogLevelEnum.Error,
-					message: 'Clinic not fround by id',
-					context: 'ClinicService',
-					data: {
-						id: id,
-					},
-				});
-
 				throw new NotFoundException('Clinic not found');
 			}
 
 			await this.cacheService.set<ClinicResponseDto>(cacheKey, clinic);
 
-			return clinic;
+			return toClinicResponseDto(clinic);
 		}
 
 		return cachedClinic;
@@ -129,22 +116,13 @@ export class ClinicService {
 		if (!findAndUpdate) {
 			this._logger.error(`Clinic ID: ${id} not found to update`);
 
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic not fround by id to update',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
-
 			throw new NotFoundException('Clinic not found to update');
 		}
 
 		await this.cacheService.delete(`${CacheKeyEnum.CLINIC}:${id}`);
 		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 
-		return findAndUpdate;
+		return toClinicResponseDto(findAndUpdate);
 	}
 
 	public async delete(id: string): Promise<void> {
@@ -157,15 +135,6 @@ export class ClinicService {
 
 		if (!find) {
 			this._logger.error(`Clinic ID: ${id} not found to delete`);
-
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Clinic not found to delete',
-				context: 'ClinicService',
-				data: {
-					id: id,
-				},
-			});
 
 			throw new NotFoundException('Clinic not found to delete');
 		}
@@ -181,16 +150,6 @@ export class ClinicService {
 		limit: number,
 	): Promise<IPaginationResult<Clinic>> {
 		if (page < 1 || limit < 1) {
-			this.eventEmitter.emit(LogEventEnum.InternalLog, {
-				level: LogLevelEnum.Error,
-				message: 'Page and limit must be greater than 1',
-				context: 'ClinicService',
-				data: {
-					pageNumber: page,
-					limit: limit,
-				},
-			});
-
 			throw new BadRequestException('Page and limit must be positive integer');
 		}
 

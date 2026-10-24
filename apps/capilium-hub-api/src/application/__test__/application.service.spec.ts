@@ -241,14 +241,17 @@ describe('ApplicationService', () => {
 	});
 
 	describe('deleteApplicationById', () => {
+		const actor = { id: 'owner-id', isAdmin: false };
+
 		it('should delete application successfully', async () => {
-			applicationRepository.listApplicationById.mockReturnValue(
-				mockApplication as any,
-			);
+			applicationRepository.listApplicationById.mockReturnValue({
+				...mockApplication,
+				userIds: [actor.id],
+			} as any);
 			applicationRepository.deleteApplication.mockResolvedValue(undefined);
 
 			await expect(
-				applicationService.deleteApplicationById(mockApplication._id),
+				applicationService.deleteApplicationById(mockApplication._id, actor),
 			).resolves.not.toThrow();
 
 			expect(applicationRepository.deleteApplication).toHaveBeenCalledWith(
@@ -260,7 +263,7 @@ describe('ApplicationService', () => {
 			applicationRepository.listApplicationById.mockReturnValue(null);
 
 			await expect(
-				applicationService.deleteApplicationById('id-inexistente'),
+				applicationService.deleteApplicationById('id-inexistente', actor),
 			).rejects.toThrow(NotFoundException);
 
 			expect(applicationRepository.deleteApplication).not.toHaveBeenCalled();

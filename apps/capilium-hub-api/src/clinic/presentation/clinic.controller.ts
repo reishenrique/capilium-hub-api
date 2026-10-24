@@ -10,6 +10,7 @@ import {
 	Post,
 	Put,
 	Req,
+	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -27,6 +28,8 @@ import {
 	ApiPaginatedClinics,
 	ApiUpdateClinicById,
 } from '../swagger/clinic.swagger';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { AdminGuard } from '../../auth/guard/admin.guard';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -38,6 +41,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateClinic()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async create(
 		@Body() clinic: CliniCreateDto,
 	): Promise<Partial<ClinicResponseDto>> {
@@ -48,6 +52,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiFindAllActivatedClinics()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findAll(): Promise<ClinicResponseDto[]> {
 		return await this.clinicService.findAllActivatedClinics();
 	}
@@ -56,6 +61,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiFindClinicById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async findById(@Param('id') id: string): Promise<ClinicResponseDto> {
 		return await this.clinicService.findClinicById(id);
 	}
@@ -64,6 +70,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdateClinicById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async upgradeClinicById(
 		@Param('id') id: string,
 		@Body() newClinicData: Partial<CliniCreateDto>,
@@ -75,14 +82,16 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteClinicById()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async deleteClinicById(id: string): Promise<void> {
-		return await this.clinicService.findClinicByIdAndDelete(id);
+		return await this.clinicService.delete(id);
 	}
 
 	@Get('paginated')
 	@HttpCode(HttpStatus.OK)
 	@ApiPaginatedClinics()
 	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
 	public async getPaginatedClinics(
 		@Req() req: Request,
 	): Promise<IPaginationResult<ClinicResponseDto>> {

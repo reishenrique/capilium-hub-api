@@ -28,7 +28,9 @@ export class AuthService {
 	) {}
 
 	async login(login: LoginDto): Promise<LoginResponseDto> {
-		const user = await this.userRepository.findUserByEmail(login.email);
+		const user = await this.userRepository.findUserByEmailWithPassword(
+			login.email,
+		);
 
 		if (!user) {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {
@@ -43,10 +45,7 @@ export class AuthService {
 			throw new UnauthorizedException('Unauthorized');
 		}
 
-		const isValidPassword = await bcrypt.compareSync(
-			login.password,
-			user.password,
-		);
+		const isValidPassword = await bcrypt.compare(login.password, user.password);
 
 		if (!isValidPassword) {
 			this.eventEmitter.emit(LogEventEnum.InternalLog, {

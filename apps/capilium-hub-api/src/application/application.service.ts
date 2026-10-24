@@ -1,5 +1,6 @@
 import {
 	ConflictException,
+	ForbiddenException,
 	Injectable,
 	Logger,
 	NotFoundException,
@@ -18,6 +19,8 @@ import { Application } from './entity/application.entity';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { toUserResponseDto } from '../users/mappers/users.mappers';
 import { UserResponseDto } from '../users/dto/userResponseDto';
+import { toApplicationResponseDto } from './mappers/application.mappers';
+import { ApplicationActor } from './interfaces/applicationActor.interface';
 
 @Injectable()
 export class ApplicationService {
@@ -54,12 +57,14 @@ export class ApplicationService {
 				userId,
 			);
 
-			applicationResponse = application;
+			applicationResponse = toApplicationResponseDto(application);
 		} else {
-			applicationResponse = await this.applicationRepository.createApplication(
+			const newApplication = await this.applicationRepository.createApplication(
 				opportunityId,
 				userId,
 			);
+
+			applicationResponse = toApplicationResponseDto(newApplication);
 		}
 
 		await this.sendApplyConfirmationEmail(
@@ -114,7 +119,7 @@ export class ApplicationService {
 		};
 
 		const idempotencyKey = generateIdempotencyKey(
-			user._id,
+			user._id.toString(),
 			EmailTypeEnum.APPLICATION,
 			opportunityId,
 		);
@@ -130,15 +135,35 @@ export class ApplicationService {
 		});
 	}
 
-	public async deleteApplicationById(id: string): Promise<void> {
-		const listApplicationById =
-			this.applicationRepository.listApplicationById(id);
+	public async deleteApplicationById(
+		id: string,
+		actor: ApplicationActor,
+	): Promise<void> {
+		const application =
+			await this.applicationRepository.listApplicationById(id);
 
-		if (!listApplicationById) {
+		if (!application) {
 			this._logger.error(`Application with ID: ${id} not found to delete`);
 			throw new NotFoundException('Application not found by id');
 		}
 
+		this.validateCanDeleteApplication(application, actor);
+
 		await this.applicationRepository.deleteApplication(id);
+	}
+
+	private validateCanDeleteApplication(
+		application: Application,
+		actor: ApplicationActor,
+	): void {
+		const isOwner = application.userIds?.some(
+			(userId) => userId.toString() === actor.id,
+		);
+
+		if (!actor.isAdmin && !isOwner) {
+			throw new ForbiddenException(
+				'Only the applicant or an administrator can delete this application',
+			);
+		}
 	}
 }

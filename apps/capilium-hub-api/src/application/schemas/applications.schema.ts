@@ -1,7 +1,7 @@
 import { SchemaFactory } from '@nestjs/mongoose';
-import type { Document } from 'mongoose';
+import type { HydratedDocument } from 'mongoose';
 import { Application } from '../entity/application.entity';
 
-export type ApplicationDocument = Application & Document;
+export type ApplicationDocument = HydratedDocument<Application>;
 
 export const ApplicationSchema = SchemaFactory.createForClass(Application);
