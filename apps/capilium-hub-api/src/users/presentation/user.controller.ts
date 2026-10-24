@@ -9,12 +9,13 @@ import {
 	Param,
 	Post,
 	Put,
+	Req,
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from '../user.service';
 import { UserCreateDto } from '../dto/userCreateDto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { UserResponseDto } from '../dto/userResponseDto';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import {
@@ -25,6 +26,9 @@ import {
 	ApiUpdateUserSwaggerDocumentation,
 } from '../swagger/user.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
+import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
+import { removePrivilegedFields } from '../helpers/userPayload.helper';
 
 @ApiTags('user')
 @Controller('user')
@@ -67,7 +71,7 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, SelfOrAdminGuard)
 	public async deleteUserById(@Param('id') id: string): Promise<void> {
 		return await this.userService.deleteUserById(id);
 	}
@@ -76,11 +80,16 @@ export class UserController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdateUserSwaggerDocumentation()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard, SelfOrAdminGuard)
 	public async updateUserById(
 		@Param('id') id: string,
 		@Body() newUserData: Partial<UserCreateDto>,
+		@Req() request: AuthenticatedRequest,
 	): Promise<Partial<UserResponseDto>> {
-		return await this.userService.updateUserById(id, newUserData);
+		const updateData = request.user.isAdmin
+			? newUserData
+			: removePrivilegedFields(newUserData);
+
+		return await this.userService.updateUserById(id, updateData);
 	}
 }
