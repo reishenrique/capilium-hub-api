@@ -100,16 +100,37 @@ export class OpportunityService {
 	): Promise<Partial<OpportunityResponseDto>> {
 		const user = await this.userRepository.findUserById(userId);
 
+		if (!user) {
+			this._logger.error(
+				`User with ID: ${userId} not found to create opportunity`,
+			);
+
+			throw new NotFoundException('User not found');
+		}
+
 		if (!user.isAdmin)
 			throw new BadRequestException(
 				'Only clinic administrators can create opportunities',
 			);
 
-		const clinic = await this.clinicRepository.findClinicByCnpj(user.clinicId);
+		if (!user.clinicId) {
+			throw new BadRequestException('Administrator is not linked to a clinic');
+		}
+
+		const clinic = await this.clinicRepository.findClinicById(user.clinicId);
+
+		if (!clinic) {
+			this._logger.error(
+				`Clinic with ID: ${user.clinicId} not found to create opportunity`,
+			);
+
+			throw new NotFoundException('Clinic not found');
+		}
 
 		const opportunityPayload = {
 			...opportunity,
 			clinicName: clinic.clinicName,
+			clinicId: clinic._id.toString(),
 		};
 
 		const newOpportunity =
