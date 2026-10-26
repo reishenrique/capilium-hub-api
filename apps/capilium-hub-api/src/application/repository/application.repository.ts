@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Application } from '../entity/application.entity';
 import { Model } from 'mongoose';
+import { Application } from '../entity/application.entity';
 import { ApplicationDocument } from '../schemas/applications.schema';
 
 @Injectable()
@@ -65,5 +65,14 @@ export class ApplicationRepository {
 
 	async deleteApplication(id: string): Promise<void> {
 		await this.applicationModel.deleteOne({ _id: id }).exec();
+	}
+
+	async deleteApplicationIfEmpty(id: string): Promise<void> {
+		await this.applicationModel
+			.findOneAndDelete({
+				_id: id,
+				userIds: { $size: 0 },
+			})
+			.exec();
 	}
 }

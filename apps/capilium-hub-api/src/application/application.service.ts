@@ -1,3 +1,6 @@
+import { EMAIL_QUEUE } from '@app/shared';
+import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
+import { InjectQueue } from '@nestjs/bull';
 import {
 	ConflictException,
 	ForbiddenException,
@@ -5,24 +8,22 @@ import {
 	Logger,
 	NotFoundException,
 } from '@nestjs/common';
-import { ApplicationRepository } from './repository/application.repository';
-import { ApplicationCreateDto } from './dto/applicationCreateDto';
-import { InjectQueue } from '@nestjs/bull';
-import { EMAIL_QUEUE } from '@app/shared';
 import { Queue } from 'bull';
-import { ApplicationResponseDto } from './dto/applicationResponseDto';
-import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
-import templates from '../common/templates/email.templates.json';
-import { UserRepository } from '../users/repository/user.repository';
-import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
-import { Opportunity } from '../opportunity/entity/opportunity.entity';
-import { Application } from './entity/application.entity';
+import { Actor } from '../auth/interfaces/actor.interface';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { isDuplicateKeyError } from '../common/helpers/mongoError.helper';
-import { toUserResponseDto } from '../users/mappers/users.mappers';
+import templates from '../common/templates/email.templates.json';
+import { Opportunity } from '../opportunity/entity/opportunity.entity';
+import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
 import { UserResponseDto } from '../users/dto/userResponseDto';
+import { toUserResponseDto } from '../users/mappers/users.mappers';
+import { UserRepository } from '../users/repository/user.repository';
+import { ApplicationResponseDto } from './dto/applicationResponseDto';
+import { Application } from './entity/application.entity';
+import { ApplicationApplyInput } from './interfaces/applicationApplyInput.interface';
 import { toApplicationResponseDto } from './mappers/application.mappers';
-import { Actor } from '../auth/interfaces/actor.interface';
+import { ApplicationRepository } from './repository/application.repository';
+import { ApplicationDocument } from './schemas/applications.schema';
 
 @Injectable()
 export class ApplicationService {
@@ -35,12 +36,20 @@ export class ApplicationService {
 	) {}
 
 	public async apply(
-		applicationPayload: ApplicationCreateDto,
+		applicationPayload: ApplicationApplyInput,
 	): Promise<ApplicationResponseDto> {
 		const { opportunityId, userId } = applicationPayload;
 
 		const opportunity =
 			await this.opportunityRepository.findOpportunityById(opportunityId);
+
+		if (!opportunity) {
+			this._logger.error(
+				`Opportunity with id: ${opportunityId}, does not exist`,
+			);
+
+			throw new NotFoundException('Opportunity not found');
+		}
 
 		const user = await this.validateUserExists(userId);
 
@@ -60,7 +69,9 @@ export class ApplicationService {
 					userId,
 				);
 
-			applicationResponse = toApplicationResponseDto(updatedApplication);
+			applicationResponse = toApplicationResponseDto(
+				this.ensureApplicationUpdated(updatedApplication),
+			);
 		} else {
 			try {
 				const newApplication =
@@ -81,7 +92,9 @@ export class ApplicationService {
 						userId,
 					);
 
-				applicationResponse = toApplicationResponseDto(updatedApplication);
+				applicationResponse = toApplicationResponseDto(
+					this.ensureApplicationUpdated(updatedApplication),
+				);
 			}
 		}
 
@@ -95,11 +108,31 @@ export class ApplicationService {
 		return applicationResponse;
 	}
 
+	private ensureApplicationUpdated(
+		application: ApplicationDocument | null,
+	): ApplicationDocument {
+		if (!application) {
+			this._logger.error(
+				'Application was removed while the user was being added',
+			);
+
+			throw new ConflictException(
+				'Application changed concurrently, please try again',
+			);
+		}
+
+		return application;
+	}
+
 	private validateUserHasNotApplied(
 		application: Application,
 		userId: string,
 	): void {
-		if (application?.userIds?.includes(userId)) {
+		const isApplicant = application?.userIds?.some(
+			(id) => id.toString() === userId,
+		);
+
+		if (isApplicant) {
 			throw new ConflictException('User already applied for this opportunity');
 		}
 	}
@@ -182,7 +215,7 @@ export class ApplicationService {
 		if (!updated) return;
 
 		if (updated.userIds.length === 0) {
-			await this.applicationRepository.deleteApplication(applicationId);
+			await this.applicationRepository.deleteApplicationIfEmpty(applicationId);
 		}
 	}
 
