@@ -13,22 +13,24 @@ import {
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from '../user.service';
-import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiTags } from '@nestjs/swagger';
-import { UserResponseDto } from '../dto/userResponseDto';
+import { AdminGuard } from '../../auth/guard/admin.guard';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { UserCreateDto } from '../dto/userCreateDto';
+import { UserResponseDto } from '../dto/userResponseDto';
+import { removePrivilegedFields } from '../helpers/userPayload.helper';
 import {
+	ApiCreateClinicAdminSwaggerDocumentation,
 	ApiCreateUserSwaggerDocumentation,
 	ApiDeleteUserSwaggerDocumentation,
 	ApiGetUserByCpfSwaggerDocumentation,
 	ApiGetUserByIdSwaggerDocumetation,
 	ApiUpdateUserSwaggerDocumentation,
 } from '../swagger/user.swagger';
-import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
-import { removePrivilegedFields } from '../helpers/userPayload.helper';
+import { UserService } from '../user.service';
 
 @ApiTags('user')
 @Controller('user')
@@ -43,6 +45,18 @@ export class UserController {
 		@Body() user: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
 		return await this.userService.create(user);
+	}
+
+	@Post('/clinic-admin')
+	@HttpCode(HttpStatus.CREATED)
+	@ApiCreateClinicAdminSwaggerDocumentation()
+	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard, AdminGuard)
+	public async createClinicAdmin(
+		@Body() user: UserCreateDto,
+		@Req() request: AuthenticatedRequest,
+	): Promise<Partial<UserResponseDto>> {
+		return await this.userService.createClinicAdmin(user, request.user);
 	}
 
 	@Get('by-id/:id')

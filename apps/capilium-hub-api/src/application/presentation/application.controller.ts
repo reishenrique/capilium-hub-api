@@ -10,16 +10,17 @@ import {
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
-import { ApplicationService } from '../application.service';
 import { ApiTags } from '@nestjs/swagger';
-import { ApplicationResponseDto } from '../dto/applicationResponseDto';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { ApplicationService } from '../application.service';
+import { ApplicationResponseDto } from '../dto/applicationResponseDto';
 import {
 	ApiApplyApplication,
 	ApiDeleteApplication,
+	ApiWithdrawApplication,
 } from '../swagger/application.swagger';
-import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
 
 @ApiTags('application')
 @Controller('application')
@@ -40,6 +41,18 @@ export class ApplicationController {
 			opportunityId,
 			userId: request.user.id,
 		});
+	}
+
+	@Delete('/:id/withdraw')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiWithdrawApplication()
+	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
+	public async withdrawApplication(
+		@Param('id') id: string,
+		@Req() request: AuthenticatedRequest,
+	): Promise<void> {
+		return await this.applicationService.withdrawApplication(id, request.user);
 	}
 
 	@Delete('/:id')

@@ -9,5 +9,6 @@ export function toApplicationResponseDto(
 	return {
 		...applicationObject,
 		_id: application._id.toString(),
+		userIds: applicationObject.userIds.map((userId) => userId.toString()),
 	};
 }

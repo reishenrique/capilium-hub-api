@@ -1,15 +1,15 @@
 import {
-	UnauthorizedException,
 	BadRequestException,
 	NotFoundException,
+	UnauthorizedException,
 } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
+import bcrypt from 'bcrypt';
+import EventEmitter2 from 'eventemitter2';
 import { createUserEntityMock } from '../../common/factories/user.factory';
+import * as tokenHelper from '../../common/helpers/jwt.helper';
 import { UserRepository } from '../../users/repository/user.repository';
 import { AuthService } from '../auth.service';
-import bcrypt from 'bcrypt';
-import * as tokenHelper from '../../common/helpers/jwt.helper';
-import EventEmitter2 from 'eventemitter2';
 
 describe('AuthService', () => {
 	let authService: AuthService;
@@ -28,6 +28,7 @@ describe('AuthService', () => {
 					provide: UserRepository,
 					useValue: {
 						findUserByEmail: jest.fn(),
+						findUserByEmailWithPassword: jest.fn(),
 					},
 				},
 				{
@@ -44,13 +45,15 @@ describe('AuthService', () => {
 	});
 
 	afterEach(() => {
-		jest.clearAllMocks();
+		jest.restoreAllMocks();
 	});
 
 	describe('login', () => {
 		it('should return token and success message when credentials are valid', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(mockUser as any);
-			jest.spyOn(bcrypt, 'compareSync').mockReturnValue(true as never);
+			userRepository.findUserByEmailWithPassword.mockResolvedValue(
+				mockUser as any,
+			);
+			jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 			jest
 				.spyOn(tokenHelper, 'generateAccessToken')
 				.mockReturnValue('mock-token');
@@ -67,7 +70,7 @@ describe('AuthService', () => {
 		});
 
 		it('should throw UnauthorizedException when user is not found', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(null);
+			userRepository.findUserByEmailWithPassword.mockResolvedValue(null);
 
 			await expect(
 				authService.login({ email: 'notfound@test.com', password: '123@Test' }),
@@ -75,8 +78,10 @@ describe('AuthService', () => {
 		});
 
 		it('should throw UnauthorizedException when password is invalid', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(mockUser as any);
-			jest.spyOn(bcrypt, 'compareSync').mockReturnValue(false as never);
+			userRepository.findUserByEmailWithPassword.mockResolvedValue(
+				mockUser as any,
+			);
+			jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
 			await expect(
 				authService.login({
@@ -86,20 +91,20 @@ describe('AuthService', () => {
 			).rejects.toThrow(UnauthorizedException);
 		});
 
-		it('should call findUserByEmail with the correct email', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(null);
+		it('should call findUserByEmailWithPassword with the correct email', async () => {
+			userRepository.findUserByEmailWithPassword.mockResolvedValue(null);
 
 			await authService
 				.login({ email: 'johndoe@test.com', password: '123@Test' })
 				.catch(() => {});
 
-			expect(userRepository.findUserByEmail).toHaveBeenCalledWith(
+			expect(userRepository.findUserByEmailWithPassword).toHaveBeenCalledWith(
 				'johndoe@test.com',
 			);
 		});
 
 		it('should not generate token when user is not found', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(null);
+			userRepository.findUserByEmailWithPassword.mockResolvedValue(null);
 			const generateTokenSpy = jest.spyOn(tokenHelper, 'generateAccessToken');
 
 			await authService

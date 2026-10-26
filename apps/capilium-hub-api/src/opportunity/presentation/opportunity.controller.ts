@@ -1,23 +1,26 @@
 import {
-	Controller,
-	HttpCode,
-	Logger,
-	Post,
-	HttpStatus,
-	Param,
-	Get,
 	Body,
+	Controller,
 	Delete,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Logger,
+	Param,
+	Post,
 	Put,
-	UseInterceptors,
 	Req,
 	UseGuards,
+	UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { OpportunityService } from '../opportunity.service';
-import { OpportunityResponseDto } from '../dto/opportunityResponseDto';
-import { OpportunityCreateDto } from '../dto/opportunityCreateDto';
+import { AdminGuard } from '../../auth/guard/admin.guard';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { OpportunityCreateDto } from '../dto/opportunityCreateDto';
+import { OpportunityResponseDto } from '../dto/opportunityResponseDto';
+import { OpportunityService } from '../opportunity.service';
 import {
 	ApiCreateOpportunity,
 	ApiDeleteOpportunityById,
@@ -25,9 +28,6 @@ import {
 	ApiFindOpportunityById,
 	ApiUpdatedOpportunityById,
 } from '../swagger/opportunity.swagger';
-import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { AdminGuard } from '../../auth/guard/admin.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
 
 @ApiTags('opportunity')
 @Controller('opportunity')
@@ -74,8 +74,14 @@ export class OpportunityController {
 	@ApiDeleteOpportunityById()
 	@UseInterceptors(LoggingInterceptor)
 	@UseGuards(JwtAuthGuard, AdminGuard)
-	public async deleteOpportunity(@Param('id') id: string): Promise<void> {
-		return await this.opportunityService.deleteOpportunityById(id);
+	public async deleteOpportunity(
+		@Param('id') id: string,
+		@Req() request: AuthenticatedRequest,
+	): Promise<void> {
+		return await this.opportunityService.deleteOpportunityById(
+			id,
+			request.user,
+		);
 	}
 
 	@Put('/:id')
@@ -86,10 +92,12 @@ export class OpportunityController {
 	public async updateOpportunityById(
 		@Param('id') id: string,
 		@Body() newOpportunityData: Partial<OpportunityCreateDto>,
+		@Req() request: AuthenticatedRequest,
 	): Promise<Partial<OpportunityResponseDto>> {
 		return await this.opportunityService.updateOpportunityById(
 			id,
 			newOpportunityData,
+			request.user,
 		);
 	}
 }

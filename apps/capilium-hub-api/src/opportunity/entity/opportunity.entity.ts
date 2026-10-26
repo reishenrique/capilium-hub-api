@@ -26,6 +26,10 @@ export class Opportunity {
 	status: StatusEnum;
 
 	@ApiProperty()
-	@Prop({ type: Types.ObjectId, ref: 'Clinic' })
+	@Prop()
 	clinicName: string;
+
+	@ApiProperty({ example: '67ba145c48ea4e5cdf5b5a0e' })
+	@Prop({ type: Types.ObjectId, ref: 'Clinic' })
+	clinicId?: string;
 }

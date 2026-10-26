@@ -2,24 +2,27 @@ import { EMAIL_QUEUE } from '@app/shared';
 import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import { getQueueToken } from '@nestjs/bull';
 import {
-	ConflictException,
 	BadRequestException,
+	ConflictException,
 	NotFoundException,
 } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Queue } from 'bull';
 import EventEmitter2 from 'eventemitter2';
+import { Actor } from '../../auth/interfaces/actor.interface';
 import { ClinicRepository } from '../../clinic/repository/clinic.repository';
-import { CacheService } from '../../infrastructure/cache/cache.service';
-import { LogEventEnum } from '../../logger/enum/log-event.enum';
-import { LogLevelEnum } from '../../logger/enum/log-level.enum';
-import { UserRepository } from '../repository/user.repository';
-import { UserService } from '../user.service';
 import {
 	createUserEntityMock,
 	createUserMock,
 	createUserResponseMock,
 } from '../../common/factories/user.factory';
+import { CacheService } from '../../infrastructure/cache/cache.service';
+import { LogEventEnum } from '../../logger/enum/log-event.enum';
+import { LogLevelEnum } from '../../logger/enum/log-level.enum';
+import { User } from '../entity/users.entity';
+import { UserRepository } from '../repository/user.repository';
+import { UserDocument } from '../schemas/users.schema';
+import { UserService } from '../user.service';
 
 describe('UserService', () => {
 	let service: UserService;
@@ -28,6 +31,27 @@ describe('UserService', () => {
 	let cacheService: jest.Mocked<CacheService>;
 	let emailQueue: jest.Mocked<Queue>;
 	let eventEmitter: jest.Mocked<EventEmitter2>;
+
+	const actorClinicId = '67ba145c48ea4e5cdf5b5a0f';
+	const otherClinicId = '67ba145c48ea4e5cdf5b5a10';
+
+	const createUserDocumentMock = (
+		overrides: Partial<User> & { _id?: string } = {},
+	): UserDocument => {
+		const { _id = 'user-id-1', ...userOverrides } = overrides;
+		const user = createUserEntityMock(userOverrides);
+
+		return {
+			...user,
+			_id: { toString: () => _id },
+			toObject: () => ({ ...user, _id }),
+		} as unknown as UserDocument;
+	};
+
+	const toUserResponse = (user: UserDocument) => ({
+		...user.toObject(),
+		_id: user._id.toString(),
+	});
 
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
@@ -47,7 +71,7 @@ describe('UserService', () => {
 				{
 					provide: ClinicRepository,
 					useValue: {
-						findClinicByCnpj: jest.fn(),
+						findClinicById: jest.fn(),
 					},
 				},
 				{
@@ -55,6 +79,7 @@ describe('UserService', () => {
 					useValue: {
 						get: jest.fn(),
 						set: jest.fn(),
+						delete: jest.fn(),
 					},
 				},
 				{
@@ -78,6 +103,11 @@ describe('UserService', () => {
 		cacheService = module.get(CacheService);
 		emailQueue = module.get(getQueueToken(EMAIL_QUEUE));
 		eventEmitter = module.get(EventEmitter2);
+
+		userRepository.findUserByCpf.mockResolvedValue(null);
+		userRepository.findUserByEmail.mockResolvedValue(null);
+		userRepository.createUser.mockResolvedValue(createUserDocumentMock());
+		emailQueue.add.mockResolvedValue({} as any);
 	});
 
 	afterEach(() => {
@@ -85,79 +115,71 @@ describe('UserService', () => {
 	});
 
 	describe('create', () => {
-		beforeEach(() => {
-			userRepository.findUserByCpf.mockResolvedValue(null);
-			userRepository.findUserByEmail.mockResolvedValue(null);
-			userRepository.createUser.mockResolvedValue(createUserEntityMock());
-			emailQueue.add.mockResolvedValue({} as any);
-		});
-
 		it('should successfully create a user', async () => {
-			const mockUser = createUserEntityMock();
+			const mockUser = createUserDocumentMock();
 			userRepository.createUser.mockResolvedValue(mockUser);
 
-			const payload = createUserMock();
-			const result = await service.create(payload);
+			const result = await service.create(createUserMock());
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual(toUserResponse(mockUser));
 			expect(userRepository.createUser).toHaveBeenCalledTimes(1);
 		});
 
 		it('should throw ConflictException when CPF is already registered', async () => {
-			userRepository.findUserByCpf.mockResolvedValue(createUserEntityMock());
+			userRepository.findUserByCpf.mockResolvedValue(createUserDocumentMock());
 
-			await expect(service.create(createUserEntityMock())).rejects.toThrow(
+			await expect(service.create(createUserMock())).rejects.toThrow(
 				ConflictException,
 			);
 			expect(userRepository.createUser).not.toHaveBeenCalled();
 		});
 
 		it('should throw ConflictException when email is already registered', async () => {
-			userRepository.findUserByEmail.mockResolvedValue(createUserEntityMock());
+			userRepository.findUserByEmail.mockResolvedValue(
+				createUserDocumentMock(),
+			);
 
-			await expect(service.create(createUserEntityMock())).rejects.toThrow(
+			await expect(service.create(createUserMock())).rejects.toThrow(
 				ConflictException,
 			);
 			expect(userRepository.createUser).not.toHaveBeenCalled();
 		});
 
-		it('should throw BadRequestException when isAdmin=true and clinicCnpj is not provided', async () => {
+		it('should reject public registration when isAdmin is true', async () => {
 			await expect(
-				service.create(
-					createUserEntityMock({ isAdmin: true, clinicId: undefined }),
-				),
-			).rejects.toThrow(BadRequestException);
+				service.create(createUserMock({ isAdmin: true })),
+			).rejects.toThrow(
+				new BadRequestException('isAdmin cannot be set on public registration'),
+			);
+
+			expect(userRepository.createUser).not.toHaveBeenCalled();
 		});
 
-		it('should throw NotFoundException when clinicCnpj does not match any clinic', async () => {
-			clinicRepository.findClinicByCnpj.mockResolvedValue(null);
-
-			await expect(
-				service.create(
-					createUserMock({ isAdmin: true, clinicCnpj: '12345678000100' }),
-				),
-			).rejects.toThrow(NotFoundException);
-		});
-
-		it('should associate clinicId with the user when isAdmin=true and the clinic is found', async () => {
-			const mockClinic = { _id: 'clinic-id-1', cnpj: '12345678000100' };
-			clinicRepository.findClinicByCnpj.mockResolvedValue(mockClinic as any);
-
+		it('should strip privileged fields from public registration', async () => {
 			await service.create(
-				createUserMock({ isAdmin: true, clinicCnpj: '12345678000100' }),
+				createUserMock({
+					isAdmin: false,
+					clinicId: otherClinicId,
+					clinicCnpj: '99.999.999/0001-99',
+				}),
 			);
 
-			expect(userRepository.createUser).toHaveBeenCalledWith(
-				expect.objectContaining({ clinicId: 'clinic-id-1' }),
-			);
+			const persistedUser = userRepository.createUser.mock
+				.calls[0][0] as User & {
+				clinicCnpj?: string;
+			};
+
+			expect(persistedUser.isAdmin).not.toBe(true);
+			expect(persistedUser.clinicId).toBeUndefined();
+			expect(persistedUser.clinicCnpj).toBeUndefined();
 		});
 
 		it('should send a welcome email after creating the user', async () => {
-			const mockUser = createUserEntityMock();
+			const mockUser = createUserDocumentMock();
 
 			userRepository.findUserByEmail
 				.mockResolvedValueOnce(null)
-				.mockResolvedValueOnce(mockUser as any);
+				.mockResolvedValueOnce(mockUser);
 
 			await service.create(createUserMock());
 
@@ -173,7 +195,7 @@ describe('UserService', () => {
 		});
 
 		it('should emit a successful log event after creating the user', async () => {
-			await service.create(createUserEntityMock());
+			await service.create(createUserMock());
 
 			expect(eventEmitter.emit).toHaveBeenCalledWith(
 				LogEventEnum.InternalLog,
@@ -185,12 +207,77 @@ describe('UserService', () => {
 		});
 
 		it('should hash the password before creating the user', async () => {
-			const payload = createUserEntityMock({ password: '123@Test' });
-			await service.create(payload);
+			await service.create(createUserMock({ password: '123@Test' }));
 
 			const createUserCall = userRepository.createUser.mock.calls[0][0];
 			expect(createUserCall.password).not.toBe('123@Test');
 			expect(createUserCall.password).toMatch(/^\$2[ab]\$\d+\$/);
+		});
+	});
+
+	describe('createClinicAdmin', () => {
+		it('should reject creation when the actor is not linked to a clinic', async () => {
+			const actor: Actor = { id: 'admin-id', isAdmin: true };
+
+			await expect(
+				service.createClinicAdmin(createUserMock(), actor),
+			).rejects.toThrow(
+				new BadRequestException('Administrator is not linked to a clinic'),
+			);
+
+			expect(userRepository.createUser).not.toHaveBeenCalled();
+		});
+
+		it('should reject creation when the clinic does not exist', async () => {
+			clinicRepository.findClinicById.mockResolvedValue(null);
+
+			const actor: Actor = {
+				id: 'admin-id',
+				isAdmin: true,
+				clinicId: actorClinicId,
+			};
+
+			await expect(
+				service.createClinicAdmin(createUserMock(), actor),
+			).rejects.toThrow(new NotFoundException('Clinic not found'));
+
+			expect(clinicRepository.findClinicById).toHaveBeenCalledWith(
+				actorClinicId,
+			);
+			expect(userRepository.createUser).not.toHaveBeenCalled();
+		});
+
+		it('should use the actor clinic even when the body sends another clinic', async () => {
+			clinicRepository.findClinicById.mockResolvedValue({
+				_id: { toString: () => actorClinicId },
+			} as any);
+
+			const actor: Actor = {
+				id: 'admin-id',
+				isAdmin: true,
+				clinicId: actorClinicId,
+			};
+
+			await service.createClinicAdmin(
+				createUserMock({
+					isAdmin: false,
+					clinicId: otherClinicId,
+					clinicCnpj: '99.999.999/0001-99',
+				}),
+				actor,
+			);
+
+			const persistedUser = userRepository.createUser.mock
+				.calls[0][0] as User & {
+				clinicCnpj?: string;
+			};
+
+			expect(clinicRepository.findClinicById).toHaveBeenCalledWith(
+				actorClinicId,
+			);
+			expect(persistedUser.isAdmin).toBe(true);
+			expect(persistedUser.clinicId).toBe(actorClinicId);
+			expect(persistedUser.clinicCnpj).toBeUndefined();
 		});
 	});
 
@@ -206,18 +293,18 @@ describe('UserService', () => {
 		});
 
 		it('should fetch the user from the database when not available in the cache', async () => {
-			const mockUser = createUserEntityMock();
+			const mockUser = createUserDocumentMock();
 			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
 
 			const result = await service.findUserById('user-id-1');
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual(toUserResponse(mockUser));
 			expect(userRepository.findUserById).toHaveBeenCalledWith('user-id-1');
 		});
 
 		it('should save the user to the cache after fetching from the database', async () => {
-			const mockUser = createUserEntityMock();
+			const mockUser = createUserDocumentMock();
 			cacheService.get.mockResolvedValue(null);
 			userRepository.findUserById.mockResolvedValue(mockUser);
 
@@ -238,12 +325,12 @@ describe('UserService', () => {
 
 	describe('findUserByCpf', () => {
 		it('should return the user when CPF is found', async () => {
-			const mockUser = createUserEntityMock();
+			const mockUser = createUserDocumentMock();
 			userRepository.findUserByCpf.mockResolvedValue(mockUser);
 
 			const result = await service.findUserByCpf('12345678901');
 
-			expect(result).toEqual(mockUser);
+			expect(result).toEqual(toUserResponse(mockUser));
 		});
 
 		it('should throw NotFoundException when CPF is not found', async () => {
@@ -255,7 +342,7 @@ describe('UserService', () => {
 		});
 
 		it('should emit a successful log event when the user is found', async () => {
-			userRepository.findUserByCpf.mockResolvedValue(createUserEntityMock());
+			userRepository.findUserByCpf.mockResolvedValue(createUserDocumentMock());
 
 			await service.findUserByCpf('12345678901');
 
@@ -268,10 +355,12 @@ describe('UserService', () => {
 
 	describe('deleteUserById', () => {
 		it('should successfully delete the user', async () => {
-			userRepository.findUserById.mockResolvedValue(createUserEntityMock());
+			userRepository.findUserById.mockResolvedValue(createUserDocumentMock());
 			userRepository.deleteUserById.mockResolvedValue(undefined);
 
-			await expect(service.deleteUserById('user-id-1')).resolves.not.toThrow();
+			await expect(
+				service.deleteUserById('user-id-1'),
+			).resolves.toBeUndefined();
 			expect(userRepository.deleteUserById).toHaveBeenCalledWith('user-id-1');
 		});
 
@@ -285,7 +374,7 @@ describe('UserService', () => {
 		});
 
 		it('should emit a successful log event after deleting the user', async () => {
-			userRepository.findUserById.mockResolvedValue(createUserEntityMock());
+			userRepository.findUserById.mockResolvedValue(createUserDocumentMock());
 			userRepository.deleteUserById.mockResolvedValue(undefined);
 
 			await service.deleteUserById('user-id-1');
@@ -299,14 +388,14 @@ describe('UserService', () => {
 
 	describe('updateUserById', () => {
 		it('should successfully update the user', async () => {
-			const updatedUser = createUserEntityMock({ firstName: 'Jane' });
+			const updatedUser = createUserDocumentMock({ firstName: 'Jane' });
 			userRepository.findUserByIdAndUpdate.mockResolvedValue(updatedUser);
 
 			const result = await service.updateUserById('user-id-1', {
 				firstName: 'Jane',
 			});
 
-			expect(result).toEqual(updatedUser);
+			expect(result).toEqual(toUserResponse(updatedUser));
 			expect(userRepository.findUserByIdAndUpdate).toHaveBeenCalledWith(
 				'user-id-1',
 				{ firstName: 'Jane' },
@@ -323,7 +412,7 @@ describe('UserService', () => {
 
 		it('should emit a successful log event after updating the user', async () => {
 			userRepository.findUserByIdAndUpdate.mockResolvedValue(
-				createUserEntityMock(),
+				createUserDocumentMock(),
 			);
 
 			await service.updateUserById('user-id-1', { firstName: 'Jane' });

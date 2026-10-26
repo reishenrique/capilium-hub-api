@@ -16,7 +16,28 @@ export function ApiCreateUserSwaggerDocumentation() {
 		}),
 		ApiResponse({
 			status: 400,
-			description: 'Error when trying to created a new user',
+			description: 'isAdmin cannot be set on public registration',
+		}),
+	);
+}
+
+export function ApiCreateClinicAdminSwaggerDocumentation() {
+	return applyDecorators(
+		ApiOperation({ summary: 'Create a clinic administrator' }),
+		ApiResponse({ status: 201, type: UserResponseDto }),
+		ApiResponse({
+			status: 400,
+			description: 'Administrator is not linked to a clinic',
+		}),
+		ApiResponse({ status: 401, description: 'Unauthorized' }),
+		ApiResponse({
+			status: 403,
+			description: 'Only administrators can perform this action',
+		}),
+		ApiResponse({ status: 404, description: 'Clinic not found' }),
+		ApiResponse({
+			status: 409,
+			description: 'CPF or email already registered in the system',
 		}),
 	);
 }

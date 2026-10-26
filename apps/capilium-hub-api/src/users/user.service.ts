@@ -23,6 +23,8 @@ import { ClinicRepository } from '../clinic/repository/clinic.repository';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { toUserResponseDto } from './mappers/users.mappers';
 import { CacheKeyEnum } from '../common/enums/cache-keys.enum';
+import { removePrivilegedFields } from './helpers/userPayload.helper';
+import { Actor } from '../auth/interfaces/actor.interface';
 
 @Injectable()
 export class UserService {
@@ -38,7 +40,54 @@ export class UserService {
 	public async create(
 		userPayload: UserCreateDto,
 	): Promise<Partial<UserResponseDto>> {
-		const { cpf, email, isAdmin, clinicCnpj } = userPayload;
+		if (userPayload.isAdmin === true) {
+			this._logger.warn(
+				`Attempt to create an administrator through public registration: ${userPayload.email}`,
+			);
+
+			throw new BadRequestException(
+				'isAdmin cannot be set on public registration',
+			);
+		}
+
+		const publicUserPayload = removePrivilegedFields(
+			userPayload,
+		) as UserCreateDto;
+
+		return this.persistNewUser(publicUserPayload, { isAdmin: false });
+	}
+
+	public async createClinicAdmin(
+		userPayload: UserCreateDto,
+		actor: Actor,
+	): Promise<Partial<UserResponseDto>> {
+		if (!actor.clinicId) {
+			throw new BadRequestException('Administrator is not linked to a clinic');
+		}
+
+		const clinic = await this.clinicRepository.findClinicById(actor.clinicId);
+
+		if (!clinic) {
+			this._logger.error(
+				`Clinic with ID: ${actor.clinicId} not found to create administrator`,
+			);
+
+			throw new NotFoundException('Clinic not found');
+		}
+
+		const adminPayload = removePrivilegedFields(userPayload) as UserCreateDto;
+
+		return this.persistNewUser(adminPayload, {
+			isAdmin: true,
+			clinicId: clinic._id.toString(),
+		});
+	}
+
+	private async persistNewUser(
+		userPayload: UserCreateDto,
+		privileges: { isAdmin: boolean; clinicId?: string },
+	): Promise<Partial<UserResponseDto>> {
+		const { cpf, email } = userPayload;
 
 		const formattedCpf = removeNonNumeric(cpf);
 
@@ -77,25 +126,14 @@ export class UserService {
 			throw new ConflictException('Email already registered in the system');
 		}
 
-		let clinicId: string | undefined;
-
-		if (isAdmin) {
-			if (!clinicCnpj) {
-				throw new BadRequestException(
-					'Clinic CNPJ is required for admin users',
-				);
-			}
-
-			const clinic = await this.clinicRepository.findClinicByCnpj(clinicCnpj);
-
-			if (!clinic) throw new NotFoundException('Clinic not found by cnpj');
-
-			clinicId = clinic._id;
-		}
-
 		const hashPassword = await this.saltAndHashPassword(userPayload.password);
 
-		const user = { ...userPayload, password: hashPassword, clinicId };
+		const user = {
+			...userPayload,
+			password: hashPassword,
+			isAdmin: privileges.isAdmin,
+			clinicId: privileges.clinicId,
+		};
 
 		const newUser = await this.userRepository.createUser(user);
 

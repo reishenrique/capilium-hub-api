@@ -10,5 +10,5 @@ export class Application {
 
 	@ApiProperty()
 	@Prop({ type: [Types.ObjectId], required: true })
-	userIds: string[];
+	userIds: Types.ObjectId[];
 }
