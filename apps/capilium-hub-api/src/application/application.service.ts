@@ -18,6 +18,7 @@ import { OpportunityRepository } from '../opportunity/repositories/opportunity.r
 import { Opportunity } from '../opportunity/entity/opportunity.entity';
 import { Application } from './entity/application.entity';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
+import { isDuplicateKeyError } from '../common/helpers/mongoError.helper';
 import { toUserResponseDto } from '../users/mappers/users.mappers';
 import { UserResponseDto } from '../users/dto/userResponseDto';
 import { toApplicationResponseDto } from './mappers/application.mappers';
@@ -53,19 +54,35 @@ export class ApplicationService {
 		let applicationResponse: ApplicationResponseDto;
 
 		if (application) {
-			await this.applicationRepository.addUserToApplication(
-				opportunityId,
-				userId,
-			);
+			const updatedApplication =
+				await this.applicationRepository.addUserToApplication(
+					opportunityId,
+					userId,
+				);
 
-			applicationResponse = toApplicationResponseDto(application);
+			applicationResponse = toApplicationResponseDto(updatedApplication);
 		} else {
-			const newApplication = await this.applicationRepository.createApplication(
-				opportunityId,
-				userId,
-			);
+			try {
+				const newApplication =
+					await this.applicationRepository.createApplication(
+						opportunityId,
+						userId,
+					);
 
-			applicationResponse = toApplicationResponseDto(newApplication);
+				applicationResponse = toApplicationResponseDto(newApplication);
+			} catch (error) {
+				if (!isDuplicateKeyError(error)) {
+					throw error;
+				}
+
+				const updatedApplication =
+					await this.applicationRepository.addUserToApplication(
+						opportunityId,
+						userId,
+					);
+
+				applicationResponse = toApplicationResponseDto(updatedApplication);
+			}
 		}
 
 		await this.sendApplyConfirmationEmail(
