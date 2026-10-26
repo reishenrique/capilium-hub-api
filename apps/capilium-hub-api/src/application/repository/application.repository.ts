@@ -50,6 +50,19 @@ export class ApplicationRepository {
 		return application;
 	}
 
+	async removeUserFromApplication(
+		applicationId: string,
+		userId: string,
+	): Promise<ApplicationDocument | null> {
+		return this.applicationModel
+			.findByIdAndUpdate(
+				applicationId,
+				{ $pull: { userIds: userId } },
+				{ new: true },
+			)
+			.exec();
+	}
+
 	async deleteApplication(id: string): Promise<void> {
 		await this.applicationModel.deleteOne({ _id: id }).exec();
 	}
