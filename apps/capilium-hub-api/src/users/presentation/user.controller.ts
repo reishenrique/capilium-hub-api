@@ -13,11 +13,15 @@ import {
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
-import { UserService } from '../user.service';
-import { UserCreateDto } from '../dto/userCreateDto';
 import { ApiTags } from '@nestjs/swagger';
-import { UserResponseDto } from '../dto/userResponseDto';
+import { AdminGuard } from '../../auth/guard/admin.guard';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-request.interface';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { UserCreateDto } from '../dto/userCreateDto';
+import { UserResponseDto } from '../dto/userResponseDto';
+import { removePrivilegedFields } from '../helpers/userPayload.helper';
 import {
 	ApiCreateClinicAdminSwaggerDocumentation,
 	ApiCreateUserSwaggerDocumentation,
@@ -26,11 +30,7 @@ import {
 	ApiGetUserByIdSwaggerDocumetation,
 	ApiUpdateUserSwaggerDocumentation,
 } from '../swagger/user.swagger';
-import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { AdminGuard } from '../../auth/guard/admin.guard';
-import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/authenticared-request.interface';
-import { removePrivilegedFields } from '../helpers/userPayload.helper';
+import { UserService } from '../user.service';
 
 @ApiTags('user')
 @Controller('user')
