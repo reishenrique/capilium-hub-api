@@ -15,12 +15,13 @@ import { EmailTypeEnum } from '@app/shared/enums/email-type.enum';
 import templates from '../common/templates/email.templates.json';
 import { UserRepository } from '../users/repository/user.repository';
 import { OpportunityRepository } from '../opportunity/repositories/opportunity.repository';
+import { Opportunity } from '../opportunity/entity/opportunity.entity';
 import { Application } from './entity/application.entity';
 import { generateIdempotencyKey } from '../common/helpers/idempotencyKey.helper';
 import { toUserResponseDto } from '../users/mappers/users.mappers';
 import { UserResponseDto } from '../users/dto/userResponseDto';
 import { toApplicationResponseDto } from './mappers/application.mappers';
-import { ApplicationActor } from './interfaces/applicationActor.interface';
+import { Actor } from '../auth/interfaces/actor.interface';
 
 @Injectable()
 export class ApplicationService {
@@ -135,10 +136,40 @@ export class ApplicationService {
 		});
 	}
 
-	public async deleteApplicationById(
-		id: string,
-		actor: ApplicationActor,
+	public async withdrawApplication(
+		applicationId: string,
+		actor: Actor,
 	): Promise<void> {
+		const application =
+			await this.applicationRepository.listApplicationById(applicationId);
+
+		if (!application) {
+			this._logger.error(
+				`Application with ID: ${applicationId} not found to withdraw`,
+			);
+
+			throw new NotFoundException('Application not found by id');
+		}
+
+		const isApplicant = application.userIds?.some(
+			(userId) => userId.toString() === actor.id,
+		);
+
+		if (!isApplicant) return;
+
+		const updated = await this.applicationRepository.removeUserFromApplication(
+			applicationId,
+			actor.id,
+		);
+
+		if (!updated) return;
+
+		if (updated.userIds.length === 0) {
+			await this.applicationRepository.deleteApplication(applicationId);
+		}
+	}
+
+	public async deleteApplicationById(id: string, actor: Actor): Promise<void> {
 		const application =
 			await this.applicationRepository.listApplicationById(id);
 
@@ -147,22 +178,35 @@ export class ApplicationService {
 			throw new NotFoundException('Application not found by id');
 		}
 
-		this.validateCanDeleteApplication(application, actor);
+		const opportunity = await this.opportunityRepository.findOpportunityById(
+			application.opportunityId,
+		);
+
+		if (!opportunity) {
+			this._logger.error(
+				`Opportunity with ID: ${application.opportunityId} not found for application ${id}`,
+			);
+			throw new NotFoundException('Opportunity not found for this application');
+		}
+
+		this.validateCanDeleteApplication(opportunity, actor);
 
 		await this.applicationRepository.deleteApplication(id);
 	}
 
 	private validateCanDeleteApplication(
-		application: Application,
-		actor: ApplicationActor,
+		opportunity: Opportunity,
+		actor: Actor,
 	): void {
-		const isOwner = application.userIds?.some(
-			(userId) => userId.toString() === actor.id,
+		const isClinicOwner = Boolean(
+			actor.isAdmin &&
+				actor.clinicId &&
+				opportunity.clinicId?.toString() === actor.clinicId.toString(),
 		);
 
-		if (!actor.isAdmin && !isOwner) {
+		if (!isClinicOwner) {
 			throw new ForbiddenException(
-				'Only the applicant or an administrator can delete this application',
+				'Only the clinic administrator responsible for the opportunity can delete this application',
 			);
 		}
 	}
