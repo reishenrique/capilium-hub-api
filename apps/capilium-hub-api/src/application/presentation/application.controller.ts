@@ -17,6 +17,7 @@ import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor
 import {
 	ApiApplyApplication,
 	ApiDeleteApplication,
+	ApiWithdrawApplication,
 } from '../swagger/application.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { AuthenticatedRequest } from '../../auth/interfaces/authenticared-request.interface';
@@ -40,6 +41,18 @@ export class ApplicationController {
 			opportunityId,
 			userId: request.user.id,
 		});
+	}
+
+	@Delete('/:id/withdraw')
+	@HttpCode(HttpStatus.NO_CONTENT)
+	@ApiWithdrawApplication()
+	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
+	public async withdrawApplication(
+		@Param('id') id: string,
+		@Req() request: AuthenticatedRequest,
+	): Promise<void> {
+		return await this.applicationService.withdrawApplication(id, request.user);
 	}
 
 	@Delete('/:id')
