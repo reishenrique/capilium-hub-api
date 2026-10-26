@@ -27,7 +27,7 @@ import {
 } from '../swagger/opportunity.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { AdminGuard } from '../../auth/guard/admin.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticared-request.interface';
 
 @ApiTags('opportunity')
 @Controller('opportunity')

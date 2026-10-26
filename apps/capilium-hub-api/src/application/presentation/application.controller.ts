@@ -19,7 +19,7 @@ import {
 	ApiDeleteApplication,
 } from '../swagger/application.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticared-request.interface';
 
 @ApiTags('application')
 @Controller('application')

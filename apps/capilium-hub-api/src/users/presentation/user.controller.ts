@@ -27,7 +27,7 @@ import {
 } from '../swagger/user.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
-import { AuthenticatedRequest } from '../../auth/interfaces/IAuthenticatedRequest';
+import { AuthenticatedRequest } from '../../auth/interfaces/authenticared-request.interface';
 import { removePrivilegedFields } from '../helpers/userPayload.helper';
 
 @ApiTags('user')
