@@ -1,12 +1,12 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { ClinicRepository } from '../../clinic/repository/clinic.repository';
+import { StatusEnum } from '../../common/enums/status.enum';
+import { createUserEntityMock } from '../../common/factories/user.factory';
+import { CacheService } from '../../infrastructure/cache/cache.service';
 import { OpportunityService } from '../../opportunity/opportunity.service';
 import { OpportunityRepository } from '../../opportunity/repositories/opportunity.repository';
-import { StatusEnum } from '../../common/enums/status.enum';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { UserRepository } from '../../users/repository/user.repository';
-import { ClinicRepository } from '../../clinic/repository/clinic.repository';
-import { CacheService } from '../../infrastructure/cache/cache.service';
-import { createUserEntityMock } from '../../common/factories/user.factory';
 
 describe('Opportunity Service', () => {
 	let opportunityService: OpportunityService;
@@ -347,6 +347,7 @@ describe('Opportunity Service', () => {
 				salary: 100,
 				status: StatusEnum.Open,
 				clinicName: 'ClinicName',
+				clinicId: 'clinic-id-1',
 				createdAt: '2025-02-22T18:15:56.550Z',
 				updatedAt: '2025-02-22T18:15:56.550Z',
 				__v: 0,
@@ -364,7 +365,11 @@ describe('Opportunity Service', () => {
 				.spyOn(cacheService, 'delete')
 				.mockResolvedValue(undefined);
 
-			await opportunityService.deleteOpportunityById(opportunityId);
+			await opportunityService.deleteOpportunityById(opportunityId, {
+				id: 'admin-id',
+				isAdmin: true,
+				clinicId: 'clinic-id-1',
+			});
 
 			expect(spyCacheDelete).toHaveBeenCalledWith(
 				`opportunity:${opportunityId}`,
@@ -385,10 +390,15 @@ describe('Opportunity Service', () => {
 				salary: 100,
 				status: StatusEnum.Open,
 				clinicName: 'ClinicName',
+				clinicId: 'clinic-id-1',
 				createdAt: '2025-02-22T18:15:56.550Z',
 				updatedAt: '2025-02-22T18:15:56.550Z',
 				__v: 0,
 			};
+
+			jest
+				.spyOn(opportunityRepository, 'findOpportunityById')
+				.mockResolvedValue(mockOpportunity as any);
 
 			jest
 				.spyOn(opportunityRepository, 'findOpportunityByIdAndUpdate')
@@ -401,6 +411,11 @@ describe('Opportunity Service', () => {
 			const result = await opportunityService.updateOpportunityById(
 				opportunityId,
 				{ title: 'Updated Opportunity Title' },
+				{
+					id: 'admin-id',
+					isAdmin: true,
+					clinicId: 'clinic-id-1',
+				},
 			);
 
 			expect(result).toEqual(mockOpportunity);
