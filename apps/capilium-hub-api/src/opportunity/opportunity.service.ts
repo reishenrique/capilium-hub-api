@@ -22,12 +22,12 @@ import { OpportunityDocument } from './schemas/opportunity.schema';
 @Injectable()
 export class OpportunityService {
 	protected readonly _logger = new Logger('OpportunityService');
-	eventEmitter: EventEmitter2;
 	constructor(
 		private readonly opportunityRepository: OpportunityRepository,
 		private readonly userRepository: UserRepository,
 		private readonly clinicRepository: ClinicRepository,
 		private readonly cacheService: CacheService,
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	async findOpportunityById(
@@ -176,23 +176,17 @@ export class OpportunityService {
 
 		this.validateCanManageOpportunity(opportunity, actor, 'update');
 
-		const findOpportunityAndUpdate =
-			await this.opportunityRepository.findOpportunityByIdAndUpdate(
-				id,
+		const updatedOpportunity =
+			await this.opportunityRepository.updateOpportunity(
+				opportunity,
 				newOpportunityData,
 			);
 
-		if (!findOpportunityAndUpdate) {
-			this._logger.error(`Opportunity ID: ${id} not found to update`);
-			throw new NotFoundException('Opportunity not found to update');
-		}
-
-		const cacheKey = `${CacheKeyEnum.OPPORTUNITY}:${id}`;
-
-		await this.cacheService.delete(cacheKey);
+		await this.cacheService.delete(`${CacheKeyEnum.OPPORTUNITY}:${id}`);
+		await this.cacheService.delete(CacheKeyEnum.CLINIC_ACTIVATED);
 		await this.cacheService.delete(CacheKeyEnum.OPPORTUNITIES_OPENED);
 
-		return toOpportunityResponseDto(findOpportunityAndUpdate);
+		return toOpportunityResponseDto(updatedOpportunity);
 	}
 
 	private validateCanManageOpportunity(

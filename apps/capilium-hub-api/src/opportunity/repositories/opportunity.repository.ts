@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Opportunity } from '../entity/opportunity.entity';
 import { Model } from 'mongoose';
-import { OpportunityDocument } from '../schemas/opportunity.schema';
 import { StatusEnum } from '../../common/enums/status.enum';
+import { Opportunity } from '../entity/opportunity.entity';
+import { OpportunityDocument } from '../schemas/opportunity.schema';
 
 @Injectable()
 export class OpportunityRepository {
@@ -36,15 +36,12 @@ export class OpportunityRepository {
 		await this.opportunityModel.deleteOne({ _id: id }).exec();
 	}
 
-	async findOpportunityByIdAndUpdate(
-		id: string,
+	async updateOpportunity(
+		opportunity: OpportunityDocument,
 		newOpportunityData: object,
 	): Promise<OpportunityDocument> {
-		const findOpportunityByIdAndUpdate =
-			await this.opportunityModel.findByIdAndUpdate(id, newOpportunityData, {
-				new: true,
-			});
+		opportunity.set(newOpportunityData);
 
-		return findOpportunityByIdAndUpdate;
+		return await opportunity.save();
 	}
 }

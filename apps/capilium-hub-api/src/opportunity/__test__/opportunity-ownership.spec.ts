@@ -1,11 +1,13 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import EventEmitter2 from 'eventemitter2';
 import { Actor } from '../../auth/interfaces/actor.interface';
 import { ClinicRepository } from '../../clinic/repository/clinic.repository';
 import { CacheService } from '../../infrastructure/cache/cache.service';
 import { UserRepository } from '../../users/repository/user.repository';
 import { OpportunityService } from '../opportunity.service';
 import { OpportunityRepository } from '../repositories/opportunity.repository';
+import { OpportunityDocument } from '../schemas/opportunity.schema';
 
 describe('OpportunityService clinic ownership', () => {
 	let opportunityService: OpportunityService;
@@ -15,9 +17,8 @@ describe('OpportunityService clinic ownership', () => {
 	const clinicId = '67ba145c48ea4e5cdf5b5a0f';
 	const otherClinicId = '67ba145c48ea4e5cdf5b5a10';
 
-	const buildOpportunity = (ownerClinicId = clinicId) => {
+	const buildOpportunity = (ownerClinicId = clinicId): OpportunityDocument => {
 		const opportunity = {
-			_id: opportunityId,
 			title: 'Test opportunity',
 			description: 'Test description',
 			location: 'Remote',
@@ -28,8 +29,8 @@ describe('OpportunityService clinic ownership', () => {
 		return {
 			...opportunity,
 			_id: { toString: () => opportunityId },
-			toObject: () => opportunity,
-		} as any;
+			toObject: () => ({ ...opportunity, _id: opportunityId }),
+		} as unknown as OpportunityDocument;
 	};
 
 	const actor: Actor = { id: 'admin-id', isAdmin: true, clinicId };
@@ -42,7 +43,7 @@ describe('OpportunityService clinic ownership', () => {
 					provide: OpportunityRepository,
 					useValue: {
 						findOpportunityById: jest.fn(),
-						findOpportunityByIdAndUpdate: jest.fn(),
+						updateOpportunity: jest.fn(),
 						deleteOpportunity: jest.fn(),
 					},
 				},
@@ -64,6 +65,12 @@ describe('OpportunityService clinic ownership', () => {
 						get: jest.fn(),
 						set: jest.fn(),
 						delete: jest.fn(),
+					},
+				},
+				{
+					provide: EventEmitter2,
+					useValue: {
+						emit: jest.fn(),
 					},
 				},
 			],
@@ -121,9 +128,11 @@ describe('OpportunityService clinic ownership', () => {
 	describe('updateOpportunityById', () => {
 		it('allows the administrator of the clinic that owns the opportunity', async () => {
 			const opportunity = buildOpportunity();
+			const updatedOpportunity = buildOpportunity();
+
 			opportunityRepository.findOpportunityById.mockResolvedValue(opportunity);
-			opportunityRepository.findOpportunityByIdAndUpdate.mockResolvedValue(
-				opportunity,
+			opportunityRepository.updateOpportunity.mockResolvedValue(
+				updatedOpportunity,
 			);
 
 			const result = await opportunityService.updateOpportunityById(
@@ -133,12 +142,13 @@ describe('OpportunityService clinic ownership', () => {
 			);
 
 			expect(result).toEqual({
-				...opportunity.toObject(),
+				...updatedOpportunity.toObject(),
 				_id: opportunityId,
 			});
-			expect(
-				opportunityRepository.findOpportunityByIdAndUpdate,
-			).toHaveBeenCalledWith(opportunityId, { title: 'Updated title' });
+			expect(opportunityRepository.updateOpportunity).toHaveBeenCalledWith(
+				opportunity,
+				{ title: 'Updated title' },
+			);
 		});
 
 		it('forbids an administrator of another clinic', async () => {
@@ -154,9 +164,7 @@ describe('OpportunityService clinic ownership', () => {
 				),
 			).rejects.toThrow(ForbiddenException);
 
-			expect(
-				opportunityRepository.findOpportunityByIdAndUpdate,
-			).not.toHaveBeenCalled();
+			expect(opportunityRepository.updateOpportunity).not.toHaveBeenCalled();
 		});
 
 		it('throws NotFoundException when the opportunity does not exist', async () => {
@@ -170,9 +178,7 @@ describe('OpportunityService clinic ownership', () => {
 				),
 			).rejects.toThrow(NotFoundException);
 
-			expect(
-				opportunityRepository.findOpportunityByIdAndUpdate,
-			).not.toHaveBeenCalled();
+			expect(opportunityRepository.updateOpportunity).not.toHaveBeenCalled();
 		});
 	});
 });
