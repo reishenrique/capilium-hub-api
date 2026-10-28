@@ -16,6 +16,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { ClinicService } from '../clinic.service';
 import { CliniCreateDto } from '../dto/clinicCreateDto';
+import { ClinicUpdateDto } from '../dto/clinicUpdateDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
 import { Request } from 'express';
 import { IPaginationResult } from '../interface/IPaginationResult';
@@ -73,7 +74,7 @@ export class ClinicController {
 	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async upgradeClinicById(
 		@Param('id') id: string,
-		@Body() newClinicData: Partial<CliniCreateDto>,
+		@Body() newClinicData: ClinicUpdateDto,
 	): Promise<ClinicResponseDto> {
 		return await this.clinicService.updateClinicById(id, newClinicData);
 	}

@@ -20,6 +20,7 @@ import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-reques
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import { OpportunityCreateDto } from '../dto/opportunityCreateDto';
 import { OpportunityResponseDto } from '../dto/opportunityResponseDto';
+import { OpportunityUpdateDto } from '../dto/opportunityUpdateDto';
 import { OpportunityService } from '../opportunity.service';
 import {
 	ApiCreateOpportunity,
@@ -91,7 +92,7 @@ export class OpportunityController {
 	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async updateOpportunityById(
 		@Param('id') id: string,
-		@Body() newOpportunityData: Partial<OpportunityCreateDto>,
+		@Body() newOpportunityData: OpportunityUpdateDto,
 		@Req() request: AuthenticatedRequest,
 	): Promise<Partial<OpportunityResponseDto>> {
 		return await this.opportunityService.updateOpportunityById(
