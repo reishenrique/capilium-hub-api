@@ -21,6 +21,7 @@ import { AuthenticatedRequest } from '../../auth/interfaces/authenticated-reques
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import { UserCreateDto } from '../dto/userCreateDto';
 import { UserResponseDto } from '../dto/userResponseDto';
+import { UserUpdateDto } from '../dto/userUpdateDto';
 import { removePrivilegedFields } from '../helpers/userPayload.helper';
 import {
 	ApiCreateClinicAdminSwaggerDocumentation,
@@ -97,7 +98,7 @@ export class UserController {
 	@UseGuards(JwtAuthGuard, SelfOrAdminGuard)
 	public async updateUserById(
 		@Param('id') id: string,
-		@Body() newUserData: Partial<UserCreateDto>,
+		@Body() newUserData: UserUpdateDto,
 		@Req() request: AuthenticatedRequest,
 	): Promise<Partial<UserResponseDto>> {
 		const updateData = request.user.isAdmin

@@ -9,17 +9,20 @@ import {
 	Param,
 	Post,
 	Put,
-	Req,
+	Query,
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { AdminGuard } from '../../auth/guard/admin.guard';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import { ClinicService } from '../clinic.service';
 import { CliniCreateDto } from '../dto/clinicCreateDto';
+import { ClinicPaginationQueryDto } from '../dto/clinicPaginationQueryDto';
 import { ClinicResponseDto } from '../dto/clinicResponseDto';
-import { Request } from 'express';
+import { ClinicUpdateDto } from '../dto/clinicUpdateDto';
 import { IPaginationResult } from '../interface/IPaginationResult';
-import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import {
 	ApiCreateClinic,
 	ApiDeleteClinicById,
@@ -28,8 +31,6 @@ import {
 	ApiPaginatedClinics,
 	ApiUpdateClinicById,
 } from '../swagger/clinic.swagger';
-import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
-import { AdminGuard } from '../../auth/guard/admin.guard';
 
 @ApiTags('clinic')
 @Controller('clinic')
@@ -57,6 +58,20 @@ export class ClinicController {
 		return await this.clinicService.findAllActivatedClinics();
 	}
 
+	@Get('paginated')
+	@HttpCode(HttpStatus.OK)
+	@ApiPaginatedClinics()
+	@UseInterceptors(LoggingInterceptor)
+	@UseGuards(JwtAuthGuard)
+	public async getPaginatedClinics(
+		@Query() pagination: ClinicPaginationQueryDto,
+	): Promise<IPaginationResult<ClinicResponseDto>> {
+		return await this.clinicService.getPagedAllClinics(
+			pagination.page,
+			pagination.limit,
+		);
+	}
+
 	@Get('/:id')
 	@HttpCode(HttpStatus.OK)
 	@ApiFindClinicById()
@@ -73,7 +88,7 @@ export class ClinicController {
 	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async upgradeClinicById(
 		@Param('id') id: string,
-		@Body() newClinicData: Partial<CliniCreateDto>,
+		@Body() newClinicData: ClinicUpdateDto,
 	): Promise<ClinicResponseDto> {
 		return await this.clinicService.updateClinicById(id, newClinicData);
 	}
@@ -85,19 +100,5 @@ export class ClinicController {
 	@UseGuards(JwtAuthGuard, AdminGuard)
 	public async deleteClinicById(id: string): Promise<void> {
 		return await this.clinicService.delete(id);
-	}
-
-	@Get('paginated')
-	@HttpCode(HttpStatus.OK)
-	@ApiPaginatedClinics()
-	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard)
-	public async getPaginatedClinics(
-		@Req() req: Request,
-	): Promise<IPaginationResult<ClinicResponseDto>> {
-		const page = Number.parseInt(req.query.page as string) || 1;
-		const limit = Number.parseInt(req.query.limit as string) || 10;
-
-		return await this.clinicService.getPagedAllClinics(page, limit);
 	}
 }
