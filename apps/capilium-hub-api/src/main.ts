@@ -1,8 +1,9 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { Logger, type NestApplicationOptions } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import { AppModule } from './app.module';
+import { createGlobalValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap() {
 	const configNest: NestApplicationOptions = {
@@ -11,6 +12,7 @@ async function bootstrap() {
 
 	const app = await NestFactory.create(AppModule, configNest);
 
+	app.useGlobalPipes(createGlobalValidationPipe());
 	app.use(bodyParser.json({ limit: '150mb' }));
 
 	const config = new DocumentBuilder()
