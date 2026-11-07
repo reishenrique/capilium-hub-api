@@ -6,6 +6,7 @@ import {
 	Param,
 	Post,
 	UploadedFile,
+	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
 import { UploadService } from '../upload.service';
@@ -14,6 +15,8 @@ import { ApiTags } from '@nestjs/swagger';
 import { multerStorage, pdfFileFilter } from '../helpers/upload.helper';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import { ApiCreateUploadResume } from '../swagger/upload.swagger';
+import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
+import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
 
 @ApiTags('upload')
 @Controller('upload')
@@ -31,6 +34,7 @@ export class UploadController {
 		}),
 		LoggingInterceptor,
 	)
+	@UseGuards(JwtAuthGuard, SelfOrAdminGuard)
 	public async uploadResume(
 		@Param('id') userId: string,
 		@UploadedFile() file: Express.Multer.File,
