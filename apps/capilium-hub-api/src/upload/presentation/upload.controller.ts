@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	Controller,
 	HttpCode,
 	HttpStatus,
@@ -9,14 +10,14 @@ import {
 	UseGuards,
 	UseInterceptors,
 } from '@nestjs/common';
-import { UploadService } from '../upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
-import { multerStorage, pdfFileFilter } from '../helpers/upload.helper';
-import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
-import { ApiCreateUploadResume } from '../swagger/upload.swagger';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { SelfOrAdminGuard } from '../../auth/guard/self-or-admin.guard';
+import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
+import { resumeMulterOptions } from '../helpers/upload.helper';
+import { ApiCreateUploadResume } from '../swagger/upload.swagger';
+import { UploadService } from '../upload.service';
 
 @ApiTags('upload')
 @Controller('upload')
@@ -28,17 +29,18 @@ export class UploadController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateUploadResume()
 	@UseInterceptors(
-		FileInterceptor('file', {
-			storage: multerStorage,
-			fileFilter: pdfFileFilter,
-		}),
+		FileInterceptor('file', resumeMulterOptions),
 		LoggingInterceptor,
 	)
 	@UseGuards(JwtAuthGuard, SelfOrAdminGuard)
 	public async uploadResume(
 		@Param('id') userId: string,
-		@UploadedFile() file: Express.Multer.File,
+		@UploadedFile() file?: Express.Multer.File,
 	) {
+		if (!file) {
+			throw new BadRequestException('Resume file is required');
+		}
+
 		return await this.uploadService.attachResumeIntoUser(userId, file.filename);
 	}
 }
