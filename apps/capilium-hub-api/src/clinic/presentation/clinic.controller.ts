@@ -14,7 +14,8 @@ import {
 	UseInterceptors,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AdminGuard } from '../../auth/guard/admin.guard';
+import { ClinicScopeGuard } from '../../auth/guard/clinic-scope.guard';
+import { GlobalAdminGuard } from '../../auth/guard/global-admin.guard';
 import { JwtAuthGuard } from '../../auth/guard/jwt.guard';
 import { LoggingInterceptor } from '../../common/interceptors/LoggingInterceptor';
 import { ClinicService } from '../clinic.service';
@@ -42,7 +43,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.CREATED)
 	@ApiCreateClinic()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard, AdminGuard)
+	@UseGuards(JwtAuthGuard, GlobalAdminGuard)
 	public async create(
 		@Body() clinic: CliniCreateDto,
 	): Promise<Partial<ClinicResponseDto>> {
@@ -85,7 +86,7 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiUpdateClinicById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard, AdminGuard)
+	@UseGuards(JwtAuthGuard, ClinicScopeGuard)
 	public async upgradeClinicById(
 		@Param('id') id: string,
 		@Body() newClinicData: ClinicUpdateDto,
@@ -97,8 +98,8 @@ export class ClinicController {
 	@HttpCode(HttpStatus.OK)
 	@ApiDeleteClinicById()
 	@UseInterceptors(LoggingInterceptor)
-	@UseGuards(JwtAuthGuard, AdminGuard)
-	public async deleteClinicById(id: string): Promise<void> {
+	@UseGuards(JwtAuthGuard, ClinicScopeGuard)
+	public async deleteClinicById(@Param('id') id: string): Promise<void> {
 		return await this.clinicService.delete(id);
 	}
 }
