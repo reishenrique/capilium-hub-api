@@ -14,6 +14,11 @@ export function ApiCreateClinic() {
 			status: 400,
 			description: 'Error when trying to created a new clinic',
 		}),
+		ApiResponse({ status: 401, description: 'Unauthenticated' }),
+		ApiResponse({
+			status: 403,
+			description: 'Only global administrators can create clinics',
+		}),
 	);
 }
 
@@ -38,6 +43,11 @@ export function ApiUpdateClinicById() {
 		ApiOperation({ summary: 'Upgrade a clinic by id' }),
 		ApiResponse({ status: 200 }),
 		ApiResponse({ status: 400, description: 'Clinic not found to update' }),
+		ApiResponse({ status: 401, description: 'Unauthenticated' }),
+		ApiResponse({
+			status: 403,
+			description: 'Cannot update another clinic',
+		}),
 		ApiResponse({ status: 500, description: 'Internal Server Error' }),
 	);
 }
@@ -47,6 +57,11 @@ export function ApiDeleteClinicById() {
 		ApiOperation({ summary: 'Delete clinic by id' }),
 		ApiResponse({ status: 200 }),
 		ApiResponse({ status: 400, description: 'Clinic not found to delete' }),
+		ApiResponse({ status: 401, description: 'Unauthenticated' }),
+		ApiResponse({
+			status: 403,
+			description: 'Cannot delete another clinic',
+		}),
 		ApiResponse({ status: 500, description: 'Internal Server Error ' }),
 	);
 }
